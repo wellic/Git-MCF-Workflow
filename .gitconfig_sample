@@ -1,30 +1,55 @@
+#customize your
+#   user.name
+#   user.email
+#   alias.mynikname
 [user]
-	name = Valerii Savchenko\n\n
-	email = valerii.s@giantleaplab.com
+  name = Valerii Savchenko\n\n
+  email = valerii.s@giantleaplab.com
 [alias]
-  check = grep -n -e -P 'wellic|valerii'
+  mynikname = "! f() {          \
+    nikname='wellic'            \
+    ;echo $nikname              \
+  ;}; f" 
+
+  myname = "! echo $(git config user.name | tr -d '\n')"
+  myallname = "! echo $(git mynikname)'|'$(git myname)"
+
+#Check labels in sources. Useful look for nikname, f.e. in comments 
+  mycheck = "! f() {                  \
+    allname=$(git mynik);             \
+    echo Find nikname in sources $allname;                    \
+    git grep -nEe \"${allname}\"      \
+  ;}; f "
+
+  st = status
   co = checkout
   ci = commit
-#  ci = ! git commit -m $@ && git last
-  ch = cherry-pick
-  st = status
+  amend = commit --amend -C HEAD
+  ins = ! git add -- $@ && git status
   br = branch
   rb = rebase
   rbi = rebase -i
+  ch = cherry-pick
   type = cat-file -t
   dump = cat-file -p
-#  unstage = reset HEAD --
-  unstage = ! git reset HEAD -- $@ && git status
+  unstage = ! git reset HEAD -- $@ 
   hist  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
+  hist2 = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
   last  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
-  mylog = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
   sshow = show --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate --no-notes
   visual = !gitk &
-  amend = commit --amend -C HEAD
-  ins = ! git add -- $@ && git status
-# see git gi list
+
+# see gitignore: git gi list
   gi = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
 
+#Show log for current user sorted by date
+  mylog = "! f() { \
+    allname=$(git myallname); \
+    name=$(git myname); \
+    nik=$(git mynikname); \
+    echo Log of user \"'$allname'\" sorted by date; \
+    git hist2 $@ | grep -i -E \"${allname}\" | sort --key=3,3 -r | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
+  ;}; f $@"
 
   df = diff
   df0 = diff -U0
@@ -44,21 +69,17 @@
   unmerged = branch --no-merged
 
 fsckclear = "! f(){ \
-    echo "= git fsck"                                          && git fsck \
+    echo "= git fsck"                                             && git fsck \
     && echo "= git reflog expire --expire-unreachable=now --all"  && git reflog expire --expire-unreachable=now --all \
     && echo "= git gc --prune prunefsck"                          && git gc --prune=now \
     && echo "= git fsck"                                          && git fsck ;}; f"
 
-#update = ! master=${1:-master} && cfg=${2:-cfg} && fix=${3:-fix} && git co $master && git rb $master $cfg && git rb $cfg $fix
-#fullupdate = ! master=${1:-master} && cfg=${2:-cfg} && fix=${3:-fix} && git co $master && git pull --rebase && git update
-
-svnlog = !git svn log --oneline -20 | sort
-#  pushmaster = ! echo =  push_u_origin_master && git push -u origin master
+##########################
+### my worlflow useful
+##########################
 
 pushall      = ! echo "=  pushall"         && git push --all origin
-#pushallforce = ! echo "=  pushallforce"    && echo git push --all --force origin
 pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
-svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
 
 copy2tmp = "! f(){ \
  user=wellic \
@@ -82,10 +103,43 @@ backupcfg = "! f(){ \
  && echo '---------------' \
  && git st ;}; f"
 
-preparefix = "! f(){ \
- cbr=$(git rev-parse --abbrev-ref HEAD) \
- && git rb $cbr fix \
- && git updatesvn ;}; f"
+
+# Загрузить свои изменения в ветку master из ветки fix, исключая коммиты ветки cfg. Стать на ветку мастер.
+load = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  load $fix $cfg $master " \
+ && echo "== load 1: git co $fix"                      && git co $fix \
+ && echo "== load 2: git rb --onto $master $cfg $fix"  && git rb --onto $master $cfg $fix  \
+ && echo "== load 3: git co $master"                   && git co $master \
+ && echo "== load 4: git rebase $fix $master"          && git rebase $fix $master ;}; f"
+
+# Обновить master из origin. Залить изменения из fix и cfg. Вернуться в fix.
+update = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  update ${fix} ${cfg} ${master} " \
+ && echo "== update 1: git co $master"      && git co $master  \
+ && echo "== update 2: git pull --rebase"   && git pull --rebase \
+ && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
+ && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
+
+# Обновить master из origin. Залить изменения из fix в master. Отправить мастер в origin. Сделать бекап cfg, Вернуться в fix.
+upload = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  upload $fix $cfg $master " \
+ && echo "== upload 1: "                                && git update $fix $cfg $master \
+ && echo "== upload 2: "                                && git load $fix $cfg $master \
+ && echo "== upload 3: git push origin $master:$master" && git push origin $master:$master \
+ && echo "== upload 4: "                                && git update $fix $cfg $master \
+ && echo "== upload 5: git backupcfg"                   && git backupcfg \
+ && echo "== update 6: git co $fix"                     && git co $fix   \
+ && echo "=====" && git last ;}; f"
+
+##########################
+### git-svn useful
+##########################
+
+svnlog = !git svn log --oneline -20 | sort
+svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
 
 uploadsvn = "! f(){ \
  fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
@@ -98,7 +152,6 @@ uploadsvn = "! f(){ \
  && git pushallforce \
  && echo "=====" && git last \
  && echo "=====" && git svnlog ;}; f"
-
 
 updatesvn = "! f(){ \
  fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
@@ -116,36 +169,7 @@ loadsvn = "! f(){ \
  && echo "== git co $master"                   && git co $master \
  && echo "== git rebase $fix $master"          && git rebase $fix $master ;}; f"
 
-# загрузить свои изменения в ветку master из ветки fix исключая коммиты ветки cfg (master)
-load = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  load $fix $cfg $master " \
- && echo "== load 1: git co $fix"                      && git co $fix \
- && echo "== load 2: git rb --onto $master $cfg $fix"  && git rb --onto $master $cfg $fix  \
- && echo "== load 3: git co $master"                   && git co $master \
- && echo "== load 4: git rebase $fix $master"          && git rebase $fix $master ;}; f"
-
-# Обновить ветки cfg и fix новыми комитами из мастера. (fix)
-update = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  update ${fix} ${cfg} ${master} " \
- && echo "== update 1: git co $master"      && git co $master  \
- && echo "== update 2: git pull --rebase"   && git pull --rebase \
- && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
- && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
-
-# Залить вести master, cfg и fix в origin. (fix)
-upload = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  upload $fix $cfg $master " \
- && echo "== upload 1: "                                && git update $fix $cfg $master \
- && echo "== upload 2: "                                && git load $fix $cfg $master \
- && echo "== upload 3: git push origin $master:$master" && git push origin $master:$master \
- && echo "== upload 4: "                                && git update $fix $cfg $master \
- && echo "== upload 5: git backupcfg"                   && git backupcfg \
- && echo "== update 6: git co $fix"                     && git co $fix   \
- && echo "=====" && git last ;}; f"
-
+##########################
 
 [commit]
 	template = /home/wellic/.gitmessage_template
