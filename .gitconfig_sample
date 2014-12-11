@@ -17,6 +17,7 @@
   unstage = ! git reset HEAD -- $@ && git status
   hist  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
   last  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
+  mylog = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
   sshow = show --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate --no-notes
   visual = !gitk &
   amend = commit --amend -C HEAD
