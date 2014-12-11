@@ -9,7 +9,7 @@
   mynikname = "! f() {          \
     nikname='wellic'            \
     ;echo $nikname              \
-  ;}; f" 
+  ;}; f"
 
   myname = "! echo $(git config user.name | tr -d '\n')"
   myallname = "! echo $(git mynikname)'|'$(git myname)"
@@ -82,7 +82,7 @@ pushall      = ! echo "=  pushall"         && git push --all origin
 pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
 
 copy2tmp = "! f(){ \
- user=wellic \
+ user=$(git mynikname) \
  && tmpbranch=tmp_${user} \
  && cbr=$(git rev-parse --abbrev-ref HEAD) \
  && echo "=   copy2tmp" \
@@ -94,7 +94,7 @@ copy2tmp = "! f(){ \
  && git st ;}; f"
 
 backupcfg = "! f(){ \
- user=wellic \
+ user=$(git mynikname) \
  && cfg=${1:-cfg} \
  && tmpbranch=${cfg}_${user} \
  && cbr=cfg \
