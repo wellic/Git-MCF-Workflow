@@ -43,12 +43,16 @@
   gi = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
 
 #Show log for current user sorted by date
+  mylogsort = "! f() { \
+    git mylog $@ | sort --key=3,3 -r \
+  ;}; f $@"
+
   mylog = "! f() { \
     allname=$(git myallname); \
     name=$(git myname); \
     nik=$(git mynikname); \
     echo Log of user \"'$allname'\" sorted by date; \
-    git hist2 $@ | grep -i -E \"${allname}\" | sort --key=3,3 -r | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
+    git hist2 $@ | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
   ;}; f $@"
 
   df = diff
