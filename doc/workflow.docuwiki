@@ -1,0 +1,319 @@
+====== 3-бранч (три-бранчевый) git workflow с локальной конфигурацией. ======
+
+===== Зачем это надо =====
+
+Практически в любом проекте нужно настроить конфигурацию разработки, которая отличается от конфигурации заказчика. Например, это или настройки базы, или настройки хоста, или пути к библиотекам, специфичные файлы IDE и т.п. Также это необходимо, чтобы помочь нескольким разработчикам иметь одинаковую конфигурационную среду.
+
+Все это легко настроить, но сразу возникнет проблема, как отделять общий код от локальной конфигурации.
+
+В интернете есть много решений, очень популярная техника Git Workflow:
+  * http://nvie.com/posts/a-successful-git-branching-model/
+  * https://www.atlassian.com/git/tutorials/comparing-workflows/centralized-workflow
+  * http://habrahabr.ru/post/60030/
+
+Но они или для больших групп разработчиков, либо имеют некоторые неудобности.
+
+===== Краткое описание =====
+
+Интрига — для работы с внешним репозиторием достаточно одной, максимум двух команд. Я в своей работе с Git, при деплое своих исходников в общий репозиторий использую 1 команду и для внесения внешних изменений в локальные тоже 1 команду. Т.е. 2 команды, а чаще достаточно одной и все ручная работа безошибочно выполняется, делая достаточно большое количество операций. При этом практически в 99.9% случаев все проходит без конфликтов, и занимает несколько секунд. При этом учитывается то, часть файлов в локальном и внешнем репозитории отличается и их отличие хранится в отдельной ветке.
+
+===== 3-branch workflow (MCF) =====
+
+Для работы этих 2х комманд используется 3 веточная схема: master-cfg-fix. 
+
+По умолчанию ветки (бранчи), имеют названия (но можно у себя назвать как угодно, главное выдержать суть:
+ - master — основная общая ветка с production настройками;
+ - cfg — ветка локальной конфигурации, наследуется от мастер, но имеет свои особенности;
+ - fix — ветка разработки, наследуется от cfg. В ней ведется разработка. Изменения в ней переносятся в master, по окончанию работ.
+
+Для работ по обмену информацией между ветками и поддержанию их в актуальном состоянии достаточно 2-х команд. По окончанию работ на ветке нужно fix нужно выполнить ряд действий:
+  - подтянуть изменения с внешнего репозитория, т.к. во время работы могли произойти изменения, т.е. обновить ветку master;
+  - перенести эти изменения на ветки cfg и fix
+  - применить изменения с ветки fix на ветку master, исключая изменения в ветке cfg;
+  - отправить в репозиторий обновленную ветку master;
+  - отправить в репозиторий копию ветки ветки cfg;
+  - на всякий случай применить пункты a) и b);
+
+Пункты a) и b) выполняет пользовательская команда git upload. Т.е. эта команда приводит к актуальному состоянию 3 ветки master-cfg-fix (MCF).
+A весь цикл, пункты a-f, выполняет пользовательская команда git upload.
+
+===== Примеры задач =====
+
+Считаем, что все макросы для работы добавлены в .gitconfig и настроены имя, почта, ник.
+
+==== пример создания структуры MCF ====
+
+<code>
+git co master
+git co -b cfg
+git co -b fix
+</code>
+
+==== пример отправки своих изменений из ветки fix ====
+
+  * проверка новых внешних изменений
+<code>git update</code>
+
+  * тестируем с новыми внешними изменениями, если все ок загружаем свои правки в общий репозиторий
+<code>git upload</code>
+
+==== Настройка локального конфига ====
+
+  * настройка
+
+<code>
+git co cfg
+... edit and setup config files ...
+git st 
+git add .
+git ci -m 'your message'
+... настраиваем столько сколько нужно ...
+</code>
+
+  * применение новых настроек в ветке 
+<code>git rb cfg fix</code>
+
+==== Разработка функционала, исправление ошибок на дефолтной ветке ====
+
+  * создать MCF ([[techdocs:cvs:git:workflow_wellic#пример_создания_структуры_mcf|см. пример создания структуры MCF]])
+
+  * исправляем ошибки, делаем много комитов на ветке newfix:
+<code>
+... edit files ...
+git st 
+git add .
+git ci -m 'your message'
+... повторяем столько сколько нужно ...
+</code>
+
+  * отправлем правки
+<code>git upload newfix</code>
+
+==== Разработка функционала, исправление ошибок с использованием кастомной ветки разработки ====
+
+  * создать MCF (кастомная ветка newfix)
+
+<code>
+git co cfg
+git co -b newfix
+</code>
+
+  * Исправляем ошибки, делаем много комитов на ветке newfix
+
+<code>
+... edit files ...
+git st 
+git add .
+git ci -m 'your message'
+... повторяем столько сколько нужно ...
+</code>
+
+  * отправляем правки
+
+<code>git upload newfix</code>
+
+==== Имена веток по умолчанию для команд: update, upload, load ====
+
+<code>
+fixNameBranch   = fix
+cfgNameBranch   = cfg
+masterNameBranc = master
+</code>
+
+==== Перенос локальных изменений из рабочей ветки в ветку master ====
+
+<code>
+git load
+git load fixNameBranch
+git load fixNameBranch cfgNameBranch
+git load fixNameBranch cfgNameBranch masterNameBranc
+</code>
+
+==== Загрузка локальных изменений на локальную ветку master и на внешний ресурс ====
+
+<code>
+git upload
+git upload fixNameBranch
+git upload fixNameBranch cfgNameBranch
+git upload fixNameBranch cfgNameBranch masterNameBranc
+</code>
+
+==== Загрузка внешних изменений в локальные ветки ====
+
+<code>
+git update 
+git update fixNameBranch
+git update fixNameBranch cfgNameBranch
+git update fixNameBranch cfgNameBranch masterNameBranc
+</code>
+==== Выводы: ====
+
+Данная система команд позволяет с помощью предложенной схемы
+  * автоматическое обновление исходников в рабочих ветках
+  * автоматическое обновление исходников в удаленном хранилище
+  * поддерживать линейную схему истории
+  * для одного проекта использовать несколько локальных конфигов окружения
+  * при автоматических обновлениях все шаги документируются
+  * позволяет в группе проводить единую схему работы
+  * делается бекап локального конфига на удаленный сервер
+
+===== TODO =====
+
+Необходимо будет доделать работу не только с сервером origin, но и дать возможность указывать другие удаленные хранилища. Например, чтобы обновления брались с одного сервера, а изменения писались на другой внешний сервер.
+
+===== Дополнение =====
+
+==== Исходники ====
+
+https://github.com/wellic/myworkflow
+
+==== Настройка .gitconfig ====
+
+Добавить в свой ~/.gitconfig 
+<code>
+
+#customize your
+#   user.name
+#   user.email
+#   alias.mynikname
+[user]
+#!!! Customize name
+  name = Valerii Savchenko
+#!!! Customize email
+  email = wellic@mail.ru
+[alias]
+#!!! Customize nikname Только одно слово 
+  mynikname = "! f() {          \
+    nikname='wellic'            \
+    ;echo $nikname              \
+  ;}; f"
+
+  myname = "! echo $(git config user.name | tr -d '\n')"
+  myallname = "! echo $(git mynikname)'|'$(git myname)"
+
+#Check labels in sources. Useful look for nikname, f.e. in comments 
+  mycheck = "! f() {                  \
+    allname=$(git mynik);             \
+    echo Find nikname in sources $allname;                    \
+    git grep -nEe \"${allname}\"      \
+  ;}; f "
+
+  st = status
+  co = checkout
+  ci = commit
+  amend = commit --amend -C HEAD
+  br = branch
+  rb = rebase
+  rbi = rebase -i
+  ch = cherry-pick
+  unstage = ! git reset HEAD -- $@ 
+
+  hist = log --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
+  hist2 = log --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
+  last = log --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
+  sshow = show --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate --no-notes
+  visual = !gitk &
+
+# see gitignore: git gi list
+  gi = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
+
+#Show log for current user sorted by date
+  mylogsort = "! f() { \
+    git mylog $@ | sort --key=3,3 -r \
+  ;}; f $@"
+
+  mylog = "! f() { \
+    allname=$(git myallname); \
+    name=$(git myname); \
+    nik=$(git mynikname); \
+    echo Log of user \"'$allname'\" sorted by date; \
+    git hist2 $@ | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
+  ;}; f $@"
+
+  df = diff
+  df0 = diff -U0
+  dfc = diff --cached
+  lg = log -p
+  lol = log --graph --decorate --pretty=oneline --abbrev-commit
+  lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+  ls = ls-files
+
+# Show files ignored by git:
+  ign = ls-files -o -i --exclude-standard
+
+# To see the list of the ignored files.
+  ignored = !git ls-files -v | grep ^[a-z]
+
+# temporarily ignoring file
+  ignore = update-index --assume-unchanged
+  unignore = update-index --no-assume-unchanged
+  merged = branch --merged
+  unmerged = branch --no-merged
+
+fsckclear = "! f(){ \
+    echo "= git fsck"                                             && git fsck \
+    && echo "= git reflog expire --expire-unreachable=now --all"  && git reflog expire --expire-unreachable=now --all \
+    && echo "= git gc --prune prunefsck"                          && git gc --prune=now \
+    && echo "= git fsck"                                          && git fsck ;}; f"
+
+##########################
+### my worlflow useful
+##########################
+
+pushall      = ! echo "=  pushall"         && git push --all origin
+pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
+
+copy2tmp = "! f(){ \
+ user=$(git mynikname) \
+ && tmpbranch=tmp_${user} \
+ && cbr=$(git rev-parse --abbrev-ref HEAD) \
+ && echo "=   copy2tmp" \
+ && echo "==  copy2tmp 1: git add ."                                      && git add . \
+ && echo "==  copy2tmp 2: git ci -am 'tmp_'${cbr}_$(date +%y%m%d_%H%M%S)" && git ci -am 'tmp_'${cbr}_$(date +%y%m%d_%H%M%S) \
+ && echo "==  copy2tmp 3: git push -f origin $cbr:$tmpbranch"             && git push -f origin $cbr:$tmpbranch \
+ && echo "==  copy2tmp 4: git reset HEAD~1"                               && git reset HEAD~1 \
+ && echo '---------------' \
+ && git st ;}; f"
+
+backupcfg = "! f(){ \
+ user=$(git mynikname) \
+ && cfg=${1:-cfg} \
+ && tmpbranch=${cfg}_${user} \
+ && cbr=cfg \
+ && echo "=   backupcfg" \
+ && echo "==  backupcfg 1: git push -f origin $cbr:$tmpbranch" && git push -f origin $cbr:$tmpbranch \
+ && echo '---------------' \
+ && git st ;}; f"
+
+
+# Загрузить свои изменения в ветку master из ветки fix, исключая коммиты ветки cfg. Стать на ветку мастер.
+load = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  load $fix $cfg $master " \
+ && echo "== load 1: git co $fix"                      && git co $fix \
+ && echo "== load 2: git rb --onto $master $cfg $fix"  && git rb --onto $master $cfg $fix  \
+ && echo "== load 3: git co $master"                   && git co $master \
+ && echo "== load 4: git rebase $fix $master"          && git rebase $fix $master ;}; f"
+
+# Обновить master из origin. Залить изменения из fix и cfg. Вернуться в fix.
+update = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  update ${fix} ${cfg} ${master} " \
+ && echo "== update 1: git co $master"      && git co $master  \
+ && echo "== update 2: git pull --rebase"   && git pull --rebase \
+ && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
+ && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
+
+# Обновить master из origin. Залить изменения из fix в master. Отправить мастер в origin. Сделать бекап cfg, Вернуться в fix.
+upload = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  upload $fix $cfg $master " \
+ && echo "== upload 1: "                                && git update $fix $cfg $master \
+ && echo "== upload 2: "                                && git load $fix $cfg $master \
+ && echo "== upload 3: git push origin $master:$master" && git push origin $master:$master \
+ && echo "== upload 4: "                                && git update $fix $cfg $master \
+ && echo "== upload 5: git backupcfg"                   && git backupcfg \
+ && echo "== update 6: git co $fix"                     && git co $fix   \
+ && echo "=====" && git last ;}; f"
+
+</code>
