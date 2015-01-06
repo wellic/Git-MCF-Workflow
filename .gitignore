@@ -1,6 +1,4 @@
-*
 
-!bin/
-!README.md
 !.gitconfig_sample
 !.gitignore
+!.gitkeep
