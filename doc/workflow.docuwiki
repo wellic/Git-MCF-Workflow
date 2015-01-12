@@ -99,10 +99,10 @@ git status
 git add .
 git commit  -m 'your message'
 ... повторяем столько сколько нужно ...
-<code>
+</code>
   - отправляем правки<code>
 git upload newfix cfg_special
-<code>
+</code>
 
 ==== Задача: Отправка своих изменений из ветки fix в удаленный репозиторий (полный цикл с тестированием) ====
   - Проверка новых внешних изменений (ветки master,cfg,fix)<code>
@@ -113,20 +113,19 @@ git upload
 </code>
 
 ==== Задача: Загрузка локальных изменений на локальную ветку master и на внешний ресурс ====
-
-<code>
+  * upload<code>
 git upload [ fixNameBranch [ cfgNameBranch [ masterNameBranc ] ] ]
 git upload fix234 cfg_nginx 
 </code>
 
 ==== Задача: Загрузка внешних изменений в локальные ветки ====
 
-<code>
+  * update<code>
 git update [ fixNameBranch [ cfgNameBranch [ masterNameBranc ] ] ]
 git update fix234 
 </code>
 
-==== Вывод ====
+===== Вывод =====
 
 Данная система команд позволяет с помощью предложенной схемы:
   * автоматическое обновление исходников в рабочих ветках;

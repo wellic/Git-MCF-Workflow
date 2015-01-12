@@ -96,24 +96,25 @@ git status
 git add .
 git commit  -m 'your message'
 ... повторяем столько сколько нужно ...
-<code>
-  - отправляем правки<code>
+отправляем правки
 git upload newfix cfg_special
-<code>
 
-==== Задача: Отправка своих изменений из ветки fix в удаленный репозиторий (полный цикл с тестированием) ====
-  - Проверка новых внешних изменений (ветки master,cfg,fix)<code>
+Задача: Отправка своих изменений из ветки fix в удаленный репозиторий (полный цикл с тестированием)
+
+Проверка новых внешних изменений (ветки master,cfg,fix)
 git update
 Тестируем с полученными новыми внешними изменениями, если все ок - загружаем свои правки из дефолтных веток в удаленный репозиторий
 git upload
 
 Задача: Загрузка локальных изменений на локальную ветку master и на внешний ресурс
 
+upload
 git upload [ fixNameBranch [ cfgNameBranch [ masterNameBranc ] ] ]
 git upload fix234 cfg_nginx 
 
 Задача: Загрузка внешних изменений в локальные ветки
 
+update
 git update [ fixNameBranch [ cfgNameBranch [ masterNameBranc ] ] ]
 git update fix234 
 
@@ -292,4 +293,3 @@ upload = "! f(){ \
  && echo "== upload 5: git backupcfg"                   && git backupcfg \
  && echo "== update 6: git co $fix"                     && git co $fix   \
  && echo "=====" && git last ;}; f"
-
