@@ -3,11 +3,11 @@
 #   user.email
 #   alias.mynikname
 [user]
-  name = Valerii Savchenko\n\n
-  email = valerii.s@giantleaplab.com
+  name = your_name
+  email = your_mail@example.com
 [alias]
   mynikname = "! f() {          \
-    nikname='wellic'            \
+    nikname='your_nik'            \
     ;echo $nikname              \
   ;}; f"
 

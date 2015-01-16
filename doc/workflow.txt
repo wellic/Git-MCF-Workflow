@@ -156,13 +156,13 @@ https://github.com/wellic/myworkflow
 #   alias.mynikname
 [user]
 #!!! Customize name
-  name = Valerii Savchenko
+  name = your_name
 #!!! Customize email
-  email = wellic@mail.ru
+  email = your_mail
 [alias]
 #!!! Customize nikname Только одно слово 
   mynikname = "! f() {          \
-    nikname='wellic'            \
+    nikname='your_nikname'      \
     ;echo $nikname              \
   ;}; f"
 
