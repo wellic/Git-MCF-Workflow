@@ -4,10 +4,10 @@
 #   alias.mynikname
 [user]
   name = your_name
-  email = your_mail@example.com
+  email = your@mail
 [alias]
   mynikname = "! f() {          \
-    nikname='your_nik'            \
+    nikname='yournik'            \
     ;echo $nikname              \
   ;}; f"
 
@@ -122,7 +122,7 @@ update = "! f(){ \
  fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
  && echo "=  update ${fix} ${cfg} ${master} " \
  && echo "== update 1: git co $master"      && git co $master  \
- && echo "== update 2: git pull --rebase"   && git pull --rebase \
+ && echo "== update 2: git pull --rebase"   && git pull --rebase origin $master \
  && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
  && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
 
@@ -176,7 +176,7 @@ loadsvn = "! f(){ \
 ##########################
 
 [commit]
-	template = /home/wellic/.gitmessage_template
+	template = /home/yournik/.gitmessage_template
 [color]
 	ui = true
 	status = true
@@ -203,9 +203,9 @@ loadsvn = "! f(){ \
     plain = normal
     func = normal
 [color "status"]
-    added = yellow  
-    changed = green
-    untracked = cyan
+    added = green
+    changed = yellow
+    untracked = yellow black bold
 [core]
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
     pager = less -FXRS
