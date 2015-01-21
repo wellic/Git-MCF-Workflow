@@ -117,14 +117,22 @@ load = "! f(){ \
  && echo "== load 3: git co $master"                   && git co $master \
  && echo "== load 4: git rebase $fix $master"          && git rebase $fix $master ;}; f"
 
-# Обновить master из origin. Залить изменения из fix и cfg. Вернуться в fix.
+# Обновить master из origin. Залить изменения из в cfg и fix. Вернуться в fix.
 update = "! f(){ \
  fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
  && echo "=  update ${fix} ${cfg} ${master} " \
  && echo "== update 1: git co $master"      && git co $master  \
- && echo "== update 2: git pull --rebase"   && git pull --rebase origin $master \
+ && echo "== update 2: git pull --rebase origin" && git pull --rebase origin $master \
  && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
  && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
+
+# Обновить переребейзить cfg и fix. Вернуться в fix.
+lupdate = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  update ${fix} ${cfg} ${master} " \
+ && echo "== update 1: git co $master"      && git co $master  \
+ && echo "== update 2: git rb $master $cfg" && git rb $master $cfg \
+ && echo "== update 3: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
 
 # Обновить master из origin. Залить изменения из fix в master. Отправить мастер в origin. Сделать бекап cfg, Вернуться в fix.
 upload = "! f(){ \
