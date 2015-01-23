@@ -33,9 +33,9 @@
   type = cat-file -t
   dump = cat-file -p
   unstage = ! git reset HEAD -- $@ 
-  sshow = show --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate --no-notes
-  last  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
-  hist  = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
+  sshow = show --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate --no-notes --stat 
+  last  = log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate -20
+  hist  = log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate
   visual = !gitk --all &
   df = diff
   df0 = diff -U0
@@ -56,7 +56,7 @@
   ;}; f $@"
 
 ##### Useful commands 
-  hist2 = log         --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset           | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
+  hist2 = log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate
   lg    = log -p
   lol   = log --graph --decorate --pretty=oneline --abbrev-commit
   lola  = log --graph --decorate --pretty=oneline --abbrev-commit --all
