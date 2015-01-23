@@ -52,8 +52,8 @@
     name=$(git myname); \
     nik=$(git mynikname); \
     echo Log of user \"'$allname'\" sorted by date; \
-    git hist2 $@ | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
-  ;}; f $@"
+    git hist2 \"$@\" | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
+  ;}; f \"$@\" "
 
 ##### Useful commands 
   hist2 = ! git --no-pager log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate $@ && echo
@@ -100,13 +100,12 @@ copy2tmp = "! f(){ \
  && rbranch=_${user}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
  && MESS=$(echo -n \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
- && echo \
  && echo \"=   copy2tmp $dst\" \
- && echo \"==  copy2tmp 1:\ngit add --all\"                  && git add --all \
- && echo \"==  copy2tmp 2:\ngit ci -am '$MESS'\"             && git ci -m \"${MESS}\" \
- && echo \"==  copy2tmp 3:\ngit push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
- && echo \"==  copy2tmp 4:\ngit reset HEAD~1\"               && git reset HEAD~1 \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"==  copy2tmp 1-4:\ngit add --all\"                  && git add --all \
+ && echo \"==  copy2tmp 2-4:\ngit ci -am '$MESS'\"             && git ci -m \"${MESS}\" \
+ && echo \"==  copy2tmp 3-4:\ngit push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
+ && echo \"==  copy2tmp 4-4:\ngit reset HEAD~1\"               && git reset HEAD~1 \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Сделать копию $cfg в репу $dst (origin).
@@ -117,10 +116,9 @@ backupcfg = "! f(){ \
  && dst=${2:-origin} \
  && hidelog=$3 \
  && rbranch=_${user}_${cfg}_backup \
- && echo \
  && echo \"=   backupcfg $cfg $dst\" \
- && echo \"==  backupcfg 1:\ngit push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"==  backupcfg 1-1:\ngit push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Переребейзить $cfg и $fix, Т.е. подготовить ветки к 3-х веточной схемы работы.
@@ -130,21 +128,19 @@ lupdate = "! f(){ \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
  && hidelog=$4 \
- && echo \
  && echo \"=  lupdate $fix $cfg $master\" \
- && echo \"== lupdate 1:\ngit co $master\"      && git co $master  \
- && echo \"== lupdate 2:\ngit rb $master $cfg\" && git rb $master $cfg \
- && echo \"== lupdate 3:\ngit rb $cfg $fix\"    && git rb $cfg $fix \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"== lupdate 1-3:\ngit co $master\"      && git co $master  \
+ && echo \"== lupdate 2-3:\ngit rb $master $cfg\" && git rb $master $cfg \
+ && echo \"== lupdate 3-3:\ngit rb $cfg $fix\"    && git rb $cfg $fix \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Этот метод можно переопределить в локальном конфиге.
 # Например, чтобы выполнить дополнительную синхронизацию.
 addsync = "! f(){ \
  hidelog=$1 \
- && echo \
  && echo \"=  addsync $hidelog\" \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
@@ -157,14 +153,14 @@ update = "! f(){ \
  && src=${4:-origin} \
  && src_branch=${5:-$master} \
  && hidelog=$6 \
- && echo \"== update 1:\ngit fetch $src $src_branch\"      && git fetch $src $src_branch \
- && echo \"== update 2:\ngit co $src_branch\"              && git co $src_branch \
- && echo \"== update 3:\ngit merge --ff-only $src_branch\" && git merge $src/$src_branch \
- && echo \"== update 4:\ngit addsync\"                     && git addsync off\
- && echo \"== update 5:\ngit co $master\"                  && git co $master \
- && echo \"== update 6:\ngit merge $src_branch\"           && git merge $src_branch --no-edit \
- && echo \"== update 7:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master off \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"== update 1-7:\ngit fetch $src $src_branch\"      && git fetch $src $src_branch \
+ && echo \"== update 2-7:\ngit co $src_branch\"              && git co $src_branch \
+ && echo \"== update 3-7:\ngit merge $src/$src_branch\"      && git merge $src/$src_branch \
+ && echo \"== update 4-7:\ngit addsync\"                     && git addsync off\
+ && echo \"== update 5-7:\ngit co $master\"                  && git co $master \
+ && echo \"== update 6-7:\ngit merge $src_branch\"           && git merge $src_branch --no-edit \
+ && echo \"== update 7-7:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master off \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
@@ -174,15 +170,14 @@ applyfix = "! f(){ \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
  && hidelog=$4 \
- && echo \
  && echo \"=  applyfix $fix $cfg $master\" \
- && echo \"== applyfix 1:\ngit co $fix\"                      && git co $fix \
- && echo \"== applyfix 2:\ngit rb --onto $master $cfg $fix\"  && git rb --onto $master $cfg $fix  \
- && echo \"== applyfix 3:\ngit co $master\"                   && git co $master \
- && echo \"== applyfix 4:\ngit rb $fix $master\"              && git rb $fix $master \
- && echo \"== applyfix 5:\ngit rb $master $cfg\"              && git rb $master $cfg \
- && echo \"== applyfix 6:\ngit rb $cfg $fix\"                 && git rb $cfg $fix \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"== applyfix 1-6:\ngit co $fix\"                      && git co $fix \
+ && echo \"== applyfix 2-6:\ngit rb --onto $master $cfg $fix\"  && git rb --onto $master $cfg $fix  \
+ && echo \"== applyfix 3-6:\ngit co $master\"                   && git co $master \
+ && echo \"== applyfix 4-6:\ngit rb $fix $master\"              && git rb $fix $master \
+ && echo \"== applyfix 5-6:\ngit rb $master $cfg\"              && git rb $master $cfg \
+ && echo \"== applyfix 6-6:\ngit rb $cfg $fix\"                 && git rb $cfg $fix \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
@@ -199,11 +194,10 @@ upload = "! f(){ \
  && dst=${6:-$src} \
  && dst_branch=${7:-$src_branch} \
  && hidelog=$8 \
- && echo \
  && echo \"=  upload $fix $cfg $master $src $src_branch $dst $dst_branch\" \
- && echo \"== upload 1:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch off \
- && echo \"== upload 2:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch off \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"== upload 1-2:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch off \
+ && echo \"== upload 2-2:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch off \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 # Залить изменения из $fix в master. 
@@ -217,12 +211,11 @@ sendfix = "! f(){ \
  && dst=${4:-origin} \
  && dst_branch=${5:-$src_branch} \
  && hidelog=$6 \
- && echo \
- && echo \"=  sendfix $fix $cfg $master $src $src_branch $dst $dst_branch\" \
- && echo \"== sendfix 1:\ngit load $fix $cfg $master\"                    && git applyfix $fix $cfg $master off \
- && echo \"== sendfix 2:\ngit push $dst $master:$dst_branch\"             && git push $dst $master:$dst_branch \
- && echo \"== sendfix 3:\ngit backupcfg $cfg $dst\"                       && git backupcfg $cfg $dst off \
- && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ && echo \"=  sendfix $fix $cfg $master $src $src_branch\" \
+ && echo \"== sendfix 1-3:\ngit load $fix $cfg $master\"                    && git applyfix $fix $cfg $master off \
+ && echo \"== sendfix 2-3:\ngit push $dst $master:$dst_branch\"             && git push $dst $master:$dst_branch \
+ && echo \"== sendfix 3-3:\ngit backupcfg $cfg $dst\"                       && git backupcfg $cfg $dst off \
+ && if [ -z \"$hidelog\" ] ; then echo '--- Please check ---' && git last; fi \
  ;}; f"
 
 ##########################
