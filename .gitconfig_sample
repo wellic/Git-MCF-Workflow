@@ -274,9 +274,9 @@ loadsvn = "! f(){ \
     plain = normal
     func = normal
 [color "status"]
-    added = green
-    changed = yellow
-    untracked = cyan
+    added = green dim
+    changed = cyan
+    untracked = yellow
 [core]
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
     pager = less -FXRS
