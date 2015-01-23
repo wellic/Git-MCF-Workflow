@@ -33,9 +33,9 @@
   type = cat-file -t
   dump = cat-file -p
   unstage = ! git reset HEAD -- $@ 
-  sshow = show --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate --no-notes --stat 
-  last  = log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate -20
-  hist  = log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate
+  sshow = ! git --no-pager show --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate --no-notes --stat $@ && echo
+  last  = ! git --no-pager log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate -20 $@ && echo
+  hist  = ! git --no-pager log  --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate$@ && echo
   visual = !gitk --all &
   df = diff
   df0 = diff -U0
@@ -56,10 +56,10 @@
   ;}; f $@"
 
 ##### Useful commands 
-  hist2 = log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate
-  lg    = log -p
-  lol   = log --graph --decorate --pretty=oneline --abbrev-commit
-  lola  = log --graph --decorate --pretty=oneline --abbrev-commit --all
+  hist2 = ! git --no-pager ! git --no-pager log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate $@ && echo
+  lg    = ! git --no-pager ! git --no-pager log -p $@ && echo
+  lol   = ! git --no-pager ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit $@ && echo
+  lola  = ! git --no-pager ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit --all $@ && echo
 
   # ignored
   # Show files ignored by git:
@@ -95,6 +95,7 @@ fsckclear = "! f(){ \
 copy2tmp = "! f(){ \
  user=$(git mynikname) \
  && dst=${1:-origin} \
+ && hidelog=$2 \
  && cbr=$(git rev-parse --abbrev-ref HEAD) \
  && rbranch=_${user}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
@@ -105,7 +106,7 @@ copy2tmp = "! f(){ \
  && echo \"==  copy2tmp 2:\ngit ci -am '$MESS'\"             && git ci -m \"${MESS}\" \
  && echo \"==  copy2tmp 3:\ngit push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
  && echo \"==  copy2tmp 4:\ngit reset HEAD~1\"               && git reset HEAD~1 \
- && echo && echo 'Please check!!!' && git last \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Сделать копию $cfg в репу $dst (origin).
@@ -114,10 +115,12 @@ backupcfg = "! f(){ \
  user=$(git mynikname) \
  && cfg=${1:-cfg} \
  && dst=${2:-origin} \
+ && hidelog=$3 \
  && rbranch=_${user}_${cfg}_backup \
  && echo \
  && echo \"=   backupcfg $cfg $dst\" \
  && echo \"==  backupcfg 1:\ngit push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Переребейзить $cfg и $fix, Т.е. подготовить ветки к 3-х веточной схемы работы.
@@ -126,11 +129,13 @@ lupdate = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
+ && hidelog=$4 \
  && echo \
  && echo \"=  lupdate $fix $cfg $master\" \
  && echo \"== lupdate 1:\ngit co $master\"      && git co $master  \
  && echo \"== lupdate 2:\ngit rb $master $cfg\" && git rb $master $cfg \
  && echo \"== lupdate 3:\ngit rb $cfg $fix\"    && git rb $cfg $fix \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
@@ -142,14 +147,16 @@ update = "! f(){ \
  && master=${3:-master} \
  && src=${4:-origin} \
  && src_branch=${5:-$master} \
+ && hidelog=$6 \
  && echo \
  && echo \"=  update $fix $cfg $master $src $src_branch\" \
  && echo \"== update 1:\ngit fetch $src $src_branch\"      && git fetch $src $src_branch \
  && echo \"== update 2:\ngit co $src_branch\"              && git co $src_branch \
- && echo \"== update 3:\ngit merge --ff-only $src_branch\" && git merge --ff-only $src_branch \
+ && echo \"== update 3:\ngit merge --ff-only $src_branch\" && git merge $src_branch \
  && echo \"== update 3:\ngit co $master\"                  && git co $master \
- && echo \"== update 4:\ngit merge $src_branch\"           && git merge $src_branch \
- && echo \"== update 5:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master \
+ && echo \"== update 4:\ngit merge $src_branch\"           && git merge $src_branch -m 'Merge with $src_branch' \
+ && echo \"== update 5:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master off \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
@@ -158,6 +165,7 @@ applyfix = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
+ && hidelog=$4 \
  && echo \
  && echo \"=  applyfix $fix $cfg $master\" \
  && echo \"== applyfix 1:\ngit co $fix\"                      && git co $fix \
@@ -166,6 +174,7 @@ applyfix = "! f(){ \
  && echo \"== applyfix 4:\ngit rb $fix $master\"              && git rb $fix $master \
  && echo \"== applyfix 5:\ngit rb $master $cfg\"              && git rb $master $cfg \
  && echo \"== applyfix 6:\ngit rb $cfg $fix\"                 && git rb $cfg $fix \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
@@ -181,11 +190,12 @@ upload = "! f(){ \
  && src_branch=${5:-$master} \
  && dst=${6:-$src} \
  && dst_branch=${7:-$src_branch} \
+ && hidelog=$8 \
  && echo \
  && echo \"=  upload $fix $cfg $master $src $src_branch $dst $dst_branch\" \
- && echo \"== upload 1:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch \
- && echo \"== upload 2:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch \
- && echo && echo 'Please check!!!' && git last \
+ && echo \"== upload 1:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch off \
+ && echo \"== upload 2:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch off \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 # Залить изменения из $fix в master. 
@@ -198,11 +208,13 @@ sendfix = "! f(){ \
  && master=${3:-master} \
  && dst=${4:-origin} \
  && dst_branch=${5:-$src_branch} \
+ && hidelog=$6 \
  && echo \
  && echo \"=  sendfix $fix $cfg $master $src $src_branch $dst $dst_branch\" \
- && echo \"== sendfix 1:\ngit load $fix $cfg $master\"                    && git applyfix $fix $cfg $master \
+ && echo \"== sendfix 1:\ngit load $fix $cfg $master\"                    && git applyfix $fix $cfg $master off \
  && echo \"== sendfix 2:\ngit push $dst $master:$dst_branch\"             && git push $dst $master:$dst_branch \
- && echo \"== sendfix 3:\ngit backupcfg $cfg $dst\"                       && git backupcfg $cfg $dst \
+ && echo \"== sendfix 3:\ngit backupcfg $cfg $dst\"                       && git backupcfg $cfg $dst off \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
 ##########################
