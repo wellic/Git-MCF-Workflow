@@ -56,10 +56,10 @@
   ;}; f $@"
 
 ##### Useful commands 
-  hist2 = ! git --no-pager ! git --no-pager log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate $@ && echo
-  lg    = ! git --no-pager ! git --no-pager log -p $@ && echo
-  lol   = ! git --no-pager ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit $@ && echo
-  lola  = ! git --no-pager ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit --all $@ && echo
+  hist2 = ! git --no-pager log --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate $@ && echo
+  lg    = ! git --no-pager log -p $@ && echo
+  lol   = ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit $@ && echo
+  lola  = ! git --no-pager log --graph --decorate --pretty=oneline --abbrev-commit --all $@ && echo
 
   # ignored
   # Show files ignored by git:
@@ -138,6 +138,15 @@ lupdate = "! f(){ \
  && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
+# Этот метод можно переопределить в локальном конфиге.
+# Например, чтобы выполнить дополнительную синхронизацию.
+addsync = "! f(){ \
+ hidelog=$1 \
+ && echo \
+ && echo \"=  addsync $hidelog\" \
+ && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
+ ;}; f"
+
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
 # Применить изменения к $cfg и $fix.
 # Конечная ветка: $fix.
@@ -148,14 +157,13 @@ update = "! f(){ \
  && src=${4:-origin} \
  && src_branch=${5:-$master} \
  && hidelog=$6 \
- && echo \
- && echo \"=  update $fix $cfg $master $src $src_branch\" \
  && echo \"== update 1:\ngit fetch $src $src_branch\"      && git fetch $src $src_branch \
  && echo \"== update 2:\ngit co $src_branch\"              && git co $src_branch \
- && echo \"== update 3:\ngit merge --ff-only $src_branch\" && git merge $src_branch \
- && echo \"== update 3:\ngit co $master\"                  && git co $master \
- && echo \"== update 4:\ngit merge $src_branch\"           && git merge $src_branch -m 'Merge with $src_branch' \
- && echo \"== update 5:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master off \
+ && echo \"== update 3:\ngit merge --ff-only $src_branch\" && git merge $src/$src_branch \
+ && echo \"== update 4:\ngit addsync\"                     && git addsync off\
+ && echo \"== update 5:\ngit co $master\"                  && git co $master \
+ && echo \"== update 6:\ngit merge $src_branch\"           && git merge $src_branch --no-edit \
+ && echo \"== update 7:\ngit lupdate $fix $cfg $master\"   && git lupdate $fix $cfg $master off \
  && if [ -z \"$hidelog\" ] ; then echo && echo 'Please check!!!' && git last; fi \
  ;}; f"
 
@@ -273,9 +281,9 @@ loadsvn = "! f(){ \
     local = yellow
     remote = green reverse
 [color "branch"]
-    current = green    
+    current = green bold   
     local = yellow
-    remote = green reverse
+    remote = cyan 
 [color "diff"]
     commit = yellow bold 
     meta = normal bold
