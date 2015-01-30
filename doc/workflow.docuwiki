@@ -20,7 +20,7 @@
 Для работы c данной схемой используется 3 веточная схема: master-cfg-fix (MCF).
 
 По умолчанию ветки (бранчи), имеют названия (но можно у себя назвать как удобно, главное выдержать суть содержания:
-  - master — основная общая ветка с production настройками; Важно помнить, что работать на это ветке нельзя, т.к. эта ветка должно точно соответствовать тому, что находится в удаленном хранилище.
+  - master — основная общая ветка с production настройками; Важно помнить, что работать на это ветке нельзя, т.к. эта ветка должно точно соответствовать тому, что находится в удаленном хранилище, может использоваться при работе, где не нужно специальное локальное окружение.
   - cfg — ветка локальной конфигурации, наследуется от мастер и имеет свои особенности. Ветка предназначена для настройки и внесения изменений необходимых для локальной работы разработчика (конфигурационные файлы, различные настройки и т.п.). Данная ветка также не используется для работы.
   - fix — ветка разработки, наследуется от cfg. В ней ведется разработка. По окончанию работ изменения, сделанные в ней, переносятся в ветку master и в удаленное хранилище с помощью команды upload.
 
@@ -42,7 +42,155 @@
 
 Для упрощения на рисунке не показано, что в удаленном хранилище создается последний временная ветка с последним коммитом из локальной ветки cfg.
 
-Вывод: для работы с внешним репозиторием достаточно одной (upload), максимум двух команд (update+upload). Преимущество - вся ручная работа безошибочно выполняется в автоматическом режиме, при этом выполняется достаточно большое количество операций. Практически в 99% случаев все проходит без конфликтов, и занимает несколько секунд. 
+Вывод: для работы с внешним репозиторием достаточно одной (upload), максимум двух команд (update+upload). Преимущество - вся ручная работа безошибочно выполняется в автоматическом режиме, при этом выполняется достаточно большое количество операций. Практически в 99% случаев все проходит без конфликтов, и занимает несколько секунд.  Также данные команды могут использоваться и для схемы работы, когда не нужно специальное рабочее окружения. Ветка cfg создается для совместимости и не используется, и все команды используются для синхронизации как было описано выше.
+
+===== Пример реальной задачи =====
+В качестве примера возьмем CMS PrestaShop. Эту CMS мы используем в своих проектах, но также, вносим правки в нее, т.е. являемся для нее контрибьютерами.
+
+Для этого мы используем 3 репозитория:
+  - presta - источник оригинального кода Prestashop
+  - gll - форк оригинала PrestaShop, необходим для контрибуции
+  - origin - наш репозиторий для текущего проекта
+
+Стандартные задачи, которые нужно выполнять регулярно:
+  * загружать обновления с presta;
+  * синхронизировать presta c gll;
+  * обновление локальной разработки origin обновлениями c presta;
+  * вносить замеченные ошибки и улучшения в PrectsShop;
+  * решение текущей задачи с PrestaShop;
+  * бекап копии конфигурации для локальной разработки.
+
+
+==== Предварительная настройка ====
+
+Настройка репозиториев для работы:<code>
+#origin - our project
+git clone git@git.giantleaplab.com:client-projects/OurProject
+
+# presta - dev branch
+git remote add presta https://github.com/PrestaShop/PrestaShop.git
+
+# gll - fork presta
+git remote add gll git@github.com:GiantLeapLab/PrestaShop.git
+</code>
+
+==== Настройка веток разработки ====
+
+Для работы используется несколько веток. Настроим окружение.
+  - '1.6' - ветка из presta, содержит последние изменения Prestashop. Эта же ветка используется в gll для дальнейшей контрибуции<code>
+git fetch presta 1.6
+git checkout 1.6
+</code>
+  - 'work' - ветка в origin, порождается от 1.6, содержит наши разработки<code>
+git checkout -b work
+</code>
+  - 'cfg' - локальная ветка, порождается от work, содержит настройки локальной конфигурации для разработки<code>
+git checkout -b cfg
+</code>
+  - 'fix' - локальная ветка, порождается от cfg, в ней ведется разработка<code>
+git checkout -b fix
+</code>
+  - удаляем локальную ветку master, т.к. мы ее использовать не будем и чтобы она нас не запутывала<code>
+git branch -D master
+</code>
+
+==== Стандартная разработка ====
+Считаем, что все синхронизировано, все ветки созданы. 
+
+=== Работа ===
+
+Работы выполняем на ветке fix:<code>
+git checkout fix
+...
+git commit -m 'Issue 1'
+...
+git commit -m 'Issue 2'
+...
+git commit -m 'Issue 3'
+</code>
+
+=== Отправка результатов работы ===
+
+Теперь нам нужно все перенести на ветку work и отправить в хранилище. Но за время нашей работы в presta/1.6 или в origin/work могли внести изменения. Поэтому нужно сделать достаточно много этапов для внесения новых изменений по веткам.
+  * Загрузить новые обновления, которые могли сделать коллеги из origin/work в work:<code>
+git fetch origin work
+git checkout work
+git merge origin/work
+</code>
+  * Загрузить новые обновления из presta/1.6 в ветки 1.6 и work:<code>
+git fetch presta 1.6
+git checkout 1.6
+git merge presta 1.6
+git push gll 1.6:1.6
+git checkout work
+git merge 1.6 --no-edit
+</code>
+  * Восстановить связи cfg и fix c work после обновления:<code>
+git checkout work
+git rebase work cfg
+git rebase cfg fix
+</code>
+  * Залить изменения из ветки fix в ветку work, исключая настройки локальной конфигурации cfg:<code>
+git checkout fix
+git rebase --onto work cfg fix
+git checkout work
+git rebase fix work
+git rebase work cfg
+git rebase cfg fix
+</code>
+  * Отправить изменения в origin и сделать бекап локальной конфигурации в origin/cfg_backup:<code>
+git push origin work:work
+git push --force origin cfg:cfg_backup
+</code>
+
+Но все действия по отправке можно заменить простой парой комманд:<code>
+git upload fix cfg work presta 1.6 origin work
+git push gll 1.6:1.6
+</code>
+
+=== Оптимизация отправки результатов работы ===
+
+Чтобы не набирать в командной строке большое количество параметров, учитывая, что вместо ветки master используется ветка work, удобно в файле .git/config внести вспомогательные алиасы:<code>
+[alias]
+#эта команда вызывается при вызове команды update
+addsync = "! f(){ \
+ echo \"=  git addsync 1: git push gll 1.6:1.6\" && git push gll 1.6:1.6 \
+ ;}; f"
+
+wupdate = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-work} \
+ && git update $fix $cfg $master \
+ && git update $fix $cfg $master presta 1.6 \
+ ;}; f"
+
+wupload = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-work} \
+ && git upload $fix $cfg $master presta 1.6 origin $master \
+ ;}; f"
+</code>
+
+И тогда выкладывание своих правок будет всего лишь одной коммандой:<code>
+git wupload
+</code>
+==== Контрибуция ====
+После исправления ошибки, достаточно отправить в репозиторий gll ветку, и уже на сайте гитхаб сделать pull-request:<code>
+git checkout cfg
+git checkout -b fix_issue_presta
+.....
+git commit -m 'Fixed issue in prestashop'
+git push gll fix_issue_presta:fix_issue_presta
+</code>
+
+Когда правку примут, то нужно удалить лишние ветки:<code>
+git checkout cfg
+git branch -D fix_issue_presta
+git push gll :fix_issue_presta
+git remote prune gll
+</code>
 
 ===== Примеры задач и схемы их решения (Cookbooks) =====
 
@@ -135,7 +283,8 @@ git update fix234
   * для одного проекта можно использовать несколько локальных конфигов окружения;
   * при автоматических обновлениях все шаги документируются;
   * позволяет в группе проводить единую схему работы;
-  * уменьшения количества ошибок за счет автоматизации процесса.
+  * уменьшения количества ошибок за счет автоматизации процесса;
+  * может использоваться при работе, где не нужно специальное локальное окружение.
 
 ===== TODO =====
 
@@ -149,155 +298,6 @@ https://github.com/wellic/myworkflow
 
 ==== Настройка .gitconfig ====
 
-Ниже представлен пример файла ~/.gitconfig, в котором кроме описанных выше макрокоманд upload, update, а также представлены другие полезные команды, которые помогают в повседневной работе с гит. 
+Добавьте с помощью текстового редактора в свой ~/.gitconfig необходимые команды из [[https://github.com/wellic/myworkflow/blob/master/.gitconfig_sample|.gitconfig_sample]].
 
-Добавьте с помощью текстового редактора в свой ~/.gitconfig
-
-<code>
-
-#customize your
-#   user.name
-#   user.email
-#   alias.mynikname
-[user]
-#!!! Customize name
-  name = your_name
-#!!! Customize email
-  email = your_mail
-[alias]
-#!!! Customize nikname Только одно слово 
-  mynikname = "! f() {          \
-    nikname='your_nikname'      \
-    ;echo $nikname              \
-  ;}; f"
-
-  myname = "! echo $(git config user.name | tr -d '\n')"
-  myallname = "! echo $(git mynikname)'|'$(git myname)"
-
-#Check labels in sources. Useful look for nikname, f.e. in comments 
-  mycheck = "! f() {                  \
-    allname=$(git mynik);             \
-    echo Find nikname in sources $allname;                    \
-    git grep -nEe \"${allname}\"      \
-  ;}; f "
-
-  st = status
-  co = checkout
-  ci = commit
-  amend = commit --amend -C HEAD
-  br = branch
-  rb = rebase
-  rbi = rebase -i
-  ch = cherry-pick
-  unstage = ! git reset HEAD -- $@ 
-
-  hist = log --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
-  hist2 = log --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate
-  last = log --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate -20
-  sshow = show --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset \" --graph --date=short --decorate --no-notes
-  visual = !gitk &
-
-# see gitignore: git gi list
-  gi = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
-
-#Show log for current user sorted by date
-  mylogsort = "! f() { \
-    git mylog $@ | sort --key=3,3 -r \
-  ;}; f $@"
-
-  mylog = "! f() { \
-    allname=$(git myallname); \
-    name=$(git myname); \
-    nik=$(git mynikname); \
-    echo Log of user \"'$allname'\" sorted by date; \
-    git hist2 $@ | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
-  ;}; f $@"
-
-  df = diff
-  df0 = diff -U0
-  dfc = diff --cached
-  lg = log -p
-  lol = log --graph --decorate --pretty=oneline --abbrev-commit
-  lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
-  ls = ls-files
-
-# Show files ignored by git:
-  ign = ls-files -o -i --exclude-standard
-
-# To see the list of the ignored files.
-  ignored = !git ls-files -v | grep ^[a-z]
-
-# temporarily ignoring file
-  ignore = update-index --assume-unchanged
-  unignore = update-index --no-assume-unchanged
-  merged = branch --merged
-  unmerged = branch --no-merged
-
-fsckclear = "! f(){ \
-    echo "= git fsck"                                             && git fsck \
-    && echo "= git reflog expire --expire-unreachable=now --all"  && git reflog expire --expire-unreachable=now --all \
-    && echo "= git gc --prune prunefsck"                          && git gc --prune=now \
-    && echo "= git fsck"                                          && git fsck ;}; f"
-
-##########################
-### my worlflow useful
-##########################
-
-pushall      = ! echo "=  pushall"         && git push --all origin
-pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
-
-copy2tmp = "! f(){ \
- user=$(git mynikname) \
- && tmpbranch=tmp_${user} \
- && cbr=$(git rev-parse --abbrev-ref HEAD) \
- && echo "=   copy2tmp" \
- && echo "==  copy2tmp 1: git add ."                                      && git add . \
- && echo "==  copy2tmp 2: git ci -am 'tmp_'${cbr}_$(date +%y%m%d_%H%M%S)" && git ci -am 'tmp_'${cbr}_$(date +%y%m%d_%H%M%S) \
- && echo "==  copy2tmp 3: git push -f origin $cbr:$tmpbranch"             && git push -f origin $cbr:$tmpbranch \
- && echo "==  copy2tmp 4: git reset HEAD~1"                               && git reset HEAD~1 \
- && echo '---------------' \
- && git st ;}; f"
-
-backupcfg = "! f(){ \
- user=$(git mynikname) \
- && cfg=${1:-cfg} \
- && tmpbranch=${cfg}_${user} \
- && cbr=cfg \
- && echo "=   backupcfg" \
- && echo "==  backupcfg 1: git push -f origin $cbr:$tmpbranch" && git push -f origin $cbr:$tmpbranch \
- && echo '---------------' \
- && git st ;}; f"
-
-
-# Загрузить свои изменения в ветку master из ветки fix, исключая коммиты ветки cfg. Стать на ветку мастер.
-load = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  load $fix $cfg $master " \
- && echo "== load 1: git co $fix"                      && git co $fix \
- && echo "== load 2: git rb --onto $master $cfg $fix"  && git rb --onto $master $cfg $fix  \
- && echo "== load 3: git co $master"                   && git co $master \
- && echo "== load 4: git rebase $fix $master"          && git rebase $fix $master ;}; f"
-
-# Обновить master из origin. Залить изменения из fix и cfg. Вернуться в fix.
-update = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  update ${fix} ${cfg} ${master} " \
- && echo "== update 1: git co $master"      && git co $master  \
- && echo "== update 2: git pull --rebase"   && git pull --rebase \
- && echo "== update 3: git rb $master $cfg" && git rb $master $cfg \
- && echo "== update 4: git rb $cfg $fix"    && git rb $cfg $fix ;}; f"
-
-# Обновить master из origin. Залить изменения из fix в master. Отправить мастер в origin. Сделать бекап cfg, Вернуться в fix.
-upload = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  upload $fix $cfg $master " \
- && echo "== upload 1: "                                && git update $fix $cfg $master \
- && echo "== upload 2: "                                && git load $fix $cfg $master \
- && echo "== upload 3: git push origin $master:$master" && git push origin $master:$master \
- && echo "== upload 4: "                                && git update $fix $cfg $master \
- && echo "== upload 5: git backupcfg"                   && git backupcfg \
- && echo "== update 6: git co $fix"                     && git co $fix   \
- && echo "=====" && git last ;}; f"
-
-</code>
-
+В [[https://github.com/wellic/myworkflow/blob/master/.gitconfig_sample|.gitconfig_sample]] кроме описанных выше макрокоманд upload, update, также представлены другие полезные команды, которые помогают в повседневной работе с гит. 
