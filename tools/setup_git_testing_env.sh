@@ -3,8 +3,8 @@
 set -o nounset
 #set -e 
 
-CNT_DEVS=5
-CNT_SERVERS=3
+CNT_DEVS=3
+CNT_SERVERS=2
 
 ROOT="${PWD}/_testgit_"
 DIR_SERVERS="$ROOT/servers"
@@ -38,15 +38,15 @@ make_devs() {
   for i in $(seq 1 $CNT_DEVS) ; do 
     cd "$DIR_DEVS"  
     NAME="$NAME_DEV"$i
-    git clone --no-hardlink "$DIR_SERVERS/$NAME_SERVER"1 "$NAME"
+    git clone --no-hardlinks -n "$DIR_SERVERS/$NAME_SERVER"1 "$NAME"
     cd $NAME
     add_repos
   done
 
-  NAME="$NAME_DEV"1
-  cd "$DIR_DEVS/$NAME"
-  git commit --allow-empty -m "'Initial commit of dev: $NAME'"
-  git push -u origin master
+#  NAME="$NAME_DEV"1
+#  cd "$DIR_DEVS/$NAME"
+#  git commit --allow-empty -m "'Initial commit of dev: $NAME'"
+#  git push -u origin master
 
 #  for i in $(seq 2 $CNT_DEVS) ; do 
 #    NAME="$NAME_DEV"$i
