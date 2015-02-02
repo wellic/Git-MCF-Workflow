@@ -168,9 +168,9 @@ loadfix = "! f(){ \
  && src_branch=${3:-$master} \
  && rebase=${4:-on} \
  && hidelog=${5:-on} \
- && [ -z \"$rebase\" -o \"$rebase\" = 'on' -o \"$rebase\" = 'rebase' ] && rebase=' --rebase' || rebase=''  \
- && echo \"== loadfix 1-2:\ngit checkout $branch \"                    && git checkout $branch \
- && echo \"== loadfix 2-2:\ngit pull${rebase} $src $src_branch\"       && git pull --no-edit${rebase} $src $src_branch \
+ && [ -z \"$rebase\" -o \"$rebase\" = 'on' -o \"$rebase\" = 'rebase' ]     && rebase='true' || rebase='false'  \
+ && echo \"== loadfix 1-2:\ngit checkout $branch \"                        && git checkout $branch \
+ && echo \"== loadfix 2-2:\ngit pull --rebase=${rebase} $src $src_branch\" && git pull --no-edit --rebase=$rebase $src $src_branch \
  && git checklast $hidelog \
  && echo 'Status: '$? \
  ; }; f"
@@ -195,24 +195,48 @@ update = "! f(){ \
  && git checklast $hidelog \
  ; }; f"
 
-# Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
-# Залить изменения из $fix в $master. 
-# Отправить $master в ветку $dst_branch ($master) репы $dst (origin). 
-# Сделать бекап $cfg.
+
+# Обновить $master из 2х источников
+# $src1 (origin) - основное хранилище, $src1_branch ($master) - источник правок в $src1
+# $src2 ($src1) - дополнительный источник,  $src2_branch ($src1) - источник правок в $src2
+# 1) Сначала обновить $master из удаленной ветки $src1_branch репы $src1 методом rebase.
+# 2) Затем обновить $master из удаленной ветки $src2_branch репы $src2 методом merge, 
+#    если второй источник отличается от первого
+# Конечная ветка: $fix.
+update2src = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && src1=${4:-origin} \
+ && src1_branch=${5:-$master} \
+ && src2=${6:-$src1} \
+ && src2_branch=${7:-$src1_branch} \
+ && hidelog=${8:-on} \
+ && echo \"== upload2src 1-2:\ngit update $fix $cfg $master $src1 $src1_branch rebase\"  && git update $fix $cfg $master $src1 $src1_branch rebase off \
+ && \
+if [ \"$src1\" = \"$src2\" -a \"$src1_branch\" = \"$src2_branch\" ] \
+; then echo \"== upload2src 2-2: there is not need\" \
+; else echo \"== upload2src 2-2:\ngit update $fix $cfg $master $src2 $src2_branch merge\"  && git update $fix $cfg $master $src2 $src2_branch merge  off \
+; fi \
+ && git checklast $hidelog \
+ ; }; f"
+
+# 1) Обновить $master из двух веток (см. update2src), 
+#    $src1 (origin) - основное хранилище $src2 ($src1) - дополнительный источник
+# 2) Залить изменения из $fix в $master b  Отправить $master в ветку $src1_branch ($master) репы $src1 (origin). 
+#    Сделать бекап $cfg.
 # Конечная ветка: $fix.
 upload = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
- && src=${4:-origin} \
- && src_branch=${5:-$master} \
- && dst=${6:-origin} \
- && dst_branch=${7:-$master} \
+ && src1=${4:-origin} \
+ && src1_branch=${5:-$master} \
+ && src2=${6:-$src1} \
+ && src2_branch=${7:-$src1_branch} \
  && hidelog=${8:-on} \
- && echo \"=  upload $fix $cfg $master $src $src_branch $dst $dst_branch\" \
- && echo \"== upload 1-3:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $dst $dst_branch rebase off \
- && echo \"== upload 2-3:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch merge  off \
- && echo \"== upload 3-3:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch off \
+ && echo \"== upload 1-2:\ngit update2src $fix $cfg $master $src1 $src1_branch $src2 $src2_branch\" && git update2src $fix $cfg $master $src1 $src1_branch $src2 $src2_branch off \
+ && echo \"== upload 2-2:\ngit sendfix $fix $cfg $master $src1 $src1_branch\"                       && git sendfix $fix $cfg $master $src1 $src1_branch off \
  && git checklast $hidelog \
  ; }; f"
 
