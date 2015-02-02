@@ -95,33 +95,32 @@ fsckclear = "! f(){ \
 # Конечная ветка: не меняется.
 fakecommit="! f(){ \
  mess=${1:- } \
- && hidelog=$2 \
- && a=_fakefile_.$(basename ${PWD}).$(date +%Y%m%d_%H%M%S) \
- && mess="" \
- && if [ ! -z \"$mess\" ] ; then mess=' '$mess; fi \
- && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit:${mess} (added ${a})'\" \
+ && hidelog=${2:-on} \
+ && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
+ && [ ! -z \"$mess\" ] && mess=\" $mess \" || : \
+ && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit:${mess}(added $a)'\" \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 # Этот метод можно переопределить в локальном конфиге, если обновлении нужно выполнить дополнительную комманду
 # например, чтобы выполнить дополнительную синхронизацию.
 addsync = "! f(){ \
- hidelog=$1 \
+ hidelog=${1:-on} \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 # Посмотреть последние коммиты текущей ветки, если $hidelog=show|on|''
 # Конечная ветка: не меняется.
 checklast = "! f(){ \
  hidelog=${1:-''} \
- && [ -z \"$hidelog\" -o \"$hidelog\" = 'on' -o \"$hidelog\" = 'show' ] && (echo '--- Please check ---'; git last) \
- }; f"
+ && [ -z \"$hidelog\" -o \"$hidelog\" = 'on' -o \"$hidelog\" = 'show' ] && (echo '--- Please check ---'; git last) || : \
+ ; }; f"
 
 # Сделать временный бекап текущей ветки в репу $dst (origin).
 copy2tmp = "! f(){ \
  user=$(git mynikname) \
  && dst=${1:-origin} \
- && hidelog=$2 \
+ && hidelog=${2:-on} \
  && cbr=$(git rev-parse --abbrev-ref HEAD) \
  && rbranch=_${user}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
@@ -132,7 +131,7 @@ copy2tmp = "! f(){ \
  && echo \"==  copy2tmp 3-4:\ngit push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
  && echo \"==  copy2tmp 4-4:\ngit reset HEAD~1\"               && git reset HEAD~1 \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 # Сделать копию $cfg в репу $dst (origin).
 # Конечная ветка: не меняется.
@@ -140,12 +139,12 @@ backupcfg = "! f(){ \
  user=$(git mynikname) \
  && cfg=${1:-cfg} \
  && dst=${2:-origin} \
- && hidelog=$3 \
+ && hidelog=${3:-on} \
  && rbranch=_${user}_${cfg}_backup \
  && echo \"=   backupcfg $cfg $dst\" \
  && echo \"==  backupcfg 1-1:\ngit push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 # Переребейзить $cfg и $fix, Т.е. подготовить ветки к 3-х веточной схемы работы.
 # Конечная ветка: $fix.
@@ -153,30 +152,28 @@ lupdate = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
- && hidelog=$4 \
- && echo \"=  lupdate $fix $cfg $master\" \
+ && hidelog=${4:-on} \
  && echo \"== lupdate 1-3:\ngit checkout $master\"    && git checkout $master  \
  && echo \"== lupdate 2-3:\ngit rebase $master $cfg\" && git rebase $master $cfg \
  && echo \"== lupdate 3-3:\ngit rebase $cfg $fix\"    && git rebase $cfg $fix \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
-
-# Залить новые изменения в ветку $brach из ветки $src_branch ($master) репы $src (origin).
+# Залить новые изменения в ветку $brach (master) из ветки $src_branch ($master) репы $src (origin).
 # используя либо rebase (если $rebase=on|rebase|'') или merge.
 # Конечная ветка: $branch.
 loadfix = "! f(){ \
- branch=$1 \
- && src=$2 \
- && src_branch=$3 \
+ branch=${1:-master} \
+ && src=${2:-origin} \
+ && src_branch=${3:-$master} \
  && rebase=${4:-on} \
- && hidelog=$5 \
- && [ $# -ge 3 ] \
- && ( [ -z \"$rebase\" -o \"$rebase\" = 'on' -o \"$rebase\" = 'rebase' ] && rebase='' || rebase='--rebase' ) \
- && echo \"== loadfix 1-2:\ngit checkout $branch \"                  && git checkout $branch \
- && echo \"== loadfix 2-2:\ngit pull $rebaseparam $src $src_branch\" && git pull --no-edit $rebase $src $src_branch ; \
+ && hidelog=${5:-on} \
+ && [ -z \"$rebase\" -o \"$rebase\" = 'on' -o \"$rebase\" = 'rebase' ] && rebase=' --rebase' || rebase=''  \
+ && echo \"== loadfix 1-2:\ngit checkout $branch \"                    && git checkout $branch \
+ && echo \"== loadfix 2-2:\ngit pull${rebase} $src $src_branch\"       && git pull --no-edit${rebase} $src $src_branch \
  && git checklast $hidelog \
- }; f"
+ && echo 'Status: '$? \
+ ; }; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin) с учетом $rebase (см. loadfix).
 # Применить изменения к $cfg и $fix. 
@@ -188,15 +185,15 @@ update = "! f(){ \
  && master=${3:-master} \
  && src=${4:-origin} \
  && src_branch=${5:-$master} \
- && rebase=$6 \
- && hidelog=$7 \
+ && rebase=${6:-on} \
+ && hidelog=${7:-on} \
  && echo \"== update 1-5:\ngit loadfix $src_branch $src $src_branch $rebase\" && git loadfix $src_branch $src $src_branch $rebase off \
  && echo \"== update 2-5:\ngit checkout $master\"                             && git checkout $master \
- && echo \"== update 3-5:\ngit merge $src_branch\"                            && git merge $src_branch --no-edit \
+ && echo \"== update 3-5:\ngit merge $src_branch\"                            && git merge --no-edit $src_branch \
  && echo \"== update 4-5:\ngit lupdate $fix $cfg $master\"                    && git lupdate $fix $cfg $master off \
  && echo \"== update 5-5:\ngit addsync\"                                      && git addsync off\
  && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 # Обновить $master из удаленной ветки $src_branch ($master) репы $src (origin).
 # Залить изменения из $fix в $master. 
@@ -211,13 +208,30 @@ upload = "! f(){ \
  && src_branch=${5:-$master} \
  && dst=${6:-origin} \
  && dst_branch=${7:-$master} \
- && hidelog=$8 \
+ && hidelog=${8:-on} \
  && echo \"=  upload $fix $cfg $master $src $src_branch $dst $dst_branch\" \
  && echo \"== upload 1-3:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $dst $dst_branch rebase off \
  && echo \"== upload 2-3:\ngit update $fix $cfg $master $src $src_branch\"  && git update $fix $cfg $master $src $src_branch merge  off \
  && echo \"== upload 3-3:\ngit sendfix $fix $cfg $master $dst $dst_branch\" && git sendfix $fix $cfg $master $dst $dst_branch off \
  && git checklast $hidelog \
- }; f"
+ ; }; f"
+
+# Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
+# Конечная ветка: $fix.
+applyfix = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && hidelog=${4:-on} \
+ && echo \"=  applyfix $fix $cfg $master\" \
+ && echo \"== applyfix 1-6:\ngit checkout $fix\"                    && git checkout $fix \
+ && echo \"== applyfix 2-6:\ngit rebase --onto $master $cfg $fix\"  && git rebase --onto $master $cfg $fix  \
+ && echo \"== applyfix 3-6:\ngit checkout $master\"                 && git checkout $master \
+ && echo \"== applyfix 4-6:\ngit rebase $fix $master\"              && git rebase $fix $master \
+ && echo \"== applyfix 5-6:\ngit rebase $master $cfg\"              && git rebase $master $cfg \
+ && echo \"== applyfix 6-6:\ngit rebase $cfg $fix\"                 && git rebase $cfg $fix \
+ && git checklast $hidelog \
+ ; }; f"
 
 # Залить изменения из $fix в master. 
 # Отправить $master в ветку $dst_branch ($master) репы $dst ($origin). 
@@ -229,30 +243,13 @@ sendfix = "! f(){ \
  && master=${3:-master} \
  && dst=${4:-origin} \
  && dst_branch=${5:-$master} \
- && hidelog=$6 \
+ && hidelog=${6:-on} \
  && echo \"=  sendfix $fix $cfg $master $src $src_branch\" \
  && echo \"== sendfix 1-3:\ngit load $fix $cfg $master\"        && git applyfix $fix $cfg $master off \
  && echo \"== sendfix 2-3:\ngit push $dst $master:$dst_branch\" && git push $dst $master:$dst_branch \
  && echo \"== sendfix 3-3:\ngit backupcfg $cfg $dst\"           && git backupcfg $cfg $dst off \
  && git checklast $hidelog \
- }; f"
-
-# Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
-# Конечная ветка: $fix.
-applyfix = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && hidelog=$4 \
- && echo \"=  applyfix $fix $cfg $master\" \
- && echo \"== applyfix 1-6:\ngit checkout $fix\"                    && git checkout $fix \
- && echo \"== applyfix 2-6:\ngit rebase --onto $master $cfg $fix\"  && git rebase --onto $master $cfg $fix  \
- && echo \"== applyfix 3-6:\ngit checkout $master\"                 && git checkout $master \
- && echo \"== applyfix 4-6:\ngit rebase $fix $master\"              && git rebase $fix $master \
- && echo \"== applyfix 5-6:\ngit rebase $master $cfg\"              && git rebase $master $cfg \
- && echo \"== applyfix 6-6:\ngit rebase $cfg $fix\"                 && git rebase $cfg $fix \
- && git checklast $hidelog \
- }; f"
+ ; }; f"
 
 ##########################
 ### git-svn useful
