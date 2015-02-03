@@ -98,8 +98,8 @@ fakecommit="! f(){ \
  mess=${1:- } \
  && hidelog=${2:-on} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
- && [ ! -z \"$mess\" ] && mess=\" $mess \" || : \
- && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit:${mess}(added $a)'\" \
+ && [ -z \"$mess\" ] && mess=\"added $a\" || : \
+ && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: ${mess}'\" \
  && git checklast $hidelog \
  ; }; f"
 
