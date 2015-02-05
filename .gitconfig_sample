@@ -32,11 +32,11 @@
   ch = cherry-pick
   type = cat-file -t
   dump = cat-file -p
-  unstage = ! git reset HEAD -- $@ 
-  sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate \"$@\" && echo  ; }; f $@"
-  last  = "! f() { git --no-pager log  -20               --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate \"$@\" && echo  ; }; f $@"
-  hist  = "! f() { git --no-pager log                    --pretty=format:'%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset' --graph --date=short --decorate \"$@\" && echo  ; }; f $@"
-  hist2 = "! f() { git --no-pager log                    --pretty=format:'%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset'           --graph --date=short --decorate \"$@\" && echo  ; }; f \"$@\" "
+  unstage = ! git reset HEAD -- $*
+  sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+  last  = "! f() { git --no-pager log  -20               --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+  hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+  hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
   visual = !gitk --all &
   df = diff
   df0 = diff -U0
@@ -44,8 +44,8 @@
 
   #Show log for current user sorted by date
   mylogsort = "! f() { \
-    git mylog \"$@\" | sort --key=3,3 -r \
-  ;}; f $@"
+    git mylog $* | sort -k 3,3 -r \
+  ;}; f"
 
   #Show log for current user without sorte
   mylog = "! f() { \
@@ -53,14 +53,14 @@
     name=$(git myname); \
     nik=$(git mynikname); \
     echo Log of users: \"'$allname'\" \"'$name'\" \"'$nik'\"; \
-    git hist2 \"$@\" --author=\"$allname\" --author=\"=$name\" --author=\"$nik\" \
-  ;}; f \"$@\" "
+    git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nik\" \
+  ;}; f "
 #    git hist2 \"$@\" | grep -i -E \"${allname}\" | sed \"s/\\[${name}\\]//i\" | sed \"s/\\[${nik}\\]//i\" \
 
 ##### Useful commands 
-  lg    = "! f() { git --no-pager log -p $@ && echo  ; }; f $@"
-  lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit \"$@\"       && echo  ; }; f \"$@\" "
-  lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all \"$@\" && echo  ; }; f \"$@\" "
+  lg    = "! f() { git --no-pager log -p $* && echo  ; }; f "
+  lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo  ; }; f "
+  lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo  ; }; f "
 
   # ignored
   # Show files ignored by git:
@@ -95,11 +95,11 @@ fsckclear = "! f(){ \
 # Создается фейковый пустой файл.
 # Конечная ветка: не меняется.
 fakecommit="! f(){ \
- mess=${1:- } \
+ mess=${1:-} \
  && hidelog=${2:-on} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"added $a\" || : \
- && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: ${mess}'\" \
+ && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
  && git checklast $hidelog \
  ; }; f"
 
