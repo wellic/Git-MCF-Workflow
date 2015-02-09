@@ -280,16 +280,15 @@ w-update-default = "! f(){ \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-show} \
  && echo \"= w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && echo \"= w-update 1-7:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
- && echo \"= w-update 2-7:\" && git w-update-from-repo $fix $cfg $master $src1 $master $src1_rbranch rebase off \
- && echo \"= w-update 3-7:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+ && echo \"= w-update 1-6:\" && git w-update-from-repo $fix $cfg $master $src1 $master $src1_rbranch rebase off \
+ && echo \"= w-update 2-6:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
  && if [ \"$src1\" = \"$src2\" -a \"$src1_branch\" = \"$src2_lbranch\" ] \
-; then echo \"= w-update 4-7: there is not need update\" \
-; else echo \"= w-update 4-7:\" && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
- && echo \"= w-update 5-7:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+; then echo \"= w-update 3-6: there is not need update\" \
+; else echo \"= w-update 3-6:\" && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
+ && echo \"= w-update 4-6:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
 ; fi \
- && echo \"= w-update 6-7:\"                    && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
- && echo \"= w-update 7-7:\ngit checkout $fix\" && git checkout $fix \
+ && echo \"= w-update 5-6:\"                    && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
+ && echo \"= w-update 6-6:\ngit checkout $fix\" && git checkout $fix \
  && git w-checklast $showlog \
  ; }; f"
 
