@@ -240,8 +240,8 @@ w-update-from-repo-default = "! f(){ \
  && rebase=${7:-rebase} \
  && showlog=${8:-} \
  && echo \"= w-update-from-repo $fix $cfg $master $src $src_lbranch $src_rbranch $rebase $showlog\" \
- && echo \"= w-update-from-repo 1-2:\"                         && git w-load-fix-from-repo $master $src $src_lbranch $src_rbranch $rebase off \
- && echo \"= w-update-from-repo 2-2:\"                         && git w-rebuild-base $fix $cfg $master off \
+ && echo \"= w-update-from-repo 1-2:\" && git w-load-fix-from-repo $master $src $src_lbranch $src_rbranch $rebase off \
+ && echo \"= w-update-from-repo 2-2:\" && git w-rebuild-base $fix $cfg $master off \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -268,14 +268,15 @@ w-update-default = "! f(){ \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-} \
  && echo \"= w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && echo \"= w-update 1-5:\" && git w-update-from-repo $fix $cfg $master $src1 $src1_lbranch $src1_rbranch rebase off \
+ && echo \"= w-update 1-6:\" && git w-update-from-repo $fix $cfg $master $src1 $src1_lbranch $src1_rbranch rebase off \
+ && echo \"= w-update 2-6:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
  && if [ \"$src1\" = \"$src2\" -a \"$src1_branch\" = \"$src2_lbranch\" ] \
-; then echo \"= w-update 2-5: there is not need update\" \
-; else echo \"= w-update 2-5:\" && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
+; then echo \"= w-update 3-6: there is not need update\" \
+; else echo \"= w-update 3-6:\" && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
+ && echo \"= w-update 4-6:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
 ; fi \
- && echo \"= w-update 3-5:\ngit push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
- && echo \"= w-update 4-5:\"                                       && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog \
- && echo \"= w-update 5-5:\ngit checkout $fix\"                    && git checkout $fix \
+ && echo \"= w-update 5-6:\"                    && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
+ && echo \"= w-update 6-6:\ngit checkout $fix\" && git checkout $fix \
  && git w-checklast $showlog \
  ; }; f"
 
