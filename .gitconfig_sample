@@ -120,15 +120,11 @@ fsckclear = "! f(){ \
 # my worlflow
 ###################
 
-#Black        0;30     Dark Gray     1;30
-#Red          0;31     Light Red     1;31
-#Green        0;32     Light Green   1;32
-#Brown/Orange 0;33     Yellow        1;33
-#Blue         0;34     Light Blue    1;34
-#Purple       0;35     Light Purple  1;35
-#Cyan         0;36     Light Cyan    1;36
-#Light Gray   0;37     White         1;37
-
+# Показать сообщение нужным цветом и оттенком
+# COLOR={0..7}
+#  0-Black(Grey), 1-Red, 2-Green, 3-Brown/Orange(Yellow), 4-Blue,  5-Purple, 6-Cyan, 7-Light Gray(White)
+# BRIGHT={0|1|2|4|7|9}
+#  0(normal), 1(light), 2(dark), 4(underline), 7(invert) 9(cross)
 w-echo = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-7} \
@@ -169,11 +165,11 @@ w-copy2tmp-default = "! f(){ \
  && rbranch=_${user}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
  && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
- && git w-echo \"= w-copy2tmp $dst $showlog\" 1 0 \
- && git w-echo \"= w-copy2tmp 1-4:\" 2 2;git w-echo \"git add --all\"                  && git add --all \
- && git w-echo \"= w-copy2tmp 2-4:\" 2 2;git w-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
- && git w-echo \"= w-copy2tmp 3-4:\" 2 2;git w-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
- && git w-echo \"= w-copy2tmp 4-4:\" 2 2;git w-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
+ && git w-echo \"= w-copy2tmp $dst $showlog\" 2 2 \
+ && git w-echo \"= w-copy2tmp 1-4:\" 6 2;git w-echo \"git add --all\"                  && git add --all \
+ && git w-echo \"= w-copy2tmp 2-4:\" 6 2;git w-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
+ && git w-echo \"= w-copy2tmp 3-4:\" 6 2;git w-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
+ && git w-echo \"= w-copy2tmp 4-4:\" 6 2;git w-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -186,8 +182,8 @@ w-backupcfg-default = "! f(){ \
  && dst=${2:-origin} \
  && showlog=${3:-} \
  && rbranch=_${user}_${cfg}_backup \
- && git w-echo \"= w-backupcfg $cfg $dst $showlog\" 2 0 \
- && git w-echo \"= w-backupcfg 1-1:\" 2 2;git w-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
+ && git w-echo \"= w-backupcfg $cfg $dst $showlog\" 2 2 \
+ && git w-echo \"= w-backupcfg 1-1:\" 6 2;git w-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -199,10 +195,10 @@ w-create-base-default = "! f(){ \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
  && showlog=${4:-show} \
- && git w-echo \"= w-create-base $fix $cfg $master $showlog\" 2 0 \
- && git w-echo \"= w-create-base 1-3:\" 2 2;git w-echo \"git checkout $master\" && git checkout $master  \
- && git w-echo \"= w-create-base 2-3:\" 2 2;git w-echo \"git checkout -b $cfg\" && git checkout -b $cfg \
- && git w-echo \"= w-create-base 3-3:\" 2 2;git w-echo \"git checkout -b $fix\" && git checkout -b $fix \
+ && git w-echo \"= w-create-base $fix $cfg $master $showlog\" 2 2 \
+ && git w-echo \"= w-create-base 1-3:\" 6 2;git w-echo \"git checkout $master\" && git checkout $master  \
+ && git w-echo \"= w-create-base 2-3:\" 6 2;git w-echo \"git checkout -b $cfg\" && git checkout -b $cfg \
+ && git w-echo \"= w-create-base 3-3:\" 6 2;git w-echo \"git checkout -b $fix\" && git checkout -b $fix \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -214,10 +210,10 @@ w-rebuild-base-default = "! f(){ \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
  && showlog=${4:-show} \
- && git w-echo \"= w-rebuild-base $fix $cfg $master $showlog\" 2 0 \
- && git w-echo \"= w-rebuild-base 1-3:\" 2 2;git w-echo \"git checkout $master\"    && git checkout $master  \
- && git w-echo \"= w-rebuild-base 2-3:\" 2 2;git w-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
- && git w-echo \"= w-rebuild-base 3-3:\" 2 2;git w-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
+ && git w-echo \"= w-rebuild-base $fix $cfg $master $showlog\" 2 2 \
+ && git w-echo \"= w-rebuild-base 1-3:\" 6 2;git w-echo \"git checkout $master\"    && git checkout $master  \
+ && git w-echo \"= w-rebuild-base 2-3:\" 6 2;git w-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
+ && git w-echo \"= w-rebuild-base 3-3:\" 6 2;git w-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -235,7 +231,7 @@ w-update-extcmd-default = "! f(){ \
  && src2_lbranch=${7:-$master} \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-show} \
- && git w-echo \"= w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 0 \
+ && git w-echo \"= w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 2 \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -250,15 +246,15 @@ w-load-fix-from-repo-default = "! f(){ \
  && src_rbranch=${4:-$src_lbranch} \
  && rebase=${5:-rebase} \
  && showlog=${6:-show} \
- && git w-echo \"= w-load-fix-from-repo $branch $src $src_lbranch $src_rbranch $rebase $showlog\" 2 0 \
- && git w-echo \"= w-load-fix-from-repo 1-4:\" 2 2;git w-echo \"git checkout $src_lbranch \"  && git checkout $src_lbranch \
- && git w-echo \"= w-load-fix-from-repo 2-4:\" 2 2;git w-echo \"git pull $src $src_rbranch \" && git pull $src $src_rbranch \
- && git w-echo \"= w-load-fix-from-repo 3-4:\" 2 2;git w-echo \"git checkout $branch \"       && git checkout $branch \
+ && git w-echo \"= w-load-fix-from-repo $branch $src $src_lbranch $src_rbranch $rebase $showlog\" 2 2 \
+ && git w-echo \"= w-load-fix-from-repo 1-4:\" 6 2;git w-echo \"git checkout $src_lbranch \"  && git checkout $src_lbranch \
+ && git w-echo \"= w-load-fix-from-repo 2-4:\" 6 2;git w-echo \"git pull $src $src_rbranch \" && git pull $src $src_rbranch \
+ && git w-echo \"= w-load-fix-from-repo 3-4:\" 6 2;git w-echo \"git checkout $branch \"       && git checkout $branch \
  && if [ -z \"$rebase\" -o \"$rebase\" = 'on' -o \"$rebase\" = 'rebase' ] \
 ; then \
-    git w-echo \"= w-load-fix-from-repo 4-4:\" 2 2;git w-echo \"git pull --rebase \" && git pull --rebase \
+    git w-echo \"= w-load-fix-from-repo 4-4:\" 6 2;git w-echo \"git pull --rebase \" && git pull --rebase \
 ; else \
-    git w-echo \"= w-load-fix-from-repo 4-4:\" 2 2;git w-echo \"git merge --no-edit $src_lbranch \" && git merge --no-edit -m \"Merged with $src/$src_rbranch\" $src_lbranch \
+    git w-echo \"= w-load-fix-from-repo 4-4:\" 6 2;git w-echo \"git merge --no-edit $src_lbranch \" && git merge --no-edit -m \"Merged with $src/$src_rbranch\" $src_lbranch \
 ; fi \
  && git w-checklast $showlog \
  ; }; f"
@@ -276,9 +272,9 @@ w-update-from-repo-default = "! f(){ \
  && src_rbranch=${6:-$src_lbranch} \
  && rebase=${7:-rebase} \
  && showlog=${8:-show} \
- && git w-echo \"= w-update-from-repo $fix $cfg $master $src $src_lbranch $src_rbranch $rebase $showlog\" 2 0 \
- && git w-echo \"= w-update-from-repo 1-2:\" 2 2 && git w-load-fix-from-repo $master $src $src_lbranch $src_rbranch $rebase off \
- && git w-echo \"= w-update-from-repo 2-2:\" 2 2 && git w-rebuild-base $fix $cfg $master off \
+ && git w-echo \"= w-update-from-repo $fix $cfg $master $src $src_lbranch $src_rbranch $rebase $showlog\" 2 2 \
+ && git w-echo \"= w-update-from-repo 1-2:\" 6 2 && git w-load-fix-from-repo $master $src $src_lbranch $src_rbranch $rebase off \
+ && git w-echo \"= w-update-from-repo 2-2:\" 6 2 && git w-rebuild-base $fix $cfg $master off \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -302,16 +298,16 @@ w-update-default = "! f(){ \
  && src2_lbranch=${7:-$master} \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-show} \
- && git w-echo \"= w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 0 \
- && git w-echo \"= w-update 1-6:\" 2 2 && git w-update-from-repo $fix $cfg $master $src1 $master $src1_rbranch rebase off \
- && git w-echo \"= w-update 2-6:\" 2 2;git w-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+ && git w-echo \"= w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 2 \
+ && git w-echo \"= w-update 1-6:\" 6 2 && git w-update-from-repo $fix $cfg $master $src1 $master $src1_rbranch rebase off \
+ && git w-echo \"= w-update 2-6:\" 6 2;git w-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
  && if [ \"$src1\" = \"$src2\" -a \"$src1_branch\" = \"$src2_lbranch\" ] \
-; then git w-echo \"= w-update 3-6: there is not need update\" 2 2 \
-; else git w-echo \"= w-update 3-6:\" 2 2 && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
- && git w-echo \"= w-update 4-6:\" 2 2;git w-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+; then git w-echo \"= w-update 3-6: there is not need update\" 6 2 \
+; else git w-echo \"= w-update 3-6:\" 6 2 && git w-update-from-repo $fix $cfg $master $src2 $src2_lbranch $src2_rbranch merge off \
+ && git w-echo \"= w-update 4-6:\" 6 2;git w-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
 ; fi \
- && git w-echo \"= w-update 5-6:\" 2 2 && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
- && git w-echo \"= w-update 6-6:\" 2 2;git w-echo \"git checkout $fix\" && git checkout $fix \
+ && git w-echo \"= w-update 5-6:\" 6 2 && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
+ && git w-echo \"= w-update 6-6:\" 6 2;git w-echo \"git checkout $fix\" && git checkout $fix \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -331,10 +327,10 @@ w-upload-default = "! f(){ \
  && src2_lbranch=${7:-$master} \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-show} \
- && git w-echo \"= w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 0 \
- && git w-echo \"= w-upload 1-3:\" 2 2 && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
- && git w-echo \"= w-upload 2-3:\" 2 2 && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
- && git w-echo \"= w-upload 3-3:\" 2 2 && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
+ && git w-echo \"= w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" 2 2 \
+ && git w-echo \"= w-upload 1-3:\" 6 2 && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
+ && git w-echo \"= w-upload 2-3:\" 6 2 && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
+ && git w-echo \"= w-upload 3-3:\" 6 2 && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -351,10 +347,10 @@ w-send-fix-default = "! f(){ \
  && dst=${4:-origin} \
  && dst_branch=${5:-$master} \
  && showlog=${6:-show} \
- && git w-echo \"= w-send-fix $fix $cfg $master $dst $dst_branch $showlog\" 2 0 \
- && git w-echo \"= w-send-fix 1-3:\" 2 2                                    && git w-apply-fix $fix $cfg $master off \
- && git w-echo \"= w-send-fix 2-3:\" 2 2;git w-echo \"git push $dst $master:$dst_branch\"   && git push $dst $master:$dst_branch \
- && git w-echo \"= w-send-fix 3-3:\" 2 2                                    && git w-backupcfg $cfg $dst off \
+ && git w-echo \"= w-send-fix $fix $cfg $master $dst $dst_branch $showlog\" 2 2 \
+ && git w-echo \"= w-send-fix 1-3:\" 6 2                                    && git w-apply-fix $fix $cfg $master off \
+ && git w-echo \"= w-send-fix 2-3:\" 6 2;git w-echo \"git push $dst $master:$dst_branch\"   && git push $dst $master:$dst_branch \
+ && git w-echo \"= w-send-fix 3-3:\" 6 2                                    && git w-backupcfg $cfg $dst off \
  && git w-checklast $showlog \
  ; }; f"
 
@@ -366,11 +362,11 @@ w-apply-fix-default = "! f(){ \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
  && showlog=${4:-show} \
- && git w-echo \"= w-apply-fix $fix $cfg $master $showlog\" 2 0 \
- && git w-echo \"= w-apply-fix 1-4:\" 2 2;git w-echo \"git checkout $fix\"                   && git checkout $fix \
- && git w-echo \"= w-apply-fix 2-4:\" 2 2;git w-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
- && git w-echo \"= w-apply-fix 3-4:\" 2 2;git w-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
- && git w-echo \"= w-apply-fix 4-4:\" 2 2                                                    && git w-rebuild-base $fix $cfg $master off \
+ && git w-echo \"= w-apply-fix $fix $cfg $master $showlog\" 2 2 \
+ && git w-echo \"= w-apply-fix 1-4:\" 6 2;git w-echo \"git checkout $fix\"                   && git checkout $fix \
+ && git w-echo \"= w-apply-fix 2-4:\" 6 2;git w-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
+ && git w-echo \"= w-apply-fix 3-4:\" 6 2;git w-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
+ && git w-echo \"= w-apply-fix 4-4:\" 6 2                                                    && git w-rebuild-base $fix $cfg $master off \
  && git w-checklast $showlog \
  ; }; f"
 

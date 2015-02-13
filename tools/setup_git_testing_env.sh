@@ -20,7 +20,7 @@ mkdir -p "$DIR_SERVERS"
 myseq() {
   s=${1:-0}; e=${2:-0}; step=${3:-1};
   result=
-  while [ "$s" -lt "$e" ]
+  while [ "$s" -le "$e" ]
   do
     result="$result $s"
     s=$(( $s+$step ))
