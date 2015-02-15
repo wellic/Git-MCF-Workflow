@@ -150,7 +150,7 @@ l-echo-l1 = "! f() { \
 
 # Посмотреть последние коммиты текущей ветки, если $showlog=show|on|''
 # Конечная ветка: не меняется.
-l-checklast = "! f(){ \
+l-last-check = "! f(){ \
  showlog=${1:-show} \
  && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ] && (git l-echo '--- Please check ---' 5; git last) || : \
 ;}; f"
@@ -165,7 +165,7 @@ l-fakecommit-default ="! f(){ \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"added $a\" || : \
  && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 #must be -1|0|1
@@ -198,7 +198,7 @@ w-copy2tmp-default = "! f(){ \
  && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
  && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
  && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Сделать копию $cfg в репу $dst (origin).
@@ -212,7 +212,7 @@ w-backupcfg-default = "! f(){ \
  && rbranch=_${user}_${cfg}_backup \
  && git l-echo-l0 \"w-backupcfg $cfg $dst $showlog\" \
  && git l-echo-l1 \"w-backupcfg 1-1:\";git l-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Создать первичные ветки для работы 3-х веточной схемы (MCF).
@@ -227,7 +227,7 @@ w-create-base-default = "! f(){ \
  && git l-echo-l1 \"w-create-base 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
  && git l-echo-l1 \"w-create-base 2-3:\";git l-echo \"git checkout -b $cfg\" && git checkout -b $cfg \
  && git l-echo-l1 \"w-create-base 3-3:\";git l-echo \"git checkout -b $fix\" && git checkout -b $fix \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Поменять базовый коммит для $cfg и $fix, т.е. подготовить ветки к 3-х веточной схемы работы.
@@ -241,7 +241,7 @@ w-rebuild-base-default = "! f(){ \
  && git l-echo-l0 \"w-rebuild-base $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
  && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Этот метод можно переопределить в локальном конфиге, чтобы при обновлении (пше w-update) выполнить дополнительную комманду.
@@ -259,7 +259,7 @@ w-update-extcmd-default = "! f(){ \
  && src2_rbranch=${8:-$src2_lbranch} \
  && showlog=${9:-show} \
  && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Залить новые изменения в ветку $brach (master) из ветки $src_branch ($master) репы $src (origin).
@@ -282,7 +282,7 @@ w-load-fix-from-repo-default = "! f(){ \
  && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $branch \" && git checkout $branch \
  && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $src_lbranch \" && git merge --no-edit -m \"Merged with $src/$src_rbranch\" $src_lbranch \
 ; fi \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Обновить $master из 2х источников
@@ -318,7 +318,7 @@ w-update-default = "! f(){ \
  && cbr=$(git get-current-branch) \
  && git l-echo-l1 \"w-update 5-5:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
  && git checkout -q $cbr \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # 1) Обновить $master из одной или двух веток (параметры см. w-update),
@@ -340,7 +340,7 @@ w-upload-default = "! f(){ \
  && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
  && git l-echo-l1 \"w-upload 1-2:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
  && git l-echo-l1 \"w-upload 2-2:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Аналогично w-upload, другой порядок парaметров.
@@ -381,7 +381,7 @@ w-send-fix-default = "! f(){ \
  && git l-echo-l1 \"w-send-fix 1-3:\" && git w-apply-fix $fix $cfg $master off \
  && git l-echo-l1 \"w-send-fix 2-3:\";git l-echo \"git push $dst $master:$dst_branch\" && git push $dst $master:$dst_branch \
  && git l-echo-l1 \"w-send-fix 3-3:\" && git w-backupcfg $cfg $dst off \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 # Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
@@ -397,7 +397,7 @@ w-apply-fix-default = "! f(){ \
  && git l-echo-l1 \"w-apply-fix 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
  && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
  && git l-echo-l1 \"w-apply-fix 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
- && git l-checklast $showlog \
+ && git l-last-check $showlog \
 ;}; f"
 
 
