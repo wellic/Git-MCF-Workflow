@@ -1,0 +1,4 @@
+!.gitignore
+install/
+before_install/my_setup_name.sh
+
