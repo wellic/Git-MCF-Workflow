@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	url = git@github.com:wellic/myworkflow.git
+	url = git@github.com:GiantLeapLab/myworkflow.git
+[branch "master"]
+	remote = gh
+	merge = refs/heads/master
+[remote "gh"]
+	url = git@github.com:wellic/myworkflow.git
+	fetch = +refs/heads/*:refs/remotes/gh/*
+[remote "gll"]
+	url = git@github.com:GiantLeapLab/myworkflow.git
+	fetch = +refs/heads/*:refs/remotes/gll/*
