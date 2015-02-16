@@ -5,14 +5,14 @@
 	logallrefupdates = true
 [remote "origin"]
 	fetch = +refs/heads/*:refs/remotes/origin/*
-	url = git@github.com:wellic/myworkflow.git
-	url = git@github.com:GiantLeapLab/myworkflow.git
+	url = gh_wellic:wellic/myworkflow.git
+	url = gh_gll:GiantLeapLab/myworkflow.git
 [branch "master"]
-	remote = gh
+	remote = origin
 	merge = refs/heads/master
 [remote "gh"]
-	url = git@github.com:wellic/myworkflow.git
+	url = gh_wellic:wellic/myworkflow.git
 	fetch = +refs/heads/*:refs/remotes/gh/*
 [remote "gll"]
-	url = git@github.com:GiantLeapLab/myworkflow.git
+	url = gh_gll:GiantLeapLab/myworkflow.git
 	fetch = +refs/heads/*:refs/remotes/gll/*
