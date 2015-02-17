@@ -1,451 +1,13 @@
 #customize your
 #   user.name
 #   user.email
-#   user.nikname
+#   user.nickname
 [user]  
 	name = your_name
 	email = your@mail
-	nikname = yournik
-
-#####################
-### Start ALIASES ###
-#####################
-
-[alias]
-
-
-###########
-# User info
-###########
-
-myname = "! git config user.name"
-mynikname = "! git config user.nikname"
-myallname = "! echo $(git myname)'\\|'$(git mynikname)"
-
-#Check labels in sources. Useful look for nikname, f.e. in comments
-mycheck = "! f() { \
- allname=$(git mynik); \
- echo Find nikname in sources $allname; \
- git grep -nEe \"${allname}\" \
-;}; f "
-
-###############
-# Main commands
-###############
-
-br = branch
-co = checkout
-ci = commit
-amend = commit --amend -C HEAD
-st = status
-rb = rebase
-rbi = rebase -i
-ch = cherry-pick
-unstage = "! git reset HEAD -- $* "
-
-# diff
-df = diff
-df0 = diff -U0
-dfc = diff --cached
-visual = !gitk --all &
-
-# show history and log
-sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-last  = "! f() { git --no-pager log  -20               --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
-
-#Show log for current user without sorte
-mylog = "! f() { \
- allname=$(git myallname); \
- name=$(git myname); \
- nik=$(git mynikname); \
- echo Log of users: \"'$allname'\" \"'$name'\" \"'$nik'\"; \
- git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nik\" \
-;}; f "
-
-#Show log for current user sorted by date
-mylogsort = "! f() { \
- git mylog $* | sort -k 3,3 -r \
-;}; f"
-
-#################
-# Useful commands
-#################
-
-cbr = rev-parse --abbrev-ref HEAD
-get-current-branch = "! git cbr"
-
-type = cat-file -t
-dump = cat-file -p
-
-# ignored
-# Show files ignored by git:
-ign = ls-files -o -i --exclude-standard
-# to see the list of the ignored files.
-ignored = !git ls-files -v | grep ^[a-z]
-
-# temporarily ignoring file
-ignore   = update-index --assume-unchanged
-unignore = update-index --no-assume-unchanged
-
-# check merged
-merged   = branch --merged
-unmerged = branch --no-merged
-
-# different list and logs
-ls = ls-files
-lg    = "! f() { git --no-pager log -p $* && echo  ; }; f "
-lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo  ; }; f "
-lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo  ; }; f "
-
-# for see gitignore: git gi list
-gi = "! gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
-
-##########################
-# Services commands
-##########################
-# Всмомогательные комманды
-##########################
-
-l-fsckclear = "! f(){ \
- git l-echo \"git fsck\"                                            && git fsck \
- && git l-echo \"git reflog expire --expire-unreachable=now --all\" && git reflog expire --expire-unreachable=now --all \
- && git l-echo \"git gc --prune prunefsck\"                         && git gc --prune=now \
- && git l-echo \"git fsck\"                                         && git fsck ;}; f"
-
-# Показать сообщение нужным цветом и оттенком
-# COLOR={0..7}
-#  0-Black(Grey), 1-Red, 2-Green, 3-Brown/Orange(Yellow), 4-Blue,  5-Purple, 6-Cyan, 7-Light Gray(White)
-# BRIGHT={0|1|2|4|7|9}
-#  0(normal), 1(light), 2(dark), 4(underline), 7(invert) 9(cross)
-l-echo = "! f() { \
- MESS=${1:-} \
- && COLOR=${2:-3} \
- && BRIGHT=${3:-1} \
- && COLOR=\"\\033[${BRIGHT};3${COLOR}m\" \
- && NOCOLOR=\"\\033[0m\" \
- && MESS=\"${COLOR}${MESS}${NOCOLOR}\" \
- && [ \"$(uname)\" = 'Linux' ]  && echo \"$MESS\" || echo -e \"$MESS\" \
-;}; f"
-
-
-l-echo-l0 = "! f() { \
- MESS=${1:-} \
- && COLOR=${2:-2} \
- && BRIGHT=${3:-2} \
- && git l-check-debug-level 0 \
- && git l-echo \"= $MESS\" \"$COLOR\" \"$BRIGHT\" \
- || : \
-;}; f"
-
-l-echo-l1 = "! f() { \
- MESS=${1:-} \
- && COLOR=${2:-6} \
- && BRIGHT=${3:-2} \
- && git l-check-debug-level 1 \
- && git l-echo \"== $MESS\" \"$COLOR\" \"$BRIGHT\" \
- || : \
-;}; f"
-
-# Посмотреть последние коммиты текущей ветки, если $showlog=show|on|''
-# Конечная ветка: не меняется.
-l-last-check = "! f(){ \
- showlog=${1:-show} \
- && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ] && (git l-echo '--- Please check ---' 5; git last) || : \
-;}; f"
-
-# Сделать сделать быстро фейковый коммит, например, для тестов.
-# Создается фейковый пустой файл.
-# Конечная ветка: не меняется.
-l-fakecommit ="! git l-fakecommit-default"
-l-fakecommit-default ="! f(){ \
- mess=${1:-} \
- && showlog=${2:-} \
- && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
- && [ -z \"$mess\" ] && mess=\"added $a\" || : \
- && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
- && git l-last-check $showlog \
-;}; f"
-
-#must be -1|0|1
-# 0 - (normal mode) show l0 diagnostic message in w-*functions
-# 1 - (debug mode)  show l0 and l1 diagnostic message in w-*functions
-l-debug-level = ! echo 0
-
-l-check-debug-level = "! f() { \
- level=${1:-0} \
- && clevel=$(git l-debug-level) \
- && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
-;}; f"
-
-###################
-# my worlflow
-###################
-
-# Сделать временный бекап текущей ветки в репу $dst (origin).
-w-copy2tmp = "! git w-copy2tmp-default"
-w-copy2tmp-default = "! f(){ \
- dst=${1:-origin} \
- && showlog=${2:-} \
- && user=$(git mynikname) \
- && cbr=$(git get-current-branch) \
- && rbranch=_${user}_${cbr}_tmp \
- && CURDATE=$(date +"%y%m%d_%H%M%S") \
- && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
- && git l-echo-l0 \"w-copy2tmp $dst $showlog\" \
- && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                  && git add --all \
- && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
- && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
- && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
- && git l-last-check $showlog \
-;}; f"
-
-# Сделать копию $cfg в репу $dst (origin).
-# Конечная ветка: не меняется.
-w-backupcfg = "! git w-backupcfg-default"
-w-backupcfg-default = "! f(){ \
- cfg=${1:-cfg} \
- && dst=${2:-origin} \
- && showlog=${3:-} \
- && user=$(git mynikname) \
- && rbranch=_${user}_${cfg}_backup \
- && git l-echo-l0 \"w-backupcfg $cfg $dst $showlog\" \
- && git l-echo-l1 \"w-backupcfg 1-1:\";git l-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
- && git l-last-check $showlog \
-;}; f"
-
-# Создать первичные ветки для работы 3-х веточной схемы (MCF).
-# Конечная ветка: $fix.
-w-create-base = "! git w-create-base-default"
-w-create-base-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && showlog=${4:-show} \
- && git l-echo-l0 \"w-create-base $fix $cfg $master $showlog\" \
- && git l-echo-l1 \"w-create-base 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
- && git l-echo-l1 \"w-create-base 2-3:\";git l-echo \"git checkout -b $cfg\" && (git checkout $cfg || git checkout -b $cfg) \
- && git l-echo-l1 \"w-create-base 3-3:\";git l-echo \"git checkout -b $fix\" && (git checkout $fix || git checkout -b $fix) \
- && git l-last-check $showlog \
-;}; f"
-
-# Поменять базовый коммит для $cfg и $fix, т.е. подготовить ветки к 3-х веточной схемы работы.
-# Конечная ветка: $fix.
-w-rebuild-base = "! git w-rebuild-base-default"
-w-rebuild-base-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && showlog=${4:-show} \
- && git l-echo-l0 \"w-rebuild-base $fix $cfg $master $showlog\" \
- && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
- && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
- && git l-last-check $showlog \
-;}; f"
-
-# Этот метод можно переопределить в локальном конфиге, чтобы при обновлении (пше w-update) выполнить дополнительную комманду.
-# Например, чтобы выполнить дополнительную синхронизацию.
-# Конечная ветка: не меняется.
-w-update-extcmd = "! git w-update-extcmd-default"
-w-update-extcmd-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && src1_rbranch=${5:-$master} \
- && src2=${6:-$src1} \
- && src2_lbranch=${7:-$master} \
- && src2_rbranch=${8:-$src2_lbranch} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && git l-last-check $showlog \
-;}; f"
-
-# Залить новые изменения в ветку $brach (master) из ветки $src_branch ($master) репы $src (origin).
-# Конечная ветка: $branch.
-w-load-fix-from-repo = "! git w-load-fix-from-repo-default"
-w-load-fix-from-repo-default = "! f(){ \
- branch=${1:-master} \
- && src=${2:-origin} \
- && src_lbranch=${3:-$master} \
- && src_rbranch=${4:-$src_lbranch} \
- && showlog=${5:-show} \
- && git l-echo-l0 \"w-load-fix-from-repo $branch $src $src_lbranch $src_rbranch $showlog\" \
- && if [ \"$branch\" = \"$src_lbranch\" ] \
-; then \
-    git l-echo-l1 \"w-load-fix-from-repo 1-2:\";git l-echo \"git checkout $branch\"                 && git checkout $branch \
- && git l-echo-l1 \"w-load-fix-from-repo 2-2:\";git l-echo \"git pull --rebase $src $src_rbranch \" && git pull --rebase $src $src_rbranch \
-; else \
-    git l-echo-l1 \"w-load-fix-from-repo 1-4:\";git l-echo \"git checkout $src_lbranch \"  && git checkout $src_lbranch \
- && git l-echo-l1 \"w-load-fix-from-repo 2-4:\";git l-echo \"git pull $src $src_rbranch \" && git pull $src $src_rbranch \
- && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $branch \" && git checkout $branch \
- && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $src_lbranch \" && git merge --no-edit -m \"Merged with $src/$src_rbranch\" $src_lbranch \
-; fi \
- && git l-last-check $showlog \
-;}; f"
-
-# Обновить $master из 2х источников
-# $src1 (origin) - основное хранилище, $src1_branch ($master) - источник правок в $src1
-# имя удаленной ветки $src1_rbranch из источника $src1 для $master
-# $src2 ($src1) - дополнительный источник,  $src2_lbranch ($src1_branch), $src2_rbranch ( $src2_lbranch ) - источник правок в $src2
-# $src2_lbranch - локальное имя удаленной ветки $src2_rbranch из источника $src2
-# 1) Сначала обновить $master из удаленной ветки $src1_branch репы $src1 методом pull --rebase.
-# 2) Затем обновить $master из удаленной ветки $src2_branch репы $src2 методом merge,
-#    только если второй источник отличается от первого
-# Конечная ветка: $fix.
-w-update = "! git w-update-default"
-w-update-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && src1_rbranch=${5:-$master} \
- && src2=${6:-$src1} \
- && src2_lbranch=${7:-$master} \
- && src2_rbranch=${8:-$src2_lbranch} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && git l-echo-l1 \"w-update 1-5:\" && git w-load-fix-from-repo $master $src1 $master $src1_rbranch off \
- && if [ \"$src1\" = \"$src2\" -a \"$src1_rbranch\" = \"$src2_lbranch\" ] \
-; then \
-    git l-echo-l1 \"w-update 2-5: there is not need update\" \
-; else \
-    git l-echo-l1 \"w-update 2-5:\" && git w-load-fix-from-repo $master $src2 $src2_lbranch $src2_rbranch off \
-; fi \
- && git l-echo-l1 \"w-update 3-5:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
- && git l-echo-l1 \"w-update 4-5:\" && git w-rebuild-base $fix $cfg $master off \
- && cbr=$(git get-current-branch) \
- && git l-echo-l1 \"w-update 5-5:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
- && git checkout -q $cbr \
- && git l-last-check $showlog \
-;}; f"
-
-# 1) Обновить $master из одной или двух веток (параметры см. w-update),
-#    $src1 (origin) - основное хранилище, $src2 ($src1) - дополнительный источник
-# 2) Залить изменения из $fix в $master. Отправить $master в ветку $src1_branch ($master) репы $src1 (origin).
-#    Сделать бекап $cfg.
-# Конечная ветка: $fix.
-w-upload = "! git w-upload-default"
-w-upload-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && src1_rbranch=${5:-$master} \
- && src2=${6:-$src1} \
- && src2_lbranch=${7:-$master} \
- && src2_rbranch=${8:-$src2_lbranch} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && git l-echo-l1 \"w-upload 1-2:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch off \
- && git l-echo-l1 \"w-upload 2-2:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
- && git l-last-check $showlog \
-;}; f"
-
-# Аналогично w-upload, другой порядок парaметров.
-# Сначала обязательно указываются параметры для второго источника, потом
-# остальные параметры указываются или берутся по-умолчанию, как для w-update.
-# Это удобно, когда нужно просто подлить в умолчательные ветки новое из второго источника,
-# но остальные параметры взять по-умолчанию
-# Конечная ветка: $fix.
-w-upload2 = "! git w-upload2-default"
-w-upload2-default = "! f(){ \
- if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
- && src2=${1:-$src1} \
- && src2_lbranch=${2:-$master} \
- && src2_rbranch=${3:-$src2_lbranch} \
- && fix=${4:-fix} \
- && cfg=${5:-cfg} \
- && master=${6:-master} \
- && src1=${7:-origin} \
- && src1_rbranch=${8:-$master} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog\" \
- && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_lbranch $src2_rbranch $showlog \
-;}; f"
-
-# Залить изменения из $fix в master.
-# Отправить $master в ветку $dst_branch ($master) репы $dst ($origin).
-# Сделать бекап $cfg.
-# Конечная ветка: $fix.
-w-send-fix = "! git w-send-fix-default"
-w-send-fix-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && dst=${4:-origin} \
- && dst_branch=${5:-$master} \
- && showlog=${6:-show} \
- && git l-echo-l0 \"w-send-fix $fix $cfg $master $dst $dst_branch $showlog\" \
- && git l-echo-l1 \"w-send-fix 1-3:\" && git w-apply-fix $fix $cfg $master off \
- && git l-echo-l1 \"w-send-fix 2-3:\";git l-echo \"git push $dst $master:$dst_branch\" && git push $dst $master:$dst_branch \
- && git l-echo-l1 \"w-send-fix 3-3:\" && git w-backupcfg $cfg $dst off \
- && git l-last-check $showlog \
-;}; f"
-
-# Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
-# Конечная ветка: $fix.
-w-apply-fix = "! git w-apply-fix-default"
-w-apply-fix-default = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && showlog=${4:-show} \
- && git l-echo-l0 \"w-apply-fix $fix $cfg $master $showlog\" \
- && git l-echo-l1 \"w-apply-fix 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
- && git l-echo-l1 \"w-apply-fix 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
- && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
- && git l-echo-l1 \"w-apply-fix 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
- && git l-last-check $showlog \
-;}; f"
-
-
-#######################################
-# git-svn useful (old workflow)
-# TODO: Refacroting usiong new workflow
-#######################################
-
-pushall      = ! echo "=  pushall"         && git push --all origin
-pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
-
-svnlog = !git svn log --oneline -20 | sort
-svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
-
-uploadsvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  uploadsvn $fix $cfg $master " \
- && git pushallforce \
- && git updatesvn $fix $cfg $master \
- && git loadsvn $fix $cfg $master \
- && git svndcommit \
- && git updatesvn $fix $cfg $master  \
- && git pushallforce \
- && echo "=====" && git last \
- && echo "=====" && git svnlog ;}; f"
-
-updatesvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  updatesvn ${fix} ${cfg} ${master} " \
- && echo "== git checkout $master"    && git checkout $master  \
- && echo "== git svn rebase"          && git svn rebase \
- && echo "== git rebase $master $cfg" && git rebase $master $cfg \
- && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
-
-loadsvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
- && echo "=  loadsvn $fix $cfg $master " \
- && echo "== git checkout $fix"                   && git checkout $fix \
- && echo "== git rebase --onto $master $cfg $fix" && git rebase --onto $master $cfg $fix  \
- && echo "== git checkout $master"                && git checkout $master \
- && echo "== git rebase $fix $master"             && git rebase $fix $master ;}; f"
-
-###################
-### End ALIASES ###
-###################
-
+	nickname = yournick
 [commit]
-#	template = /home/yournik/.gitmessage_template
+#	template = /home/yournick/.gitmessage_template
 [color]
 	ui = true
 	status = true
@@ -508,3 +70,533 @@ loadsvn = "! f(){ \
 	sslverify = false
 [push]
     default = upstream
+
+####################################################################################
+
+#####################
+### Start ALIASES ###
+#####################
+[alias]
+
+###############
+# Main commands
+###############
+
+br = branch
+co = checkout
+ci = commit
+amend = commit --amend -C HEAD
+st = status
+rb = rebase
+rbi = rebase -i
+ch = cherry-pick
+unstage = "! git reset HEAD -- $* "
+
+# diff
+df = diff
+df0 = diff -U0
+dfc = diff --cached
+visual = !gitk --all &
+
+# show history and log
+sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+last  = "! git hist -20 $* "
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
+
+###########
+# User info
+###########
+
+myname    = "! git config user.name"
+myemail   = "! git config user.email"
+mynickname = "! git config user.nickname"
+myallname = "! echo $(git myname)'\\|'$(git mynickname)"
+
+#Check labels in sources. Useful look for nickname, f.e. in comments
+mycheck = "! f() { \
+ allname=${1:-$(git mynickname)} \
+ && git l-echo \"Find '$allname' in sources\" 6  \
+ && git --no-pager grep -nEe \"${allname}\" \
+;}; f "
+
+#Show log for current user without sorte
+mylog = "! f() { \
+ allname=$(git myallname); \
+ name=$(git myname); \
+ nick=$(git mynickname); \
+ echo Log of users: \"'$allname'\" \"'$name'\" \"'$nick'\"; \
+ git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nick\" \
+;}; f "
+
+#Show log for current user sorted by date
+mylogsort = "! f() { \
+ git mylog $* | sort -k 3,3 -r \
+;}; f"
+
+#################
+# Useful commands
+#################
+
+# see gitignore rules
+gi-list="! git gi list"
+# get rules for gitignore: git gi netbeans
+gi = "! gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
+
+show-current-branch-name = "! git cbr"
+cbr = rev-parse --abbrev-ref HEAD
+
+# ignored
+# Show files ignored by git:
+ign = ls-files -o -i --exclude-standard
+
+# temporarily ignoring file
+ignore   = update-index --assume-unchanged
+unignore = update-index --no-assume-unchanged
+# to see the list of the ignored files.
+ignored = "!git ls-files -v | grep ^[a-z]"
+
+# check merged
+merged   = branch --merged
+unmerged = branch --no-merged
+
+# different list and logs
+ls = ls-files
+lg    = "! f() { git --no-pager log -p $* && echo  ; }; f "
+lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo  ; }; f "
+lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo  ; }; f "
+
+
+type = cat-file -t
+dump = cat-file -p
+
+fsckclear = "! f(){ \
+ git l-echo \"git fsck\"                                            && git fsck \
+ && git l-echo \"git reflog expire --expire-unreachable=now --all\" && git reflog expire --expire-unreachable=now --all \
+ && git l-echo \"git gc --prune prunefsck\"                         && git gc --prune=now \
+ && git l-echo \"git fsck\"                                         && git fsck \
+ && git l-echo \"git gc\"                                           && git gc \
+;}; f"
+
+###################
+# my workflow
+###################
+
+################
+# Local commands
+################
+
+# Показать сообщение нужным цветом и оттенком
+# COLOR={0..7}
+#  0-Black(Grey), 1-Red, 2-Green, 3-Brown/Orange(Yellow), 4-Blue,  5-Purple, 6-Cyan, 7-Light Gray(White)
+# BRIGHT={0|1|2|4|7|9}
+#  0(normal), 1(light), 2(dark), 4(underline), 7(invert) 9(cross)
+l-echo = "! f() { \
+ MESS=${1:-} \
+ && COLOR=${2:-3} \
+ && BRIGHT=${3:-1} \
+ && COLOR=\"\\033[${BRIGHT};3${COLOR}m\" \
+ && NOCOLOR=\"\\033[0m\" \
+ && MESS=\"${COLOR}${MESS}${NOCOLOR}\" \
+ && [ \"$(uname)\" = 'Linux' ]  && echo \"$MESS\" || echo -e \"$MESS\" \
+;}; f"
+
+l-echo-l0 = "! f() { \
+ MESS=${1:-} \
+ && COLOR=${2:-2} \
+ && BRIGHT=${3:-2} \
+ && git l-check-debug-level 0 \
+ && git l-echo \"= $MESS\" \"$COLOR\" \"$BRIGHT\" \
+ || : \
+;}; f"
+
+l-echo-l1 = "! f() { \
+ MESS=${1:-} \
+ && COLOR=${2:-6} \
+ && BRIGHT=${3:-2} \
+ && git l-check-debug-level 1 \
+ && git l-echo \"== $MESS\" \"$COLOR\" \"$BRIGHT\" \
+ || : \
+;}; f"
+
+# Посмотреть последние коммиты текущей ветки, если $showlog=show|on|''
+# Конечная ветка: не меняется.
+l-last-check = "! f(){ \
+ showlog=${1:-show} \
+ && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ] && (git l-echo '--- Please check ---' 5; git last) || : \
+;}; f"
+
+#must be -1|0|1
+# 0 - (normal mode) show l0 diagnostic message in w-*functions
+# 1 - (debug mode)  show l0 and l1 diagnostic message in w-*functions
+l-debug-level = ! echo 0
+
+l-check-debug-level = "! f() { \
+ level=${1:-0} \
+ && clevel=$(git l-debug-level) \
+ && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
+;}; f"
+
+#################
+# Global commands
+#################
+
+#  1. Эти команды помогают выполнять работы с git согласно 3-веточной схемы MCF. Все команды можено переопределять в локальных конфигах, чтобы изменить стандатное поведение. 
+#      #Отключить бекап локального конфига (ветка $cfg) на удаленный сервер для команд w-upload и w-upload2. 
+#      vim /dir/to/project/.git/config 
+#      …
+#      [alias]
+#      w-backup-cfg= “! : ”
+#  2. Все команды имеют дополнительную версию комманды с суфиксом *-default. Эти команды нужны, если после переопределения нужно воспользоваться переопредленной коммандой.
+#  3. Также эти команды можно адаптировать под работу с git-svn.
+#  4. При описании команд ниже запись $param = value  обозначает, что $param c параметром по-умолчанию value. В большинстве команд запись обозначает:
+#      $fix : имя ветки правок fix в схеме MCF
+#      $cfg : имя ветки конфигурации cfg в схеме MCF
+#      $master : имя основной ветки master в схеме MCF
+#      $showlog : показывать (show|’’) или не показывать (hide|off) log после выполнения комманды
+#      $src[1,2] : имя источника
+#      $lbranch[1,2] : локальное имя ветки источника $src[1,2]
+#    $rbranch[1,2] : удаленное имя ветки источника $src[1,2]
+#  Все команды используют умолчательные параметры, кроме w-upload2
+
+#  w-create-base [ $fix $cfg $master $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    showlog = show
+#  Создать ветки $cfg с базой от $master и $fix с базой от $cfg для работы cо схемой MCF. Если ветки уже были созданы ранее, то будет просто переход на них без изменения базовых коммитов.
+#  Конечная ветка: $fix.
+w-create-base = "! git w-create-base-default"
+w-create-base-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && showlog=${4:-show} \
+ && git l-echo-l0 \"w-create-base $fix $cfg $master $showlog\" \
+ && git l-echo-l1 \"w-create-base 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
+ && git l-echo-l1 \"w-create-base 2-3:\";git l-echo \"git checkout -b $cfg\" && (git checkout $cfg || git checkout -b $cfg) \
+ && git l-echo-l1 \"w-create-base 3-3:\";git l-echo \"git checkout -b $fix\" && (git checkout $fix || git checkout -b $fix) \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-rebuild-base [ $fix $cfg $master $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    $showlog = show
+#  Переустановить базовые коммиты на $master для $cfg и yf и $cfg для $fix, т.е. подготовить для работы cо схемой MCF.
+#  Конечная ветка: $fix.
+w-rebuild-base = "! git w-rebuild-base-default"
+w-rebuild-base-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && showlog=${4:-show} \
+ && git l-echo-l0 \"w-rebuild-base $fix $cfg $master $showlog\" \
+ && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
+ && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-load-fix-from-repo [ $master $src $lbranch $rbranch $showlog ]
+#    $master = master : куда заливать новые изменения
+#    $src = origin : имя источника откуда брать новые изменения
+#    $lbranch = $master : локальное имя ветки из источника $src
+#    $rbranch = $lbranch : удаленное имя ветки из источника $src
+#    $showlog = show
+#  Залить новые изменения в ветку $master из источника $src  $lbranch:$rbranch.
+#  Если ветки одинаковые $master=$src_lbranch, то делается pull --rebase $src $src_rbranch, а иначе сначала в ветку $src_lbranch заливаются новые изменения из $src/$src_rbranch , а потом ветка $master мержится с $src_lbranch ;
+#  Конечная ветка: $master.
+w-load-fix-from-repo = "! git w-load-fix-from-repo-default"
+w-load-fix-from-repo-default = "! f(){ \
+ $master=${1:-master} \
+ && src=${2:-origin} \
+ && lbranch=${3:-$master} \
+ && rbranch=${4:-$lbranch} \
+ && showlog=${5:-show} \
+ && git l-echo-l0 \"w-load-fix-from-repo $master $src $lbranch $rbranch $showlog\" \
+ && if [ \"$master\" = \"$lbranch\" ] \
+; then \
+    git l-echo-l1 \"w-load-fix-from-repo 1-2:\";git l-echo \"git checkout $master\"                 && git checkout $master \
+ && git l-echo-l1 \"w-load-fix-from-repo 2-2:\";git l-echo \"git pull --rebase $src $rbranch \" && git pull --rebase $src $rbranch \
+; else \
+    git l-echo-l1 \"w-load-fix-from-repo 1-4:\";git l-echo \"git checkout $lbranch \"  && git checkout $lbranch \
+ && git l-echo-l1 \"w-load-fix-from-repo 2-4:\";git l-echo \"git pull $src $rbranch \" && git pull $src $rbranch \
+ && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $master \" && git checkout $master \
+ && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $lbranch \" && git merge --no-edit -m \"Merged with $src/$rbranch\" $lbranch \
+; fi \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-update [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master : ветка которую будем обновлять 
+#    $src1 = origin : родной(tracked) источник для ветки $master
+#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
+#    $src2 = $src1 : дополнительный источник
+#    $lbranch2 = $master : локальное имя ветки дополнительного источника
+#    $rbranch2 = $lbranch2 : удаленное имя ветки дополнительного источника
+#    $showlog = show
+#  Обновить $master из 1-го или 2-х источников. 
+#  Сначала обновляется $master из основного источника $src1 $master:$rbranch1.
+#  Если второй источник аналогичен первому $src1 = $src2 && $master = $lbranch2, то второй пропускается, иначе обновить $master из дополнительного источника $src2 $lbranch2:$rbranch2.
+#  Конечная ветка: $fix.
+w-update = "! git w-update-default"
+w-update-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && src1=${4:-origin} \
+ && rbranch1=${5:-$master} \
+ && src2=${6:-$src1} \
+ && lbranch2=${7:-$master} \
+ && rbranch2=${8:-$lbranch2} \
+ && showlog=${9:-show} \
+ && git l-echo-l0 \"w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
+ && git l-echo-l1 \"w-update 1-5:\" && git w-load-fix-from-repo $master $src1 $master $rbranch1 off \
+ && if [ \"$src1\" = \"$src2\" -a \"$master\" = \"$lbranch2\" ] \
+; then \
+    git l-echo-l1 \"w-update 2-5: there is not need update\" \
+; else \
+    git l-echo-l1 \"w-update 2-5:\" && git w-load-fix-from-repo $master $src2 $lbranch2 $rbranch2 off \
+; fi \
+ && git l-echo-l1 \"w-update 3-5:\";git l-echo \"git push $src1 $master:$rbranch1\" && git push $src1 $master:$rbranch1 \
+ && git l-echo-l1 \"w-update 4-5:\" && git w-rebuild-base $fix $cfg $master off \
+ && cbr=$(git show-current-branch-name) \
+ && git l-echo-l1 \"w-update 5-5:\" && git w-update-extcmd $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 off \
+ && git checkout -q $cbr \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-update-extcmd [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    $src1 = origin
+#    $rbranch1 = $master
+#    $src2 = $src1
+#    $lbranch2 = $master
+#    $rbranch2 = $lbranch2
+#    $showlog = show
+#  Эта команда выполняется после успешного выполенения обновления w-update. Эту команду можно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
+#  Конечная ветка: не меняется.
+#    #Пример: дополнительная синхронизация с 3-м сервером server3
+#      vim /dir/to/project/.git/config 
+#      …
+#      [alias]
+#      w-update-extcmd-default = "! f(){ \
+#        fix=$1 && cfg=$2 && master=$3 && src1=$4 && rbranch1=$5 && src2=$6 && lbranch2=$7 && rbranch2=$8 && showlog=$9 \
+#      && git push server3 $master:custom_branch \
+#      ;}; f"
+w-update-extcmd = "! git w-update-extcmd-default"
+w-update-extcmd-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && src1=${4:-origin} \
+ && rbranch1=${5:-$master} \
+ && src2=${6:-$src1} \
+ && lbranch2=${7:-$master} \
+ && rbranch2=${8:-$lbranch2} \
+ && showlog=${9:-show} \
+ && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-upload [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master : ветка которую будем обновлять
+#    $src1 = origin : родной(tracked) источник для ветки $master
+#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
+#    $src2 = $src1 : дополнительный источник
+#    $lbranch2 = $master : локальное имя ветки дополнительного источника
+#    $rbranch2 = $lbranch2 : удаленное имя ветки дополнительного источника
+#    $showlog = show
+#  Загружает сделанные изменения из ветки $fix в ветку $master.
+#  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update).
+#  Затем изменения из $fix заливаются в $master и отправляются в репу $src1 ветку $rbranch1. И на последнем этапе делается бекап ветки конфигурации $cfg на сервер $src1.
+#  Конечная ветка: $fix.
+w-upload = "! git w-upload-default"
+w-upload-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && src1=${4:-origin} \
+ && rbranch1=${5:-$master} \
+ && src2=${6:-$src1} \
+ && lbranch2=${7:-$master} \
+ && rbranch2=${8:-$lbranch2} \
+ && showlog=${9:-show} \
+ && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
+ && git l-echo-l1 \"w-upload 1-3:\" && git w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 off \
+ && git l-echo-l1 \"w-upload 2-3:\" && git w-send-fix $fix $cfg $master $src1 $rbranch1 off \
+ && git l-echo-l1 \"w-upload 3-3:\" && git w-backup-cfg $cfg $src1 off \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-upload2 $src2 $lbranch2 $rbranch2 [ $fix $cfg $master $src1 $rbranch1 $showlog ]
+#    $src2 : дополнительный источник
+#    $lbranch2 : локальное имя ветки дополнительного источника
+#    $rbranch2 : удаленное имя ветки дополнительного источника
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    $src1 = origin
+#    $rbranch1 = $master
+#    $showlog = show
+#  Команда аналогичка w-upload, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update.  Это удобно, когда нужно просто подлить в умолчательные ветки новst изменения  из второго источника, но остальные параметры использовать по-умолчанию.
+#  Конечная ветка: $fix.
+w-upload2 = "! git w-upload2-default"
+w-upload2-default = "! f(){ \
+ if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
+ && src2=${1:-$src1} \
+ && lbranch2=${2:-$master} \
+ && rbranch2=${3:-$lbranch2} \
+ && fix=${4:-fix} \
+ && cfg=${5:-cfg} \
+ && master=${6:-master} \
+ && src1=${7:-origin} \
+ && rbranch1=${8:-$master} \
+ && showlog=${9:-show} \
+ && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
+ && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog \
+;}; f"
+
+#  w-apply-fix [ $fix $cfg $master $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    $showlog = show fix=${1:-fix} \
+#  Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
+#  Конечная ветка: $fix.
+w-apply-fix = "! git w-apply-fix-default"
+w-apply-fix-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && showlog=${4:-show} \
+ && git l-echo-l0 \"w-apply-fix $fix $cfg $master $showlog\" \
+ && git l-echo-l1 \"w-apply-fix 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
+ && git l-echo-l1 \"w-apply-fix 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
+ && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
+ && git l-echo-l1 \"w-apply-fix 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-send-fix [ $fix $cfg $master $src $rbranch $showlog ]
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master
+#    $src = origin
+#    $rbranch = $master
+#    $showlog = show
+#  Отправить изменения из $fix в $master, а затем $master отправить на $src в ветку $rbranch.
+#  Конечная ветка: $fix.
+w-send-fix = "! git w-send-fix-default"
+w-send-fix-default = "! f(){ \
+ fix=${1:-fix} \
+ && cfg=${2:-cfg} \
+ && master=${3:-master} \
+ && src=${4:-origin} \
+ && rbranch=${5:-$master} \
+ && showlog=${6:-show} \
+ && git l-echo-l0 \"w-send-fix $fix $cfg $master $src $rbranch $showlog\" \
+ && git l-echo-l1 \"w-send-fix 1-2:\" && git w-apply-fix $fix $cfg $master off \
+ && git l-echo-l1 \"w-send-fix 2-2:\";git l-echo \"git push $src $master:$rbranch\" && git push $src $master:$rbranch \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-fakecommit $mess $showlog
+#    $mess = ‘Added _fakefile_...’  : коментарий к коммиту
+#    $showlog = show
+#  Создает фейковый коммит c пустым файлом, например, для тестов.. Удобно при исследовании команд.
+#  Конечная ветка: не меняется.
+w-fakecommit ="! git l-fakecommit-default"
+w-fakecommit-default ="! f(){ \
+ mess=${1:-} \
+ && showlog=${2:-show} \
+ && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
+ && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
+ && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
+ && git l-last-check $showlog \
+;}; f"
+
+# Сделать временный бекап текущей ветки в репу $dst (origin).
+# Конечная ветка: не меняется.
+w-copy2tmp = "! git w-copy2tmp-default"
+w-copy2tmp-default = "! f(){ \
+ dst=${1:-origin} \
+ && showlog=${2:-show} \
+ && user=$(git mynickname) \
+ && cbr=$(git show-current-branch-name) \
+ && rbranch=_${user}_${cbr}_tmp \
+ && CURDATE=$(date +"%y%m%d_%H%M%S") \
+ && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
+ && git l-echo-l0 \"w-copy2tmp $dst $showlog\" \
+ && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                  && git add --all \
+ && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
+ && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
+ && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
+ && git l-last-check $showlog \
+;}; f"
+
+# Сделать копию $cfg в репу $dst (origin).
+# Конечная ветка: не меняется.
+w-backup-cfg = "! git w-backup-cfg-default"
+w-backup-cfg-default = "! f(){ \
+ cfg=${1:-cfg} \
+ && dst=${2:-origin} \
+ && showlog=${3:-} \
+ && user=$(git mynickname) \
+ && rbranch=_${user}_${cfg}_backup \
+ && git l-echo-l0 \"w-backup-cfg $cfg $dst $showlog\" \
+ && git l-echo-l1 \"w-backup-cfg 1-1:\";git l-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
+ && git l-last-check $showlog \
+;}; f"
+
+#######################################
+# git-svn useful (old workflow)
+# TODO: Refacroting usiong new workflow
+#######################################
+
+pushall      = ! echo "=  pushall"         && git push --all origin
+pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
+
+svnlog = !git svn log --oneline -20 | sort
+svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
+
+uploadsvn = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  uploadsvn $fix $cfg $master " \
+ && git pushallforce \
+ && git updatesvn $fix $cfg $master \
+ && git loadsvn $fix $cfg $master \
+ && git svndcommit \
+ && git updatesvn $fix $cfg $master  \
+ && git pushallforce \
+ && echo "=====" && git last \
+ && echo "=====" && git svnlog ;}; f"
+
+updatesvn = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  updatesvn ${fix} ${cfg} ${master} " \
+ && echo "== git checkout $master"    && git checkout $master  \
+ && echo "== git svn rebase"          && git svn rebase \
+ && echo "== git rebase $master $cfg" && git rebase $master $cfg \
+ && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
+
+loadsvn = "! f(){ \
+ fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ && echo "=  loadsvn $fix $cfg $master " \
+ && echo "== git checkout $fix"                   && git checkout $fix \
+ && echo "== git rebase --onto $master $cfg $fix" && git rebase --onto $master $cfg $fix  \
+ && echo "== git checkout $master"                && git checkout $master \
+ && echo "== git rebase $fix $master"             && git rebase $fix $master ;}; f"
+
+###################
+### End ALIASES ###
+###################
+
