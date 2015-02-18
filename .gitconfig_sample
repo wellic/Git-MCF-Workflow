@@ -558,7 +558,7 @@ w-copy2tmp-default = "! f(){ \
 #    $showlog = show
 #  Создает фейковый коммит c пустым файлом, например, для тестов. Команда удобна при исследовании команд.
 #  Конечная ветка: не меняется.
-w-fakecommit ="! git l-fakecommit-default"
+w-fakecommit ="! git w-fakecommit-default"
 w-fakecommit-default ="! f(){ \
  mess=${1:-} \
  && showlog=${2:-show} \
