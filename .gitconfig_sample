@@ -17,30 +17,30 @@
 	pager = true
 	grep = true
 [color "log"]
-    current = green
-    local = yellow
-    remote = green reverse
+	current = green
+	local = yellow
+	remote = green reverse
 [color "branch"]
-    current = green bold
-    local = yellow
-    remote = cyan
+	current = green bold
+	local = yellow
+	remote = cyan
 [color "diff"]
-    commit = yellow bold
-    meta = normal bold
-    frag = magenta bold
-    old = red
-    new = green
-    whitespace = red reverse blink
-    plain = normal
-    func = normal
+	commit = yellow bold
+	meta = normal bold
+	frag = magenta bold
+	old = red
+	new = green
+	whitespace = red reverse blink
+	plain = normal
+	func = normal
 [color "status"]
-    added = green dim
-    changed = cyan
-    untracked = yellow
+	added = green dim
+	changed = cyan
+	untracked = yellow
 [core]
-    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-    pager = less -FXRS
-	editor = mcedit
+#	edit = mcedit
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	pager = less -FXRS
 #    FOR WIN
 #	autocrlf = true
 	autocrlf = false
@@ -56,20 +56,20 @@
 	spellingdictionary = en_GB
 [merge]
 	tool = kdiff3
-    guitool = kdiff3
+	guitool = kdiff3
 [diff]
 	tool = kdiff3
 	guitool = kdiff3
 [difftool]
 	prompt = false
 [mergetool]
-	prompt = true
+	prompt = false
 [help]
     autocorrect = 0
 [http]
 	sslverify = false
 [push]
-    default = upstream
+	default = upstream
 
 ####################################################################################
 
@@ -198,8 +198,8 @@ l-echo = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-3} \
  && BRIGHT=${3:-1} \
- && COLOR=\"\\e[${BRIGHT};3${COLOR}m\" \
- && NOCOLOR=\"\\e[0m\" \
+ && COLOR=\"\\033[${BRIGHT};3${COLOR}m\" \
+ && NOCOLOR=\"\\033[0m\" \
  && MESS=\"${COLOR}${MESS}${NOCOLOR}\" \
  && [ \"$(uname)\" = 'Linux' ]  && echo \"$MESS\" || echo -e \"$MESS\" \
 ;}; f"

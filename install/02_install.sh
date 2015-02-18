@@ -13,11 +13,15 @@ cd "$RET_DIR"
 clear
 
 DIR_INSTALL=_install
+FNAME_INSTALL=install.sh
 
-echo -e "\033[7;35mStart clearing\n\033[0m"
+echo -e "\033[7;35mStart installing\n\033[0m"
 
-[ -d "$CUR_DIR"/"$DIR_INSTALL" ] &&  rm -vrf "$CUR_DIR"/"$DIR_INSTALL"
+bash "$CUR_DIR/$DIR_INSTALL/$FNAME_INSTALL"
 
-echo -e "\033[7;35m\nFinish clearing\033[0m"
+echo -e "\nPlease check your new '.gitconfig':"
+echo -e "\033[0;32m   less ~/.gitconfig\033[0m"
 
-exit 0
+echo -e "\033[7;35m\nFinish installing\033[0m"
+
+exit "$?"

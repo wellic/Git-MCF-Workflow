@@ -2,8 +2,15 @@
 
 set -e
 
-SRC="$HOME/.gitconfig"
-DST="../.gitconfig_sample"
+RET_DIR=$PWD
+CUR_DIR=$(dirname "$0")
+
+cd "$CUR_DIR"/../
+MAIN_DIR=$PWD
+cd "$RET_DIR"
+
+SRC=~/.gitconfig
+DST="$MAIN_DIR/.gitconfig_sample"
 
 echo cp "$SRC" "$DST"
 cp "$SRC" "$DST"
