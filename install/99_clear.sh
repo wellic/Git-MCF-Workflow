@@ -14,6 +14,6 @@ DST_DIR="$CUR_DIR"/"$NAME_INSTALL_DIR"
 FILE_NAME_INFO="my_git_name_info"
 
 [ -d "$CUR_DIR"/"$NAME_INSTALL_DIR" ] &&  rm -rf "$CUR_DIR"/"$NAME_INSTALL_DIR"
-[ -f "$CUR_DIR"/"$FILE_NAME_INFO" ] &&  mv -v "$CUR_DIR"/"$FILE_NAME_INFO" "$CUR_DIR"/"${FILE_NAME_INFO}.$(date +%Y%m%d_%H%M%S).old"
+#[ -f "$CUR_DIR"/"$FILE_NAME_INFO" ] &&  mv -v "$CUR_DIR"/"$FILE_NAME_INFO" "$CUR_DIR"/"${FILE_NAME_INFO}.$(date +%Y%m%d_%H%M%S).old"
 
 exit 0
