@@ -483,7 +483,7 @@ w-apply-fix-default = "! f(){ \
  && git l-echo-l0 \"w-apply-fix $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-apply-fix 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
  && git l-echo-l1 \"w-apply-fix 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
- && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git git rebase $fix $master\"         && git rebase $fix $master \
+ && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git rebase $fix $master\"         && git rebase $fix $master \
  && git l-echo-l1 \"w-apply-fix 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
  && git l-last-check $showlog \
 ;}; f"
