@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NAME_CFG=".gitconfig"
 NAME_TMPL=".gitconfig_sample"
