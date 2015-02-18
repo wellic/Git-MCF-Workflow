@@ -149,7 +149,9 @@ cbr = rev-parse --abbrev-ref HEAD
 
 # ignored
 # Show files ignored by git:
-ign = ls-files -o -i --exclude-standard
+ign = "! git status --ignored --short | awk '/^!!/ { print $2 }'" 
+ign-cd = ls-files -o -i --exclude-standard
+
 
 # temporarily ignoring file
 ignore   = update-index --assume-unchanged
@@ -196,8 +198,8 @@ l-echo = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-3} \
  && BRIGHT=${3:-1} \
- && COLOR=\"\\033[${BRIGHT};3${COLOR}m\" \
- && NOCOLOR=\"\\033[0m\" \
+ && COLOR=\"\\e[${BRIGHT};3${COLOR}m\" \
+ && NOCOLOR=\"\\e[0m\" \
  && MESS=\"${COLOR}${MESS}${NOCOLOR}\" \
  && [ \"$(uname)\" = 'Linux' ]  && echo \"$MESS\" || echo -e \"$MESS\" \
 ;}; f"
@@ -509,10 +511,52 @@ w-send-fix-default = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
+#  w-backup-cfg [ $cfg $src $showlog ]
+#    $cfg = cfg
+#    $src = origin : репа куда залить бекап
+#    $showlog = show
+#  Сделать бекап ветки $cfg в репе $src с именем ветки ‘_{nickname}_{$cfg}_backup’ . 
+#  Конечная ветка: не меняется.
+w-backup-cfg = "! git w-backup-cfg-default"
+w-backup-cfg-default = "! f(){ \
+ cfg=${1:-cfg} \
+ && src=${2:-origin} \
+ && showlog=${3:-show} \
+ && nick=$(git mynickname) \
+ && rbranch=_${nick}_${cfg}_backup \
+ && git l-echo-l0 \"w-backup-cfg $cfg $src $showlog\" \
+ && git l-echo-l1 \"w-backup-cfg 1-1:\";git l-echo \"git push -f $src $cfg:$rbranch\" && git push -f $src $cfg:$rbranch \
+ && git l-last-check $showlog \
+;}; f"
+
+#  w-copy2tmp $src $showlog
+#    $src = origin : репа куда залить бекап
+#    $showlog = show
+#  Сделать временный бекап состояния текущей ветки в репе $src с именем ветки ‘_{nickname}_{name_of_current_branch}_tmp.
+#  При бекапе все несохраненные изменения также отправятся в репу, а после завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
+#  Эта оперция полезна, если вы не готовы комитить изменения, но нужно сделать копию текущего состояния.
+#  Конечная ветка: не меняется.
+w-copy2tmp = "! git w-copy2tmp-default"
+w-copy2tmp-default = "! f(){ \
+ src=${1:-origin} \
+ && showlog=${2:-show} \
+ && nick=$(git mynickname) \
+ && cbr=$(git show-current-branch-name) \
+ && rbranch=_${nick}_${cbr}_tmp \
+ && CURDATE=$(date +"%y%m%d_%H%M%S") \
+ && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
+ && git l-echo-l0 \"w-copy2tmp $src $showlog\" \
+ && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                  && git add --all \
+ && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
+ && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $src $cbr:$rbranch\" && git push -f $src $cbr:$rbranch \
+ && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
+ && git l-last-check $showlog \
+;}; f"
+
 #  w-fakecommit $mess $showlog
 #    $mess = ‘Added _fakefile_...’  : коментарий к коммиту
 #    $showlog = show
-#  Создает фейковый коммит c пустым файлом, например, для тестов.. Удобно при исследовании команд.
+#  Создает фейковый коммит c пустым файлом, например, для тестов. Команда удобна при исследовании команд.
 #  Конечная ветка: не меняется.
 w-fakecommit ="! git l-fakecommit-default"
 w-fakecommit-default ="! f(){ \
@@ -521,39 +565,6 @@ w-fakecommit-default ="! f(){ \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
  && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
- && git l-last-check $showlog \
-;}; f"
-
-# Сделать временный бекап текущей ветки в репу $dst (origin).
-# Конечная ветка: не меняется.
-w-copy2tmp = "! git w-copy2tmp-default"
-w-copy2tmp-default = "! f(){ \
- dst=${1:-origin} \
- && showlog=${2:-show} \
- && user=$(git mynickname) \
- && cbr=$(git show-current-branch-name) \
- && rbranch=_${user}_${cbr}_tmp \
- && CURDATE=$(date +"%y%m%d_%H%M%S") \
- && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
- && git l-echo-l0 \"w-copy2tmp $dst $showlog\" \
- && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                  && git add --all \
- && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
- && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $dst $cbr:$rbranch\" && git push -f $dst $cbr:$rbranch \
- && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
- && git l-last-check $showlog \
-;}; f"
-
-# Сделать копию $cfg в репу $dst (origin).
-# Конечная ветка: не меняется.
-w-backup-cfg = "! git w-backup-cfg-default"
-w-backup-cfg-default = "! f(){ \
- cfg=${1:-cfg} \
- && dst=${2:-origin} \
- && showlog=${3:-} \
- && user=$(git mynickname) \
- && rbranch=_${user}_${cfg}_backup \
- && git l-echo-l0 \"w-backup-cfg $cfg $dst $showlog\" \
- && git l-echo-l1 \"w-backup-cfg 1-1:\";git l-echo \"git push -f $dst $cfg:$rbranch\" && git push -f $dst $cfg:$rbranch \
  && git l-last-check $showlog \
 ;}; f"
 

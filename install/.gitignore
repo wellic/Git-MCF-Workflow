@@ -1,0 +1,6 @@
+!.gitignore
+!install.template
+_install/
+my_git_name_info
+my_git_name_info.*
+
