@@ -271,8 +271,8 @@ l-debug-level = "! echo -1"
 #    showlog = show
 #  Создать ветки $cfg с базой от $master и $fix с базой от $cfg для работы cо схемой MCF. Если ветки уже были созданы ранее, то будет просто переход на них без изменения базовых коммитов.
 #  Конечная ветка: $fix.
-w-create-base = "! git w-create-base-default"
-w-create-base-default = "! f(){ \
+w-create-base = "! git mcf-create-base"
+mcf-create-base = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -291,8 +291,8 @@ w-create-base-default = "! f(){ \
 #    $showlog = show
 #  Переустановить базовые коммиты на $master для $cfg и yf и $cfg для $fix, т.е. подготовить для работы cо схемой MCF.
 #  Конечная ветка: $fix.
-w-rebuild-base = "! git w-rebuild-base-default"
-w-rebuild-base-default = "! f(){ \
+w-rebuild-base = "! git mcf-rebuild-base"
+mcf-rebuild-base = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -312,8 +312,8 @@ w-rebuild-base-default = "! f(){ \
 #  Залить новые изменения в ветку $master из источника $src  $lbranch:$rbranch.
 #  Если ветки одинаковые $master=$src_lbranch, то делается pull --rebase $src $src_rbranch, а иначе сначала в ветку $src_lbranch заливаются новые изменения из $src/$src_rbranch , а потом ветка $master мержится с $src_lbranch ;
 #  Конечная ветка: $master.
-w-load-fix-from-repo = "! git w-load-fix-from-repo-default"
-w-load-fix-from-repo-default = "! f(){ \
+w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
+mcf-load-fix-from-repo = "! f(){ \
  master=${1:-master} \
  && src=${2:-origin} \
  && lbranch=${3:-$master} \
@@ -347,8 +347,8 @@ w-load-fix-from-repo-default = "! f(){ \
 #  Сначала обновляется $master из основного источника $src1 $master:$rbranch1.
 #  Если второй источник аналогичен первому $src1 = $src2 && $master = $lbranch2, то второй пропускается, иначе обновить $master из дополнительного источника $src2 $lbranch2:$rbranch2.
 #  Конечная ветка: $fix.
-w-update = "! git w-update-default"
-w-update-default = "! f(){ \
+w-update = "! git mcf-update"
+mcf-update = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -386,8 +386,8 @@ w-update-default = "! f(){ \
 #    $showlog = show
 #  Команда аналогична w-update, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. Более удобна при работе с 2-мя источниками.
 #  Конечная ветка: $fix.
-w-update2 = "! git w-update2-default"
-w-update2-default = "! f(){ \
+w-update2 = "! git mcf-update2"
+mcf-update2 = "! f(){ \
  if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
  && src2=${1:-$src1} \
  && lbranch2=${2:-$master} \
@@ -418,12 +418,12 @@ w-update2-default = "! f(){ \
 #      vim /dir/to/project/.git/config 
 #      …
 #      [alias]
-#      w-update-extcmd-default = "! f(){ \
+#      mcf-update-extcmd = "! f(){ \
 #        fix=$1 && cfg=$2 && master=$3 && src1=$4 && rbranch1=$5 && src2=$6 && lbranch2=$7 && rbranch2=$8 && showlog=$9 \
 #      && git push server3 $master:custom_branch \
 #      ;}; f"
-w-update-extcmd = "! git w-update-extcmd-default"
-w-update-extcmd-default = "! f(){ \
+w-update-extcmd = "! git mcf-update-extcmd"
+mcf-update-extcmd = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -451,8 +451,8 @@ w-update-extcmd-default = "! f(){ \
 #  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update).
 #  Затем изменения из $fix заливаются в $master и отправляются в репу $src1 ветку $rbranch1. И на последнем этапе делается бекап ветки конфигурации $cfg на сервер $src1.
 #  Конечная ветка: $fix.
-w-upload = "! git w-upload-default"
-w-upload-default = "! f(){ \
+w-upload = "! git mcf-upload"
+mcf-upload = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -481,8 +481,8 @@ w-upload-default = "! f(){ \
 #    $showlog = show
 #  Команда аналогична w-upload, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. Более удобна при работе с 2-мя источниками.
 #  Конечная ветка: $fix.
-w-upload2 = "! git w-upload2-default"
-w-upload2-default = "! f(){ \
+w-upload2 = "! git mcf-upload2"
+mcf-upload2 = "! f(){ \
  if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
  && src2=${1:-$src1} \
  && lbranch2=${2:-$master} \
@@ -504,8 +504,8 @@ w-upload2-default = "! f(){ \
 #    $showlog = show fix=${1:-fix} \
 #  Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
 #  Конечная ветка: $fix.
-w-apply-fix = "! git w-apply-fix-default"
-w-apply-fix-default = "! f(){ \
+w-apply-fix = "! git mcf-apply-fix"
+mcf-apply-fix = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -527,8 +527,8 @@ w-apply-fix-default = "! f(){ \
 #    $showlog = show
 #  Отправить изменения из $fix в $master, а затем $master отправить на $src в ветку $rbranch.
 #  Конечная ветка: $fix.
-w-send-fix = "! git w-send-fix-default"
-w-send-fix-default = "! f(){ \
+w-send-fix = "! git mcf-send-fix"
+mcf-send-fix = "! f(){ \
  fix=${1:-fix} \
  && cfg=${2:-cfg} \
  && master=${3:-master} \
@@ -547,8 +547,8 @@ w-send-fix-default = "! f(){ \
 #    $showlog = show
 #  Сделать бекап ветки $cfg в репе $src с именем ветки ‘_{nickname}_{$cfg}_backup’ . 
 #  Конечная ветка: не меняется.
-w-backup-cfg = "! git w-backup-cfg-default"
-w-backup-cfg-default = "! f(){ \
+w-backup-cfg = "! git mcf-backup-cfg"
+mcf-backup-cfg = "! f(){ \
  cfg=${1:-cfg} \
  && src=${2:-origin} \
  && showlog=${3:-show} \
@@ -566,8 +566,8 @@ w-backup-cfg-default = "! f(){ \
 #  При бекапе все несохраненные изменения также отправятся в репу, а после завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
 #  Эта оперция полезна, если вы не готовы комитить изменения, но нужно сделать копию текущего состояния.
 #  Конечная ветка: не меняется.
-w-copy2tmp = "! git w-copy2tmp-default"
-w-copy2tmp-default = "! f(){ \
+w-copy2tmp = "! git mcf-copy2tmp"
+mcf-copy2tmp = "! f(){ \
  src=${1:-origin} \
  && showlog=${2:-show} \
  && nick=$(git mynickname) \
@@ -588,8 +588,8 @@ w-copy2tmp-default = "! f(){ \
 #    $showlog = show
 #  Создает фейковый коммит c пустым файлом, например, для тестов. Команда удобна при исследовании команд.
 #  Конечная ветка: не меняется.
-w-fakecommit ="! git w-fakecommit-default"
-w-fakecommit-default ="! f(){ \
+w-fakecommit ="! git mcf-fakecommit"
+mcf-fakecommit ="! f(){ \
  mess=${1:-} \
  && showlog=${2:-show} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
