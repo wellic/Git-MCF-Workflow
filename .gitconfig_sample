@@ -229,16 +229,18 @@ l-last-check = "! f(){ \
  && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ] && (git l-echo '--- Please check ---' 5; git last) || : \
 ;}; f"
 
-#must be -1|0|1
-# 0 - (normal mode) show l0 diagnostic message in w-*functions
-# 1 - (debug mode)  show l0 and l1 diagnostic message in w-*functions
-l-debug-level = ! echo 0
-
 l-check-debug-level = "! f() { \
  level=${1:-0} \
  && clevel=$(git l-debug-level) \
  && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
 ;}; f"
+
+#  l-debug-level = "! echo $level"
+#    $level : -1  is normal mode. Hide all diagnostic messages.
+#    $level :  0  is debug mode 1. Show some diagnostic message in w-* functions.
+#    $level :  1  is debug mode 2. Show all diagnostic message in w-* functions.
+#  Локальный метод, позволяет управлять выводом сообщений при работе w-* методов. Необходим при отладке методов и при изучении работы команд.
+l-debug-level = "! echo -1"
 
 #################
 # Global commands
@@ -312,7 +314,7 @@ w-rebuild-base-default = "! f(){ \
 #  Конечная ветка: $master.
 w-load-fix-from-repo = "! git w-load-fix-from-repo-default"
 w-load-fix-from-repo-default = "! f(){ \
- $master=${1:-master} \
+ master=${1:-master} \
  && src=${2:-origin} \
  && lbranch=${3:-$master} \
  && rbranch=${4:-$lbranch} \
