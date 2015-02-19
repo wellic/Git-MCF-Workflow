@@ -374,6 +374,34 @@ w-update-default = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
+#  w-update2 $src2 $lbranch2 $rbranch2 [ $fix $cfg $master $src1 $rbranch1 $showlog ]
+#    $src2
+#    $lbranch2
+#    $rbranch2
+#    $fix = fix
+#    $cfg = cfg
+#    $master = master : ветка которую будем обновлять 
+#    $src1 = origin : родной(tracked) источник для ветки $master
+#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
+#    $showlog = show
+#  Команда аналогична w-update, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. Более удобна при работе с 2-мя источниками.
+#  Конечная ветка: $fix.
+w-update2 = "! git w-update2-default"
+w-update2-default = "! f(){ \
+ if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
+ && src2=${1:-$src1} \
+ && lbranch2=${2:-$master} \
+ && rbranch2=${3:-$lbranch2} \
+ && fix=${4:-fix} \
+ && cfg=${5:-cfg} \
+ && master=${6:-master} \
+ && src1=${7:-origin} \
+ && rbranch1=${8:-$master} \
+ && showlog=${9:-show} \
+ && git l-echo-l0 \"w-update2 $src2 $lbranch2 $rbranch2 $fix $cfg $master $src1 $rbranch1 $showlog\" \
+ && git l-echo-l1 \"w-update2 1-1:\" && git w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog \
+;}; f"
+
 #  w-update-extcmd [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
 #    $fix = fix
 #    $cfg = cfg
@@ -451,7 +479,7 @@ w-upload-default = "! f(){ \
 #    $src1 = origin
 #    $rbranch1 = $master
 #    $showlog = show
-#  Команда аналогичка w-upload, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update.  Это удобно, когда нужно просто подлить в умолчательные ветки новst изменения  из второго источника, но остальные параметры использовать по-умолчанию.
+#  Команда аналогична w-upload, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. Более удобна при работе с 2-мя источниками.
 #  Конечная ветка: $fix.
 w-upload2 = "! git w-upload2-default"
 w-upload2-default = "! f(){ \
