@@ -566,7 +566,7 @@ w-fakecommit-default ="! f(){ \
  && showlog=${2:-show} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
- && touch \"$a\" && git add \"$a\" && git commit -m \"'Fake commit: $mess'\" \
+ && touch \"$a\" && git add \"$a\" && git commit -m \"Fake commit: $mess\" \
  && git l-last-check $showlog \
 ;}; f"
 
