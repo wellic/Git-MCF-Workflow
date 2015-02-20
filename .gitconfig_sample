@@ -235,12 +235,13 @@ l-check-debug-level = "! f() { \
  && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
 ;}; f"
 
-#  l-debug-level = "! echo $level"
-#    $level : -1  is normal mode. Hide all diagnostic messages.
-#    $level :  0  is debug mode 1. Show some diagnostic message in w-* functions.
-#    $level :  1  is debug mode 2. Show all diagnostic message in w-* functions.
-#  Локальный метод, позволяет управлять выводом сообщений при работе w-* методов. Необходим при отладке методов и при изучении работы команд.
-l-debug-level = "! echo -1"
+
+l-get-mcf-param = "! f() { \
+ if [ $# -ne 1 ]; then git l-echo \"Error: l-get-mcf-param has to start with 1 parameter.\" 1 1 ; exit 1; fi \
+ && param=$1 \
+ && value=$(git config \"mcf.${param}\" ) || git l-echo \"Error: incorrect parameters '$param' when called 'l-get-mcf-param'.\" 1 1 \
+ && [ ! -z \"$value\" ] && echo "$value" || exit 1\
+; }; f"
 
 #################
 # Global commands
@@ -641,3 +642,25 @@ loadsvn = "! f(){ \
 ### End ALIASES ###
 ###################
 
+[mcf]
+# For get use commnad l-get-mcf-param $nameparam
+
+#  l-debug-level = $level
+#    $level : -1  is normal mode. Hide all diagnostic messages.
+#    $level :  0  is debug mode 1. Show some diagnostic message in w-* and mcf-* functions.
+#    $level :  1  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
+#  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
+#  Необходим при отладке методов и при изучении работы команд.
+    l-debug-level = -1
+
+#  MCF main branches names
+	fix = fix
+	cfg = cfg
+	master = master
+
+#  MCF branches and repos names
+	src1 = origin
+    src1-rbranch = master
+	src2 = origin
+    src2-lbranch = master
+    src2-rbranch = master
