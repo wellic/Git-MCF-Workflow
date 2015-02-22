@@ -1,9 +1,20 @@
 #!/bin/bash
 
+clear
+echo
+echo "--- Start $0 $*"
+
 RET_DIR=$PWD
+TEST_PROG="test_testing_env.sh"
+
+# --- Input parameters
+INSTALL_DIR=${1:-}
+TEST_AFTER_INSTALL=${2:-0}
 
 CUR_DIR=$(dirname "$0")
-cd "$CUR_DIR"/../..
+INSTALL_DIR=$1
+[ -z "$INSTALL_DIR" ] && INSTALL_DIR="$CUR_DIR"/../..
+cd $INSTALL_DIR
 CUR_DIR=$PWD
 
 set -o nounset
@@ -12,12 +23,13 @@ set -o nounset
 CNT_DEVS=3
 CNT_SERVERS=2
 
-ROOT="$CUR_DIR"/_testgit_
-DIR_SERVERS="$ROOT/servers"
-DIR_DEVS="$ROOT/devs"
-
+NAME_TESTDIR=_testgit_
 NAME_SERVER=server
 NAME_DEV=dev
+
+ROOT="$CUR_DIR"/"$NAME_TESTDIR"
+DIR_SERVERS="$ROOT"/"$NAME_SERVER"s
+DIR_DEVS="$ROOT"/"$NAME_DEV"s
 
 [ -e "$ROOT" ] && (rm -rf "$ROOT".bak ; mv -f "$ROOT" "$ROOT".bak) || : ; mkdir -p "$ROOT"
 mkdir -p "$DIR_DEVS"
@@ -26,12 +38,10 @@ mkdir -p "$DIR_SERVERS"
 myseq() {
   s=${1:-0}; e=${2:-0}; step=${3:-1};
   result=
-  while [ "$s" -le "$e" ]
-  do
+  while [ "$s" -le "$e" ]; do
     result="$result $s"
     s=$(( $s+$step ))
   done
-
   echo "$result"
 }
 
@@ -52,7 +62,6 @@ add_repos() {
 
 make_devs() {
   cd "$ROOT"
-
   for i in $(myseq 1 $CNT_DEVS) ; do
     cd "$DIR_DEVS"
     NAME="$NAME_DEV"$i
@@ -62,8 +71,10 @@ make_devs() {
   done
 }
 
+do_test() {
+    [ "$TEST_AFTER_INSTALL" = '1' ] && "$CUR_DIR"/"$TEST_PROG" "$INSTALL_DIR" "$NAME_TESTDIR" "$NAME_SERVER" "$NAME_DEV"
+}
 
-clear
 make_repos
 make_devs
 
@@ -83,3 +94,5 @@ echo -e "\nFor testing go to:"
 echo -e "\033[0;32m   cd \"$DIR_DEVS\"\033[0m"
 
 echo -e "\033[7;35m\nFinish creating env. for testing\033[0m"
+
+do_test

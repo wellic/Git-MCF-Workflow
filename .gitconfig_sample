@@ -3,73 +3,73 @@
 #   user.email
 #   user.nickname
 [user]  
-	name = your_name
-	email = your@mail
-	nickname = yournick
+    name = your_name
+    email = your@mail
+    nickname = yournick
 [commit]
-#	template = /home/yournick/.gitmessage_template
+#    template = /home/yournick/.gitmessage_template
 [color]
-	ui = true
-	status = true
-	diff = true
-	branch = true
-	interactive = true
-	pager = true
-	grep = true
+    ui = true
+    status = true
+    diff = true
+    branch = true
+    interactive = true
+    pager = true
+    grep = true
 [color "log"]
-	current = green
-	local = yellow
-	remote = green reverse
+    current = green
+    local = yellow
+    remote = green reverse
 [color "branch"]
-	current = green bold
-	local = yellow
-	remote = cyan
+    current = green bold
+    local = yellow
+    remote = cyan
 [color "diff"]
-	commit = yellow bold
-	meta = normal bold
-	frag = magenta bold
-	old = red
-	new = green
-	whitespace = red reverse blink
-	plain = normal
-	func = normal
+    commit = yellow bold
+    meta = normal bold
+    frag = magenta bold
+    old = red
+    new = green
+    whitespace = red reverse blink
+    plain = normal
+    func = normal
 [color "status"]
-	added = green dim
-	changed = cyan
-	untracked = yellow
+    added = green dim
+    changed = cyan
+    untracked = yellow
 [core]
-#	edit = mcedit
-	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-	pager = less -FXRS
+#    edit = mcedit
+    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    pager = less -FXRS
 #    FOR WIN
-#	autocrlf = true
-	autocrlf = false
-	safecrlf = false
-	eol = native
+#    autocrlf = true
+    autocrlf = false
+    safecrlf = false
+    eol = native
 #    FOR WIN
 #    pager = more
 #    git config --global core.autocrlf true
 #    git config --global core.safecrlf true
 [blame]
-	data = short
+    data = short
 [gui]
-	spellingdictionary = en_GB
+    spellingdictionary = en_GB
 [merge]
-	tool = kdiff3
-	guitool = kdiff3
+    tool = kdiff3
+    guitool = kdiff3
 [diff]
-	tool = kdiff3
-	guitool = kdiff3
+    tool = kdiff3
+    guitool = kdiff3
 [difftool]
-	prompt = false
+    prompt = false
 [mergetool]
-	prompt = false
+    prompt = false
 [help]
     autocorrect = 0
 [http]
-	sslverify = false
+    sslverify = false
 [push]
-	default = upstream
+    default = upstream
 
 ####################################################################################
 
@@ -231,10 +231,9 @@ l-last-check = "! f(){ \
 
 l-check-debug-level = "! f() { \
  level=${1:-0} \
- && clevel=$(git l-debug-level) \
+ && clevel=$(git l-get-mcf-param l-debug-level) \
  && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
 ;}; f"
-
 
 l-get-mcf-param = "! f() { \
  if [ $# -ne 1 ]; then git l-echo \"Error: l-get-mcf-param has to start with 1 parameter.\" 1 1 ; exit 1; fi \
@@ -253,30 +252,46 @@ l-get-mcf-param = "! f() { \
 #      …
 #      [alias]
 #      w-backup-cfg= “! : ”
-#  2. Все команды имеют дополнительную версию комманды с суфиксом *-default. Эти команды нужны, если после переопределения нужно воспользоваться переопредленной коммандой.
+#  2. Все команды имеют дополнительную версию команды с суфиксом *-default.
+#      Эти команды нужны, если после переопределения нужно воспользоваться переопредленной командой.
 #  3. Также эти команды можно адаптировать под работу с git-svn.
 #  4. При описании команд ниже запись $param = value  обозначает, что $param c параметром по-умолчанию value. В большинстве команд запись обозначает:
-#      $fix : имя ветки правок fix в схеме MCF
-#      $cfg : имя ветки конфигурации cfg в схеме MCF
-#      $master : имя основной ветки master в схеме MCF
-#      $showlog : показывать (show|’’) или не показывать (hide|off) log после выполнения комманды
-#      $src[1,2] : имя источника
-#      $lbranch[1,2] : локальное имя ветки источника $src[1,2]
-#    $rbranch[1,2] : удаленное имя ветки источника $src[1,2]
-#  Все команды используют умолчательные параметры, кроме w-upload2
-
+#  5. Все команды используют параметры по-умолчанию:
+#      $fix = l-fix - имя ветки правок fix в схеме MCF
+#      $cfg = l-cfg - имя ветки конфигурации cfg в схеме MCF
+#      $master = l-master - имя основной ветки master в схеме MCF
+#      $src1 = l-src1 -  имя основного источника 
+#      $src1_rbranch = l-src1-rbranch: имя удаленной (remote) ветки в основном источнике 
+#      $src2 = l-src2: имя второго источника 
+#      $src2_rbranch = l-src2-rbranch: имя удаленной (remote) ветки вспомогательного источника 
+#      $showlog = show : показывать или не показывать (hide|off) log после выполнения команды
+#  6. Локальные константы l-* предназначены, для инициализации параметров команд по-умолчанию,
+#       а также переопределения значений параметров в локальных конфигах.
+#      - MCF main branches names:
+#         l-fix    = fix
+#         l-cfg    = cfg
+#         l-master = master
+#      - Main source 1 (обновление $master : git pull --rebase src1 src1_rbranch)
+#         l-src1         = origin
+#         l-src1-rbranch = master
+#      - Additional source 2 (обновление $master : git pull src2 src2_rbranch)
+#         l-src2         = origin
+#         l-src2-rbranch = master
+#     #Изменить умолчательные имя локальных веток $master -> work и $fix -> dev для текущего проекта.
+#      vim /dir/to/project/.git/config 
+#      …
+#      [mcf]
+#        l-master = work
+#        l-fix    = dev
+#
 #  w-create-base [ $fix $cfg $master $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    showlog = show
 #  Создать ветки $cfg с базой от $master и $fix с базой от $cfg для работы cо схемой MCF. Если ветки уже были созданы ранее, то будет просто переход на них без изменения базовых коммитов.
 #  Конечная ветка: $fix.
-w-create-base = "! git mcf-create-base"
+  w-create-base = "! git mcf-create-base"
 mcf-create-base = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
+        fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git l-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-create-base $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-create-base 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
@@ -286,17 +301,14 @@ mcf-create-base = "! f(){ \
 ;}; f"
 
 #  w-rebuild-base [ $fix $cfg $master $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    $showlog = show
 #  Переустановить базовые коммиты на $master для $cfg и yf и $cfg для $fix, т.е. подготовить для работы cо схемой MCF.
+#  Обычно делается всегда после правки конфигурации, или после обновления $master, чтобы внести изменения в базовые ветки.
 #  Конечная ветка: $fix.
-w-rebuild-base = "! git mcf-rebuild-base"
+  w-rebuild-base = "! git mcf-rebuild-base"
 mcf-rebuild-base = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
+        fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git l-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-rebuild-base $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
@@ -304,298 +316,237 @@ mcf-rebuild-base = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-load-fix-from-repo [ $master $src $lbranch $rbranch $showlog ]
-#    $master = master : куда заливать новые изменения
-#    $src = origin : имя источника откуда брать новые изменения
-#    $lbranch = $master : локальное имя ветки из источника $src
-#    $rbranch = $lbranch : удаленное имя ветки из источника $src
-#    $showlog = show
-#  Залить новые изменения в ветку $master из источника $src  $lbranch:$rbranch.
-#  Если ветки одинаковые $master=$src_lbranch, то делается pull --rebase $src $src_rbranch, а иначе сначала в ветку $src_lbranch заливаются новые изменения из $src/$src_rbranch , а потом ветка $master мержится с $src_lbranch ;
+#  w-load-fix-from-repo [ $master $src1 $src1_rbranch $method $showlog ]
+#  Залить новые изменения в ветку $master из источника $src1 $src1_rbranch используя $method=rebase|merge.
+#  Если ветки одинаковые $master=$src_lbranch, то делается pull --rebase $src1 $src_rbranch, а иначе сначала в ветку $src_lbranch заливаются новые изменения из $src1/$src_rbranch , а потом ветка $master мержится с $src_lbranch ;
 #  Конечная ветка: $master.
-w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
+  w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
 mcf-load-fix-from-repo = "! f(){ \
- master=${1:-master} \
- && src=${2:-origin} \
- && lbranch=${3:-$master} \
- && rbranch=${4:-$lbranch} \
- && showlog=${5:-show} \
- && git l-echo-l0 \"w-load-fix-from-repo $master $src $lbranch $rbranch $showlog\" \
- && if [ \"$master\" = \"$lbranch\" ] \
+          master=${1:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${2:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${3:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&       method=${4:-rebase} \
+ &&      showlog=${5:-show} \
+ && git l-echo-l0 \"w-load-fix-from-repo $master $src1 $src1_rbranch $method $showlog\" \
+ && if [ \"$method\" = \"rebase\" ] \
 ; then \
-    git l-echo-l1 \"w-load-fix-from-repo 1-2:\";git l-echo \"git checkout $master\"                 && git checkout $master \
- && git l-echo-l1 \"w-load-fix-from-repo 2-2:\";git l-echo \"git pull --rebase $src $rbranch \" && git pull --rebase $src $rbranch \
+    git l-echo-l1 \"w-load-fix-from-repo 1-2:\";git l-echo \"git checkout $master\"                   && git checkout $master \
+ && git l-echo-l1 \"w-load-fix-from-repo 2-2:\";git l-echo \"git pull --rebase $src1 $src1_rbranch \" && git pull --no-edit --rebase $src1 $src1_rbranch \
 ; else \
-    git l-echo-l1 \"w-load-fix-from-repo 1-4:\";git l-echo \"git checkout $lbranch \"  && git checkout $lbranch \
- && git l-echo-l1 \"w-load-fix-from-repo 2-4:\";git l-echo \"git pull $src $rbranch \" && git pull $src $rbranch \
- && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $master \" && git checkout $master \
- && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $lbranch \" && git merge --no-edit -m \"Merged with $src/$rbranch\" $lbranch \
+    git l-echo-l1 \"w-load-fix-from-repo 1-3:\";git l-echo \"git fetch $src1 $src1_rbranch \" && git fetch $src1 $src1_rbranch \
+ && git l-echo-l1 \"w-load-fix-from-repo 2-3:\";git l-echo \"git checkout $master\"           && git checkout $master \
+ && git l-echo-l1 \"w-load-fix-from-repo 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit -m '\"Merged with $src1/$src1_rbranch\"' $param $src1/$src1_rbranch \
 ; fi \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-update [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master : ветка которую будем обновлять 
-#    $src1 = origin : родной(tracked) источник для ветки $master
-#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
-#    $src2 = $src1 : дополнительный источник
-#    $lbranch2 = $master : локальное имя ветки дополнительного источника
-#    $rbranch2 = $lbranch2 : удаленное имя ветки дополнительного источника
-#    $showlog = show
+#    git l-echo-l1 \"w-load-fix-from-repo 1-4:\";git l-echo \"git checkout $src1_lbranch \"  && git checkout $src1_lbranch \
+# && git l-echo-l1 \"w-load-fix-from-repo 2-4:\";git l-echo \"git pull $src1 $src1_rbranch \" && git pull $src1 $src1_rbranch \
+# && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $master \" && git checkout $master \
+# && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $src1_lbranch \" && git merge --no-edit -m \"Merged with $src1/$src1_rbranch\" $src1_lbranch \
+
+#  w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
 #  Обновить $master из 1-го или 2-х источников. 
-#  Сначала обновляется $master из основного источника $src1 $master:$rbranch1.
-#  Если второй источник аналогичен первому $src1 = $src2 && $master = $lbranch2, то второй пропускается, иначе обновить $master из дополнительного источника $src2 $lbranch2:$rbranch2.
+#  Сначала обновляется $master из основного источника $src1 $master:$src1_rbranch.
+#  Если второй источник аналогичен первому $src1 = $src2 && $src1_rbranch = $src2_rbranch, то второй пропускается, иначе обновить $master из дополнительного источника $src2/$src2_rbranch.
+#  Параметра $rebuild_base=on|off после обновления или нет переустановку базовых веток 
 #  Конечная ветка: $fix.
-w-update = "! git mcf-update"
+  w-update = "! git mcf-update"
 mcf-update = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && rbranch1=${5:-$master} \
- && src2=${6:-$src1} \
- && lbranch2=${7:-$master} \
- && rbranch2=${8:-$lbranch2} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
- && git l-echo-l1 \"w-update 1-5:\" && git w-load-fix-from-repo $master $src1 $master $rbranch1 off \
- && if [ \"$src1\" = \"$src2\" -a \"$master\" = \"$lbranch2\" ] \
-; then \
-    git l-echo-l1 \"w-update 2-5: there is not need update\" \
-; else \
-    git l-echo-l1 \"w-update 2-5:\" && git w-load-fix-from-repo $master $src2 $lbranch2 $rbranch2 off \
+             fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+ && rebuild_base=${8:-on} \
+ &&      showlog=${9:-show} \
+ && git l-echo-l0 \"w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
+ && git l-echo-l1 \"w-update 1-4:\" && git w-load-fix-from-repo $master $src1 $src1_rbranch rebase off \
+ && if [ \"$src1\" = \"$src2\" -a \"$src1_rbranch\" = \"$src2_rbranch\" ] \
+; then git l-echo-l1 \"w-update 2-4: do not need to update from src2\" \
+; else git l-echo-l1 \"w-update 2-4:\" && git w-load-fix-from-repo $master $src2 $src2_rbranch merge off \
 ; fi \
- && git l-echo-l1 \"w-update 3-5:\";git l-echo \"git push $src1 $master:$rbranch1\" && git push $src1 $master:$rbranch1 \
- && git l-echo-l1 \"w-update 4-5:\" && git w-rebuild-base $fix $cfg $master off \
+ && if [ \"$rebuild_base\" = 'on' ] \
+; then git l-echo-l1 \"w-update 3-4:\" && git w-rebuild-base $fix $cfg $master off \
+; else git l-echo-l1 \"w-update 3-4: do not need to rebuild n\"\
+; fi \
  && cbr=$(git show-current-branch-name) \
- && git l-echo-l1 \"w-update 5-5:\" && git w-update-extcmd $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 off \
+ && git l-echo-l1 \"w-update 4-4:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
  && git checkout -q $cbr \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-update2 $src2 $lbranch2 $rbranch2 [ $fix $cfg $master $src1 $rbranch1 $showlog ]
-#    $src2
-#    $lbranch2
-#    $rbranch2
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master : ветка которую будем обновлять 
-#    $src1 = origin : родной(tracked) источник для ветки $master
-#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
-#    $showlog = show
-#  Команда аналогична w-update, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. Более удобна при работе с 2-мя источниками.
+#  w-update2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog ]
+#  Команда аналогична w-update, но другой порядок парaметров. Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. Более удобна при работе с 2-мя источниками.
 #  Конечная ветка: $fix.
-w-update2 = "! git mcf-update2"
+  w-update2 = "! git mcf-update2"
 mcf-update2 = "! f(){ \
- if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
- && src2=${1:-$src1} \
- && lbranch2=${2:-$master} \
- && rbranch2=${3:-$lbranch2} \
- && fix=${4:-fix} \
- && cfg=${5:-cfg} \
- && master=${6:-master} \
- && src1=${7:-origin} \
- && rbranch1=${8:-$master} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-update2 $src2 $lbranch2 $rbranch2 $fix $cfg $master $src1 $rbranch1 $showlog\" \
- && git l-echo-l1 \"w-update2 1-1:\" && git w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog \
+            src2=${1:-$(git l-get-mcf-param l-src2)} \
+ && src2_rbranch=${2:-$(git l-get-mcf-param l-src2-rbranch)} \
+ &&          fix=${3:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${4:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${5:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${6:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${7:-$(git l-get-mcf-param l-src1-rbranch)} \
+ && rebuild_base=${8:-on} \
+ &&      showlog=${9:-show} \
+ && git l-echo-l0 \"w-update2 $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog\" \
+ && git l-echo-l1 \"w-update2 1-1:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
 ;}; f"
 
-#  w-update-extcmd [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    $src1 = origin
-#    $rbranch1 = $master
-#    $src2 = $src1
-#    $lbranch2 = $master
-#    $rbranch2 = $lbranch2
-#    $showlog = show
+#  w-update-extcmd [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Эта команда выполняется после успешного выполенения обновления w-update. Эту команду можно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
 #  Конечная ветка: не меняется.
 #    #Пример: дополнительная синхронизация с 3-м сервером server3
 #      vim /dir/to/project/.git/config 
 #      …
 #      [alias]
-#      mcf-update-extcmd = "! f(){ \
-#        fix=$1 && cfg=$2 && master=$3 && src1=$4 && rbranch1=$5 && src2=$6 && lbranch2=$7 && rbranch2=$8 && showlog=$9 \
-#      && git push server3 $master:custom_branch \
+#      w-update-extcmd = "! f(){ \
+#           git push server3 local_branch:custom_rbranch \
 #      ;}; f"
-w-update-extcmd = "! git mcf-update-extcmd"
+  w-update-extcmd = "! git mcf-update-extcmd"
 mcf-update-extcmd = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && rbranch1=${5:-$master} \
- && src2=${6:-$src1} \
- && lbranch2=${7:-$master} \
- && rbranch2=${8:-$lbranch2} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
+             fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+ &&      showlog=${8:-show} \
+ && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-upload [ $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master : ветка которую будем обновлять
-#    $src1 = origin : родной(tracked) источник для ветки $master
-#    $rbranch1 = $master : имя удаленной ветки в источнике $src1
-#    $src2 = $src1 : дополнительный источник
-#    $lbranch2 = $master : локальное имя ветки дополнительного источника
-#    $rbranch2 = $lbranch2 : удаленное имя ветки дополнительного источника
-#    $showlog = show
+#  w-upload [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Загружает сделанные изменения из ветки $fix в ветку $master.
 #  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update).
-#  Затем изменения из $fix заливаются в $master и отправляются в репу $src1 ветку $rbranch1. И на последнем этапе делается бекап ветки конфигурации $cfg на сервер $src1.
+#  Затем изменения из $fix заливаются в $master и отправляются в репу $src1 ветку $src1_rbranch. И на последнем этапе делается бекап ветки конфигурации $cfg на сервер $src1.
 #  Конечная ветка: $fix.
-w-upload = "! git mcf-upload"
+  w-upload = "! git mcf-upload"
 mcf-upload = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src1=${4:-origin} \
- && rbranch1=${5:-$master} \
- && src2=${6:-$src1} \
- && lbranch2=${7:-$master} \
- && rbranch2=${8:-$lbranch2} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
- && git l-echo-l1 \"w-upload 1-3:\" && git w-update $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 off \
- && git l-echo-l1 \"w-upload 2-3:\" && git w-send-fix $fix $cfg $master $src1 $rbranch1 off \
+             fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+ &&      showlog=${8:-show} \
+ && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
+ && git l-echo-l1 \"w-upload 1-3:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
+ && git l-echo-l1 \"w-upload 2-3:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
  && git l-echo-l1 \"w-upload 3-3:\" && git w-backup-cfg $cfg $src1 off \
  && git l-last-check $showlog \
 ;}; f"
+# && git l-echo-l1 \"w-upload 3-5:\" && git w-rebuild-base $fix $cfg $master off \
 
-#  w-upload2 $src2 $lbranch2 $rbranch2 [ $fix $cfg $master $src1 $rbranch1 $showlog ]
-#    $src2 : дополнительный источник
-#    $lbranch2 : локальное имя ветки дополнительного источника
-#    $rbranch2 : удаленное имя ветки дополнительного источника
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    $src1 = origin
-#    $rbranch1 = $master
-#    $showlog = show
-#  Команда аналогична w-upload, но другой порядок парaметров. Первые три параметра обязательны и определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. Более удобна при работе с 2-мя источниками.
+#  w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
+#  Команда аналогична w-upload, но другой порядок парaметров. Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. 
+#  Команда более удобна при работе с 2-мя источниками, чем w-upload.
 #  Конечная ветка: $fix.
-w-upload2 = "! git mcf-upload2"
+  w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
- if [ $# -lt 3 ]; then git l-echo \"Error: w-upload2 have to start with 3 or more parameters.\" 1 1 && exit 1 ; fi \
- && src2=${1:-$src1} \
- && lbranch2=${2:-$master} \
- && rbranch2=${3:-$lbranch2} \
- && fix=${4:-fix} \
- && cfg=${5:-cfg} \
- && master=${6:-master} \
- && src1=${7:-origin} \
- && rbranch1=${8:-$master} \
- && showlog=${9:-show} \
- && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog\" \
- && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $rbranch1 $src2 $lbranch2 $rbranch2 $showlog \
+ if [ $# -lt 2 ]; then git l-echo \"Error: w-upload2 have to start with 2 or more parameters.\" 1 1 && exit 1 ; fi \
+ &&         src2=${1:-$(git l-get-mcf-param l-src2)} \
+ && src2_rbranch=${2:-$(git l-get-mcf-param l-src2-rbranch)} \
+ &&      fix=${3:-$(git l-get-mcf-param l-fix)} \
+ &&      cfg=${4:-$(git l-get-mcf-param l-cfg)} \
+ &&   master=${5:-$(git l-get-mcf-param l-master)} \
+ &&     src1=${6:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${7:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&  showlog=${9:-show} \
+ && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
+ && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
 ;}; f"
 
 #  w-apply-fix [ $fix $cfg $master $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    $showlog = show fix=${1:-fix} \
 #  Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
 #  Конечная ветка: $fix.
-w-apply-fix = "! git mcf-apply-fix"
+  w-apply-fix = "! git mcf-apply-fix"
 mcf-apply-fix = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
+        fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git l-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-apply-fix $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-apply-fix 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
  && git l-echo-l1 \"w-apply-fix 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
- && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git rebase $fix $master\"         && git rebase $fix $master \
+ && git l-echo-l1 \"w-apply-fix 3-4:\";git l-echo \"git rebase $fix $master\"             && git rebase $fix $master \
  && git l-echo-l1 \"w-apply-fix 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-send-fix [ $fix $cfg $master $src $rbranch $showlog ]
-#    $fix = fix
-#    $cfg = cfg
-#    $master = master
-#    $src = origin
-#    $rbranch = $master
-#    $showlog = show
-#  Отправить изменения из $fix в $master, а затем $master отправить на $src в ветку $rbranch.
+#  w-send-fix [ $fix $cfg $master $src1 $src1_rbranch $showlog ]
+#  Отправить изменения из $fix в $master, а затем $master отправить на $src1 в ветку $src1_rbranch.
 #  Конечная ветка: $fix.
-w-send-fix = "! git mcf-send-fix"
+  w-send-fix = "! git mcf-send-fix"
 mcf-send-fix = "! f(){ \
- fix=${1:-fix} \
- && cfg=${2:-cfg} \
- && master=${3:-master} \
- && src=${4:-origin} \
- && rbranch=${5:-$master} \
- && showlog=${6:-show} \
- && git l-echo-l0 \"w-send-fix $fix $cfg $master $src $rbranch $showlog\" \
+             fix=${1:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
+ &&      showlog=${6:-show} \
+ && git l-echo-l0 \"w-send-fix $fix $cfg $master $src1 $src1_rbranch $showlog\" \
  && git l-echo-l1 \"w-send-fix 1-2:\" && git w-apply-fix $fix $cfg $master off \
- && git l-echo-l1 \"w-send-fix 2-2:\";git l-echo \"git push $src $master:$rbranch\" && git push $src $master:$rbranch \
+ && git l-echo-l1 \"w-send-fix 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-backup-cfg [ $cfg $src $showlog ]
-#    $cfg = cfg
-#    $src = origin : репа куда залить бекап
-#    $showlog = show
-#  Сделать бекап ветки $cfg в репе $src с именем ветки ‘_{nickname}_{$cfg}_backup’ . 
+#  w-backup-cfg [ $cfg $src1 $showlog ]
+#  Сделать бекап ветки $cfg в репу $src1 с именем ветки '_{nickname}_{$cfg}_backup' . 
 #  Конечная ветка: не меняется.
-w-backup-cfg = "! git mcf-backup-cfg"
+  w-backup-cfg = "! git mcf-backup-cfg"
 mcf-backup-cfg = "! f(){ \
- cfg=${1:-cfg} \
- && src=${2:-origin} \
+        cfg=${1:-$(git l-get-mcf-param l-cfg)} \
+ &&    src1=${2:-$(git l-get-mcf-param l-src1)} \
  && showlog=${3:-show} \
- && nick=$(git mynickname) \
- && rbranch=_${nick}_${cfg}_backup \
- && git l-echo-l0 \"w-backup-cfg $cfg $src $showlog\" \
- && git l-echo-l1 \"w-backup-cfg 1-1:\";git l-echo \"git push -f $src $cfg:$rbranch\" && git push -f $src $cfg:$rbranch \
+ &&    nick=$(git mynickname) \
+ && src1_rbranch=_${nick}_${cfg}_backup \
+ && git l-echo-l0 \"w-backup-cfg $cfg $src1 $showlog\" \
+ && git l-echo-l1 \"w-backup-cfg 1-1:\";git l-echo \"git push -f $src1 $cfg:$src1_rbranch\" && git push -f $src1 $cfg:$src1_rbranch \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-copy2tmp $src $showlog
-#    $src = origin : репа куда залить бекап
+#  w-copy2tmp [ $src1 $showlog ]
+#    $src1 = origin : репа куда залить бекап
 #    $showlog = show
-#  Сделать временный бекап состояния текущей ветки в репе $src с именем ветки ‘_{nickname}_{name_of_current_branch}_tmp.
+#  Сделать временный бекап состояния текущей ветки в репе $src1 с именем ветки '_{nickname}_{name_of_current_branch}_tmp'.
 #  При бекапе все несохраненные изменения также отправятся в репу, а после завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
 #  Эта оперция полезна, если вы не готовы комитить изменения, но нужно сделать копию текущего состояния.
 #  Конечная ветка: не меняется.
-w-copy2tmp = "! git mcf-copy2tmp"
+  w-copy2tmp = "! git mcf-copy2tmp"
 mcf-copy2tmp = "! f(){ \
- src=${1:-origin} \
+       src1=${1:-$(git l-get-mcf-param l-src1)} \
  && showlog=${2:-show} \
- && nick=$(git mynickname) \
- && cbr=$(git show-current-branch-name) \
- && rbranch=_${nick}_${cbr}_tmp \
+ &&    nick=$(git mynickname) \
+ &&     cbr=$(git show-current-branch-name) \
+ && src1_rbranch=_${nick}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
  && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
- && git l-echo-l0 \"w-copy2tmp $src $showlog\" \
- && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                  && git add --all \
- && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"         && git commit -m \"${MESS}\" \
- && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $src $cbr:$rbranch\" && git push -f $src $cbr:$rbranch \
- && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"               && git reset HEAD~1 \
+ && git l-echo-l0 \"w-copy2tmp $src1 $showlog\" \
+ && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                   && git add --all \
+ && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"          && git commit -m \"${MESS}\" \
+ && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $src1 $cbr:$src1_rbranch\" && git push -f $src1 $cbr:$src1_rbranch \
+ && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"                && git reset HEAD~1 \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-fakecommit $mess $showlog
-#    $mess = ‘Added _fakefile_...’  : коментарий к коммиту
-#    $showlog = show
-#  Создает фейковый коммит c пустым файлом, например, для тестов. Команда удобна при исследовании команд.
+#  w-fakecommit [ $mess $showlog ]
+#    $mess = 'Added _fakefile_...' - коментарий к коммиту
+#    $showlog = 'show'
+#  Создает фейковый коммит c пустым файлом. Используется для тестов и при исследовании команд.
 #  Конечная ветка: не меняется.
-w-fakecommit ="! git mcf-fakecommit"
-mcf-fakecommit ="! f(){ \
- mess=${1:-} \
+  w-fakecommit = "! git mcf-fakecommit "
+mcf-fakecommit = "! f(){ \
+       mess=${1:-} \
  && showlog=${2:-show} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
- && touch \"$a\" && git add \"$a\" && git commit -m \"Fake commit: $mess\" \
+ && sleep 1 && touch \"$a\" && git add \"$a\" --  && git commit -m \"Fake commit: $mess\" \
  && git l-last-check $showlog \
 ;}; f"
 
@@ -611,7 +562,7 @@ svnlog = !git svn log --oneline -20 | sort
 svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
 
 uploadsvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
  && echo "=  uploadsvn $fix $cfg $master " \
  && git pushallforce \
  && git updatesvn $fix $cfg $master \
@@ -623,7 +574,7 @@ uploadsvn = "! f(){ \
  && echo "=====" && git svnlog ;}; f"
 
 updatesvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
  && echo "=  updatesvn ${fix} ${cfg} ${master} " \
  && echo "== git checkout $master"    && git checkout $master  \
  && echo "== git svn rebase"          && git svn rebase \
@@ -631,7 +582,7 @@ updatesvn = "! f(){ \
  && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
 
 loadsvn = "! f(){ \
- fix=${1:-fix} && cfg=${2:-cfg} && master=${3:-master} \
+ fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
  && echo "=  loadsvn $fix $cfg $master " \
  && echo "== git checkout $fix"                   && git checkout $fix \
  && echo "== git rebase --onto $master $cfg $fix" && git rebase --onto $master $cfg $fix  \
@@ -654,13 +605,14 @@ loadsvn = "! f(){ \
     l-debug-level = -1
 
 #  MCF main branches names
-	fix = fix
-	cfg = cfg
-	master = master
+    l-fix = fix
+    l-cfg = cfg
+    l-master       = master
 
-#  MCF branches and repos names
-	src1 = origin
-    src1-rbranch = master
-	src2 = origin
-    src2-lbranch = master
-    src2-rbranch = master
+#  Main source 1
+    l-src1         = origin
+    l-src1-rbranch = master
+
+#  Additional source 2
+    l-src2         = origin
+    l-src2-rbranch = master
