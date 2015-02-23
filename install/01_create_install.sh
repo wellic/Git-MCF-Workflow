@@ -35,7 +35,11 @@ echo "#user info" >> "$DST_DIR"/"$FNAME_INSTALL"
 cat "$CUR_DIR"/"$FNAME_USER_INFO" >> "$DST_DIR"/"$FNAME_INSTALL"
 echo >> "$DST_DIR"/"$FNAME_INSTALL"
 
-[ "$(uname)" = 'Linux' ] && FNAME_FIX=fix_linux.sh || FNAME_FIX=fix_win.bat
+SUFFIX_OS="win.bat"
+MY_OS=$(uname)
+[ "$MY_OS" = "Linux"  ] && SUFFIX_OS="linux.sh"
+[ "$MY_OS" = "Darwin" ] && SUFFIX_OS="macos.sh"
+FNAME_FIX="fix_${SUFFIX_OS}"
 echo "#Added from $FNAME_FIX" >> "$DST_DIR"/"$FNAME_INSTALL"
 cat "$SRC_DIR"/"$FNAME_FIX" >> "$DST_DIR"/"$FNAME_INSTALL"
 
