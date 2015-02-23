@@ -43,7 +43,7 @@
     pager = less -FXRS
 #    FOR WIN
 #    autocrlf = true
-    autocrlf = false
+    autocrlf = input
     safecrlf = false
     eol = native
 #    FOR WIN
@@ -101,9 +101,11 @@ visual = !gitk --all &
 # show history and log
 sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
 hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-last  = "! git hist -20 $* "
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
 hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
+hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+last  = "! git hist  -20 $* "
+last2 = "! git hist2 -20 $* "
+last3 = "! git hist3 -20 $* "
 
 ###########
 # User info
@@ -335,15 +337,11 @@ mcf-load-fix-from-repo = "! f(){ \
 ; else \
     git l-echo-l1 \"w-load-fix-from-repo 1-3:\";git l-echo \"git fetch $src1 $src1_rbranch \" && git fetch $src1 $src1_rbranch \
  && git l-echo-l1 \"w-load-fix-from-repo 2-3:\";git l-echo \"git checkout $master\"           && git checkout $master \
- && git l-echo-l1 \"w-load-fix-from-repo 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit -m '\"Merged with $src1/$src1_rbranch\"' $param $src1/$src1_rbranch \
+ && git l-echo-l1 \"w-load-fix-from-repo 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit $src1/$src1_rbranch \
 ; fi \
  && git l-last-check $showlog \
 ;}; f"
-
-#    git l-echo-l1 \"w-load-fix-from-repo 1-4:\";git l-echo \"git checkout $src1_lbranch \"  && git checkout $src1_lbranch \
-# && git l-echo-l1 \"w-load-fix-from-repo 2-4:\";git l-echo \"git pull $src1 $src1_rbranch \" && git pull $src1 $src1_rbranch \
-# && git l-echo-l1 \"w-load-fix-from-repo 3-4:\";git l-echo \"git checkout $master \" && git checkout $master \
-# && git l-echo-l1 \"w-load-fix-from-repo 4-4:\";git l-echo \"git merge --no-edit $src1_lbranch \" && git merge --no-edit -m \"Merged with $src1/$src1_rbranch\" $src1_lbranch \
+# && git l-echo-l1 \"w-load-fix-from-repo 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit -m \"Merged with $src1/$src1_rbranch\" $param $src1/$src1_rbranch \
 
 #  w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
 #  Обновить $master из 1-го или 2-х источников. 
@@ -436,9 +434,10 @@ mcf-upload = "! f(){ \
  && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
  &&      showlog=${8:-show} \
  && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
- && git l-echo-l1 \"w-upload 1-3:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
- && git l-echo-l1 \"w-upload 2-3:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
- && git l-echo-l1 \"w-upload 3-3:\" && git w-backup-cfg $cfg $src1 off \
+ && git l-echo-l1 \"w-upload 1-4:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
+ && git l-echo-l1 \"w-upload 2-4:\" && git w-rebuild-base $fix $cfg $master off \
+ && git l-echo-l1 \"w-upload 3-4:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
+ && git l-echo-l1 \"w-upload 4-4:\" && git w-backup-cfg $cfg $src1 off \
  && git l-last-check $showlog \
 ;}; f"
 # && git l-echo-l1 \"w-upload 3-5:\" && git w-rebuild-base $fix $cfg $master off \
@@ -602,7 +601,7 @@ loadsvn = "! f(){ \
 #    $level :  1  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
 #  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
 #  Необходим при отладке методов и при изучении работы команд.
-    l-debug-level = -1
+    l-debug-level = 0
 
 #  MCF main branches names
     l-fix = fix

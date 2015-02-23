@@ -15,6 +15,7 @@ CUR_DIR=$(dirname "$0")
 INSTALL_DIR=$1
 [ -z "$INSTALL_DIR" ] && INSTALL_DIR="$CUR_DIR"/../..
 cd $INSTALL_DIR
+SCR_DIR=$CUR_DIR
 CUR_DIR=$PWD
 
 set -o nounset
@@ -72,7 +73,7 @@ make_devs() {
 }
 
 do_test() {
-    [ "$TEST_AFTER_INSTALL" = '1' ] && "$CUR_DIR"/"$TEST_PROG" "$INSTALL_DIR" "$NAME_TESTDIR" "$NAME_SERVER" "$NAME_DEV"
+    [ "$TEST_AFTER_INSTALL" = '1' ] && "$SCR_DIR"/"$TEST_PROG" "$INSTALL_DIR" "$NAME_TESTDIR" "$NAME_SERVER" "$NAME_DEV"
 }
 
 make_repos

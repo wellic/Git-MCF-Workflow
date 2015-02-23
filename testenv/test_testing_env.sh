@@ -77,7 +77,7 @@ do_cmd() {
     $DO_CMD || exit_if_error $? "$MESS"
 }
 
-_test() {
+start_test() {
 
     local DEV=dev1
     local STEP_NUM=1
@@ -191,5 +191,28 @@ cd "$RET_DIR"
 
 
 showinfo 'Start test' $c_main
-_test
+start_test
 showinfo "Finish test: $STATUS" ${STATUS_COLOR}
+
+showinfo "Please check"
+cat << 'EOF'
+* ... | Fake commit: dev2_cfg3 (HEAD,origin/_user_cfg_backup,fix,cfg)
+* ... | Fake commit: dev2_cfg2
+* ... | Fake commit: dev2_cfg1
+* ... | Fake commit: dev2_fix3 (origin/master, master)
+* ... | Merge remote-tracking branch 'server2/master'
+|\
+| * ... | Fake commit: dev3_c3 (server2/master)
+| * ... | Fake commit: dev3_c2
+| * ... | Fake commit: dev3_c1
+* ... | Fake commit: dev1_c7
+* ... | Fake commit: dev1_c6
+* ... | Fake commit: dev2_fix2
+* ... | Fake commit: dev2_fix1
+* ... | Fake commit: dev1_c5
+* ... | Fake commit: dev1_c4
+* ... | Fake commit: dev1_c3
+* ... | Fake commit: dev1_c2
+* ... | Fake commit: Initial_dev1_c1
+EOF
+
