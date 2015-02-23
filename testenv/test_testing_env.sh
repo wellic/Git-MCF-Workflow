@@ -130,7 +130,7 @@ start_test() {
       do_cmd "$STEP 3-$CNT ($DEV)" "git last"
 
       DEV=dev1
-      do_cmd "$STEP 4-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}; pwd
+      do_cmd "$STEP 4-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
       do_cmd "$STEP 5-$CNT ($DEV)" "git w-fakecommit dev1_c4 off"
       do_cmd "$STEP 6-$CNT ($DEV)" "git w-fakecommit dev1_c5 off"
       do_cmd "$STEP 7-$CNT ($DEV)" "git last"
@@ -138,7 +138,7 @@ start_test() {
 
     STEP_NUM=5
     STEP="Step ${STEP_NUM}: Send and Load fixes in one group."
-    CNT=8
+    CNT=7
     showinfo "$STEP"
       do_cmd "$STEP 1-$CNT ($DEV)" "git push origin master"
       do_cmd "$STEP 2-$CNT ($DEV)" "git last"
@@ -154,6 +154,20 @@ start_test() {
     showinfo "$STEP Status: Finished\n"
 
     STEP_NUM=6
+    STEP="Step ${STEP_NUM}: Test w-copy2tmp."
+    CNT=7
+    showinfo "$STEP"
+      DEV=dev2
+      do_cmd "$STEP 1-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
+      do_cmd "$STEP 2-$CNT ($DEV)" "touch test.file" ${c_cmdcd}
+      do_cmd "$STEP 3-$CNT ($DEV)" "git status"
+      do_cmd "$STEP 4-$CNT ($DEV)" "git w-copy2tmp"
+      do_cmd "$STEP 5-$CNT ($DEV)" "git br -r"
+      do_cmd "$STEP 6-$CNT ($DEV)" "git status"
+      do_cmd "$STEP 7-$CNT ($DEV)" "rm -f test.file" ${c_cmdcd}
+    showinfo "$STEP Status: Finished\n"
+
+    STEP_NUM=7
     STEP="Step ${STEP_NUM}: Work with additional source."
     CNT=18
     showinfo "$STEP"

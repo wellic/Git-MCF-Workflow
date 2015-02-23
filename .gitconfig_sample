@@ -3,9 +3,9 @@
 #   user.email
 #   user.nickname
 [user]  
-    name = your_name
-    email = your@mail
-    nickname = yournick
+	name = your_name
+	email = your@mail
+	nickname = yournick
 [commit]
 #    template = /home/yournick/.gitmessage_template
 [color]
@@ -43,7 +43,7 @@
     pager = less -FXRS
 #    FOR WIN
 #    autocrlf = true
-    autocrlf = input
+	autocrlf = false
     safecrlf = false
     eol = native
 #    FOR WIN
@@ -90,7 +90,7 @@ st = status
 rb = rebase
 rbi = rebase -i
 ch = cherry-pick
-unstage = "! git reset HEAD -- $* "
+unstage = reset HEAD
 
 # diff
 df = diff
@@ -248,45 +248,41 @@ l-get-mcf-param = "! f() { \
 # Global commands
 #################
 
-#  1. Эти команды помогают выполнять работы с git согласно 3-веточной схемы MCF. Все команды можено переопределять в локальных конфигах, чтобы изменить стандатное поведение. 
-#      #Отключить бекап локального конфига (ветка $cfg) на удаленный сервер для команд w-upload и w-upload2. 
-#      vim /dir/to/project/.git/config 
+#  Все команды имеют основную версию команды (mcf-*) и дополнительную с префиксом (w-*). 
+#  Эти команды равнозначны, пока они не переопределены в локальном конфиге. Если необходимо, то переопределять лучше команды w-*, т.к. именно эти команды вызываются в расширенных командах.
+#  Команды mcf-* нужно использовать, как команды с поведением по-умолчанию.
+#  Расширенные команды выполняют работы с git согласно 3-веточной схемы. Все команды можно переопределять в локальных конфигах, чтобы изменить стандатное поведение. 
+#    #Пример
+#    #Отключить бекап локального конфига (ветка $cfg) на удаленный сервер для команд w-upload и w-upload2. 
+#    > vim /dir/to/project/.git/config 
 #      …
 #      [alias]
-#      w-backup-cfg= “! : ”
-#  2. Все команды имеют дополнительную версию команды с суфиксом *-default.
-#      Эти команды нужны, если после переопределения нужно воспользоваться переопредленной командой.
-#  3. Также эти команды можно адаптировать под работу с git-svn.
-#  4. При описании команд ниже запись $param = value  обозначает, что $param c параметром по-умолчанию value. В большинстве команд запись обозначает:
-#  5. Все команды используют параметры по-умолчанию:
-#      $fix = l-fix - имя ветки правок fix в схеме MCF
-#      $cfg = l-cfg - имя ветки конфигурации cfg в схеме MCF
-#      $master = l-master - имя основной ветки master в схеме MCF
-#      $src1 = l-src1 -  имя основного источника 
-#      $src1_rbranch = l-src1-rbranch: имя удаленной (remote) ветки в основном источнике 
-#      $src2 = l-src2: имя второго источника 
-#      $src2_rbranch = l-src2-rbranch: имя удаленной (remote) ветки вспомогательного источника 
-#      $showlog = show : показывать или не показывать (hide|off) log после выполнения команды
-#  6. Локальные константы l-* предназначены, для инициализации параметров команд по-умолчанию,
-#       а также переопределения значений параметров в локальных конфигах.
-#      - MCF main branches names:
-#         l-fix    = fix
-#         l-cfg    = cfg
-#         l-master = master
-#      - Main source 1 (обновление $master : git pull --rebase src1 src1_rbranch)
-#         l-src1         = origin
-#         l-src1-rbranch = master
-#      - Additional source 2 (обновление $master : git pull src2 src2_rbranch)
-#         l-src2         = origin
-#         l-src2-rbranch = master
-#     #Изменить умолчательные имя локальных веток $master -> work и $fix -> dev для текущего проекта.
-#      vim /dir/to/project/.git/config 
-#      …
-#      [mcf]
+#        w-backup-cfg= "! : "
+#  При описании команд ниже запись $param = value  обозначает, что $param c параметром по-умолчанию value.
+#  Все команды используют параметры по-умолчанию:
+#    $fix = l-fix - имя ветки правок fix в схеме MCF
+#    $cfg = l-cfg - имя ветки конфигурации cfg в схеме MCF
+#    $master = l-master - имя основной ветки master в схеме MCF
+#    $src1 = l-src1 -  имя основного источника
+#    $src1_rbranch = l-src1-rbranch - имя удаленной (remote) ветки в основном источнике
+#    $src2 = l-src2 - имя вспомогательного источника
+#    $src2_rbranch = l-src2-rbranch - имя удаленной (remote) ветки вспомогательного источника
+#    $showlog = show - показывать или не показывать (hide|off) log после выполнения команды
+#    $rebuild_base = on - делать(on) или не ltkfnm(off) после выполнения команды переустановку базовых веток
+#    $method = rebase - метод (rebase|merge), который использовать при получении новых изменений с удаленных (remote) источников
+
+# Локальные константы l-*?, которые находятся в секции [mcf], предназначены, для инициализации параметров команд по-умолчанию, а также для переопределения значений параметров в локальных конфигах.
+#   #Пример
+#   #Изменить умолчательные имя локальных веток $master -> work и $fix -> dev для текущего проекта.
+#   > vim /dir/to/project/.git/config.
+#     …
+#     [mcf]
 #        l-master = work
 #        l-fix    = dev
-#
-#  w-create-base [ $fix $cfg $master $showlog ]
+# Также все mcf,w-* команды можно адаптировать для работы с git-svn.
+# Далее в примерах мы используем команды с индексом w-*, и они могут быть переопределены в локальных конфигах, так же удобнее и быстрее набирать на клавиатуре.
+
+# w-create-base [ $fix $cfg $master $showlog ]
 #  Создать ветки $cfg с базой от $master и $fix с базой от $cfg для работы cо схемой MCF. Если ветки уже были созданы ранее, то будет просто переход на них без изменения базовых коммитов.
 #  Конечная ветка: $fix.
   w-create-base = "! git mcf-create-base"
@@ -302,7 +298,7 @@ mcf-create-base = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-rebuild-base [ $fix $cfg $master $showlog ]
+# w-rebuild-base [ $fix $cfg $master $showlog ]
 #  Переустановить базовые коммиты на $master для $cfg и yf и $cfg для $fix, т.е. подготовить для работы cо схемой MCF.
 #  Обычно делается всегда после правки конфигурации, или после обновления $master, чтобы внести изменения в базовые ветки.
 #  Конечная ветка: $fix.
@@ -318,9 +314,9 @@ mcf-rebuild-base = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-load-fix-from-repo [ $master $src1 $src1_rbranch $method $showlog ]
+# w-load-fix-from-repo [ $master $src1 $src1_rbranch $method $showlog ]
 #  Залить новые изменения в ветку $master из источника $src1 $src1_rbranch используя $method=rebase|merge.
-#  Если ветки одинаковые $master=$src_lbranch, то делается pull --rebase $src1 $src_rbranch, а иначе сначала в ветку $src_lbranch заливаются новые изменения из $src1/$src_rbranch , а потом ветка $master мержится с $src_lbranch ;
+#  Если $method=rebase, то используется git pull --rebase, а иначе git merge.
 #  Конечная ветка: $master.
   w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
 mcf-load-fix-from-repo = "! f(){ \
@@ -343,11 +339,12 @@ mcf-load-fix-from-repo = "! f(){ \
 ;}; f"
 # && git l-echo-l1 \"w-load-fix-from-repo 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit -m \"Merged with $src1/$src1_rbranch\" $param $src1/$src1_rbranch \
 
-#  w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
-#  Обновить $master из 1-го или 2-х источников. 
-#  Сначала обновляется $master из основного источника $src1 $master:$src1_rbranch.
-#  Если второй источник аналогичен первому $src1 = $src2 && $src1_rbranch = $src2_rbranch, то второй пропускается, иначе обновить $master из дополнительного источника $src2/$src2_rbranch.
-#  Параметра $rebuild_base=on|off после обновления или нет переустановку базовых веток 
+# w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
+#  Залить обновление в $master из 2-х источников. 
+#  Обновить $master из основного источника $src1/$src1_rbranch методом git pull --rebase.
+#  Если первый и второй источник одинаковые ($src1 = $src2 && $src1_rbranch = $src2_rbranch), то обновление из второго источника пропускается. 
+#  Если первый и второй источник разные, то обновить $master из дополнительного источника $src2/$src2_rbranch методом git merge.
+#  Параметр $rebuild_base=on|off указывает, нужно ли после обновления делать переустановку базовых веток. 
 #  Конечная ветка: $fix.
   w-update = "! git mcf-update"
 mcf-update = "! f(){ \
@@ -371,13 +368,15 @@ mcf-update = "! f(){ \
 ; else git l-echo-l1 \"w-update 3-4: do not need to rebuild n\"\
 ; fi \
  && cbr=$(git show-current-branch-name) \
- && git l-echo-l1 \"w-update 4-4:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
+ && git l-echo-l1 \"w-update 4-4:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base off \
  && git checkout -q $cbr \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-update2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog ]
-#  Команда аналогична w-update, но другой порядок парaметров. Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. Более удобна при работе с 2-мя источниками.
+# w-update2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog ]
+#  Команда аналогична w-update, но другой порядок парaметров.
+#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. 
+#  Более удобна при работе с 2-мя источниками, чем w-update, когда используются параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-update2 = "! git mcf-update2"
 mcf-update2 = "! f(){ \
@@ -394,9 +393,11 @@ mcf-update2 = "! f(){ \
  && git l-echo-l1 \"w-update2 1-1:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
 ;}; f"
 
-#  w-update-extcmd [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
-#  Эта команда выполняется после успешного выполенения обновления w-update. Эту команду можно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
-#  Конечная ветка: не меняется.
+# w-update-extcmd [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
+#  Эта команда выполняется после успешного выполнения обновления w-update.
+#  Эту команду нужно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. 
+#  Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
+#  Конечная ветка: зависит от переопределенной комманды.
 #    #Пример: дополнительная синхронизация с 3-м сервером server3
 #      vim /dir/to/project/.git/config 
 #      …
@@ -418,10 +419,10 @@ mcf-update-extcmd = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-upload [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
-#  Загружает сделанные изменения из ветки $fix в ветку $master.
+# w-upload [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
+#  Выгружает сделанные изменения из ветки $fix в ветку $master и на сервер $src1.
 #  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update).
-#  Затем изменения из $fix заливаются в $master и отправляются в репу $src1 ветку $src1_rbranch. И на последнем этапе делается бекап ветки конфигурации $cfg на сервер $src1.
+#  Затем изменения из $fix заливаются в $master и отправляются в $src1/$src1_rbranch.
 #  Конечная ветка: $fix.
   w-upload = "! git mcf-upload"
 mcf-upload = "! f(){ \
@@ -442,9 +443,10 @@ mcf-upload = "! f(){ \
 ;}; f"
 # && git l-echo-l1 \"w-upload 3-5:\" && git w-rebuild-base $fix $cfg $master off \
 
-#  w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
-#  Команда аналогична w-upload, но другой порядок парaметров. Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. 
-#  Команда более удобна при работе с 2-мя источниками, чем w-upload.
+# w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
+#  Команда аналогична w-upload, но другой порядок парaметров.
+#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. 
+#  Более удобна при работе с 2-мя источниками, чем w-upload, если используюся параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
@@ -461,7 +463,7 @@ mcf-upload2 = "! f(){ \
  && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
 ;}; f"
 
-#  w-apply-fix [ $fix $cfg $master $showlog ]
+# w-apply-fix [ $fix $cfg $master $showlog ]
 #  Загрузить свои изменения из ветки $fix в ветку $master, исключая коммиты ветки $cfg.
 #  Конечная ветка: $fix.
   w-apply-fix = "! git mcf-apply-fix"
@@ -478,8 +480,8 @@ mcf-apply-fix = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-send-fix [ $fix $cfg $master $src1 $src1_rbranch $showlog ]
-#  Отправить изменения из $fix в $master, а затем $master отправить на $src1 в ветку $src1_rbranch.
+# w-send-fix [ $fix $cfg $master $src1 $src1_rbranch $showlog ]
+#  Применить изменения (mcf-apply-fix) $fix к $master, и отправить их в $src1/$src1_rbranch.
 #  Конечная ветка: $fix.
   w-send-fix = "! git mcf-send-fix"
 mcf-send-fix = "! f(){ \
@@ -495,8 +497,9 @@ mcf-send-fix = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-backup-cfg [ $cfg $src1 $showlog ]
-#  Сделать бекап ветки $cfg в репу $src1 с именем ветки '_{nickname}_{$cfg}_backup' . 
+# w-backup-cfg [ $cfg $src1 $showlog ]
+#  Сделать бекап ветки конфигурации
+#  Отправить копию ветки $cfg в репу $src1 c именем ветки '_{nickname}_{$cfg}_backup'. 
 #  Конечная ветка: не меняется.
   w-backup-cfg = "! git mcf-backup-cfg"
 mcf-backup-cfg = "! f(){ \
@@ -510,12 +513,11 @@ mcf-backup-cfg = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-copy2tmp [ $src1 $showlog ]
-#    $src1 = origin : репа куда залить бекап
-#    $showlog = show
-#  Сделать временный бекап состояния текущей ветки в репе $src1 с именем ветки '_{nickname}_{name_of_current_branch}_tmp'.
-#  При бекапе все несохраненные изменения также отправятся в репу, а после завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
-#  Эта оперция полезна, если вы не готовы комитить изменения, но нужно сделать копию текущего состояния.
+# w-copy2tmp [ $src1 $showlog ]
+#  Сделать временный бекап состояния текущей ветки.
+#  Создается текущее состояние рабочего каталога в репу $src1 с именем ветки '_{nickname}_{name_of_current_branch}_tmp'. При бекапе все несохраненные изменения также отправятся в репу.
+#  После завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
+#  Эта операция полезна, если вы не готовы коммитить изменения, но нужно сделать копию текущего состояния.
 #  Конечная ветка: не меняется.
   w-copy2tmp = "! git mcf-copy2tmp"
 mcf-copy2tmp = "! f(){ \
@@ -534,10 +536,10 @@ mcf-copy2tmp = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-#  w-fakecommit [ $mess $showlog ]
-#    $mess = 'Added _fakefile_...' - коментарий к коммиту
-#    $showlog = 'show'
-#  Создает фейковый коммит c пустым файлом. Используется для тестов и при исследовании команд.
+# w-fakecommit [ $mess $showlog ]
+#  Создает фейковый коммит.
+#  Создается коммит c пустым файлом и коментарием 'Fake: $mess'. По-умолчанию, комментарий - 'Fake: Added _fakefile_...'.
+#  Команда используется для тестов и при исследовании git команд. 
 #  Конечная ветка: не меняется.
   w-fakecommit = "! git mcf-fakecommit "
 mcf-fakecommit = "! f(){ \
@@ -545,7 +547,7 @@ mcf-fakecommit = "! f(){ \
  && showlog=${2:-show} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
- && sleep 1 && touch \"$a\" && git add \"$a\" --  && git commit -m \"Fake commit: $mess\" \
+ && sleep 1 && touch \"$a\" && git add \"$a\" --  && git commit -m \"Fake: $mess\" \
  && git l-last-check $showlog \
 ;}; f"
 
@@ -601,7 +603,7 @@ loadsvn = "! f(){ \
 #    $level :  1  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
 #  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
 #  Необходим при отладке методов и при изучении работы команд.
-    l-debug-level = 0
+    l-debug-level = -1
 
 #  MCF main branches names
     l-fix = fix
