@@ -43,7 +43,7 @@
     pager = less -FXRS
 #    FOR WIN
 #    autocrlf = true
-	autocrlf = false
+	autocrlf = input
     safecrlf = false
     eol = native
 #    FOR WIN
@@ -450,15 +450,14 @@ mcf-upload = "! f(){ \
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
- if [ $# -lt 2 ]; then git l-echo \"Error: w-upload2 have to start with 2 or more parameters.\" 1 1 && exit 1 ; fi \
- &&         src2=${1:-$(git l-get-mcf-param l-src2)} \
+            src2=${1:-$(git l-get-mcf-param l-src2)} \
  && src2_rbranch=${2:-$(git l-get-mcf-param l-src2-rbranch)} \
- &&      fix=${3:-$(git l-get-mcf-param l-fix)} \
- &&      cfg=${4:-$(git l-get-mcf-param l-cfg)} \
- &&   master=${5:-$(git l-get-mcf-param l-master)} \
- &&     src1=${6:-$(git l-get-mcf-param l-src1)} \
+ &&          fix=${3:-$(git l-get-mcf-param l-fix)} \
+ &&          cfg=${4:-$(git l-get-mcf-param l-cfg)} \
+ &&       master=${5:-$(git l-get-mcf-param l-master)} \
+ &&         src1=${6:-$(git l-get-mcf-param l-src1)} \
  && src1_rbranch=${7:-$(git l-get-mcf-param l-src1-rbranch)} \
- &&  showlog=${9:-show} \
+ &&      showlog=${8:-show} \
  && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
 ;}; f"
@@ -528,11 +527,14 @@ mcf-copy2tmp = "! f(){ \
  && src1_rbranch=_${nick}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
  && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
+ && TMPFILE='~__REMOVE_THIS_TMP_FILE__' \
+ && touch "$TMPFILE" \
  && git l-echo-l0 \"w-copy2tmp $src1 $showlog\" \
  && git l-echo-l1 \"w-copy2tmp 1-4:\";git l-echo \"git add --all\"                   && git add --all \
  && git l-echo-l1 \"w-copy2tmp 2-4:\";git l-echo \"git commit -am '$MESS'\"          && git commit -m \"${MESS}\" \
  && git l-echo-l1 \"w-copy2tmp 3-4:\";git l-echo \"git push -f $src1 $cbr:$src1_rbranch\" && git push -f $src1 $cbr:$src1_rbranch \
  && git l-echo-l1 \"w-copy2tmp 4-4:\";git l-echo \"git reset HEAD~1\"                && git reset HEAD~1 \
+ && rm -f "$TMPFILE" \
  && git l-last-check $showlog \
 ;}; f"
 
