@@ -16,7 +16,7 @@ NAME_DEV=${4:-dev}
 
 CUR_DIR=$(dirname "$0")
 INSTALL_DIR=$1
-[ -z "$INSTALL_DIR" ] && INSTALL_DIR="$CUR_DIR"/../..
+[ -z "$INSTALL_DIR" ] && INSTALL_DIR="$CUR_DIR"/.
 cd $INSTALL_DIR
 CUR_DIR=$PWD
 
@@ -169,7 +169,7 @@ start_test() {
 
     STEP_NUM=7
     STEP="Step ${STEP_NUM}: Work with additional source."
-    CNT=20
+    CNT=21
     showinfo "$STEP"
       DEV=dev3
       do_cmd "$STEP 1-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
@@ -196,6 +196,7 @@ start_test() {
       do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-src2 server2 off"
       do_cmd "$STEP 19-$CNT ($DEV)" "git w-list-mcf-param"
       do_cmd "$STEP 20-$CNT ($DEV)" "git w-upload2"
+      do_cmd "$STEP 21-$CNT ($DEV)" "git w-del-mcf-param l-src2 off"
 
     showinfo "$STEP Status: Finished\n"
 
