@@ -169,7 +169,7 @@ start_test() {
 
     STEP_NUM=7
     STEP="Step ${STEP_NUM}: Work with additional source."
-    CNT=18
+    CNT=20
     showinfo "$STEP"
       DEV=dev3
       do_cmd "$STEP 1-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
@@ -193,7 +193,9 @@ start_test() {
       do_cmd "$STEP 15-$CNT ($DEV)" "git checkout cfg"
       do_cmd "$STEP 16-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
       do_cmd "$STEP 17-$CNT ($DEV)" "git w-rebuild-base"
-      do_cmd "$STEP 18-$CNT ($DEV)" "git w-upload2 server2 master"
+      do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-src2 server2 off"
+      do_cmd "$STEP 19-$CNT ($DEV)" "git w-list-mcf-param"
+      do_cmd "$STEP 20-$CNT ($DEV)" "git w-upload2"
 
     showinfo "$STEP Status: Finished\n"
 
