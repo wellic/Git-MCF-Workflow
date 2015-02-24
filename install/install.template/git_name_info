@@ -1,3 +1,3 @@
 git config --global user.name     "your name"
 git config --global user.email    "your@email.address"
-git config --global user.nickname "yournickname"
+git config --global mcf.l-nickname "yournickname"

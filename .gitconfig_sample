@@ -1,11 +1,10 @@
-#customize your
+#customize your personal info
 #   user.name
 #   user.email
-#   user.nickname
+#   mcf.nickname
 [user]  
 	name = your_name
 	email = your@mail
-	nickname = yournick
 [commit]
 #    template = /home/yournick/.gitmessage_template
 [color]
@@ -111,10 +110,10 @@ last3 = "! git hist3 -20 $* "
 # User info
 ###########
 
-myname    = "! git config user.name"
-myemail   = "! git config user.email"
-mynickname = "! git config user.nickname"
-myallname = "! echo $(git myname)'\\|'$(git mynickname)"
+myname     = "! git config user.name"
+myemail    = "! git config user.email"
+mynickname = "! git config mcf.l-nickname"
+myallname  = "! echo $(git myname)'\\|'$(git mynickname)"
 
 #Check labels in sources. Useful look for nickname, f.e. in comments
 mycheck = "! f() { \
@@ -299,7 +298,7 @@ mcf-create-base = "! f(){ \
 ;}; f"
 
 # w-rebuild-base [ $fix $cfg $master $showlog ]
-#  Переустановить базовые коммиты на $master для $cfg и yf и $cfg для $fix, т.е. подготовить для работы cо схемой MCF.
+#  Переустановить базовые коммиты для $cfg и $fix, т.е. подготовить ветки для работы по схеме MCF.
 #  Обычно делается всегда после правки конфигурации, или после обновления $master, чтобы внести изменения в базовые ветки.
 #  Конечная ветка: $fix.
   w-rebuild-base = "! git mcf-rebuild-base"
@@ -582,6 +581,7 @@ mcf-set-mcf-param = "! f(){ \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 6 0\
  && git l-echo \"New: $param = $newvalue\" 2 \
+ && git l-list-mcf-param --local \
 ;}; f"
 
 # w-del-mcf-param $name [ $showlog ]
@@ -598,6 +598,7 @@ mcf-del-mcf-param = "! f(){ \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 6 0\
  && git l-echo \"New: $param = $newvalue\" 2 \
+ && git l-list-mcf-param --local \
 ;}; f"
 
 # w-list-mcf-param
@@ -607,7 +608,7 @@ mcf-list-mcf-param = "! f() { \
     git l-echo \"Current exists parameters:\" 5 \
  && git l-echo \"Global:\" 6 0 \
  && git l-list-mcf-param --global \
- && git l-echo \"Local:\" 6 0 \
+ && git config --local --get-regex mcf.l- && git l-echo \"Local:\" 6 0 \
  && git l-list-mcf-param --local \
 ;}; f"
 
@@ -656,6 +657,9 @@ loadsvn = "! f(){ \
 
 [mcf]
 # Use commands w-(get,set,rm,list)-mcf-param for work with l-* parameters
+
+#Your nickname
+	l-nickname = yournick
 
 #  l-debug-level = $level
 #    $level : -1  is normal mode. Hide all diagnostic messages.
