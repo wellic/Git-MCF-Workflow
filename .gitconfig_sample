@@ -100,7 +100,7 @@ visual = !gitk --all &
 
 # show history and log
 sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo ; }; f "
 hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
 hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
 last  = "! git hist  -20 $* "
@@ -125,11 +125,11 @@ mycheck = "! f() { \
 
 #Show log for current user without sorte
 mylog = "! f() { \
- allname=$(git myallname); \
- name=$(git myname); \
- nick=$(git mynickname); \
- echo Log of users: \"'$allname'\" \"'$name'\" \"'$nick'\"; \
- git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nick\" \
+    allname=$(git myallname) \
+ && name=$(git myname) \
+ && nick=$(git mynickname) \
+ && echo Log of users: \"'$allname'\" \"'$name'\" \"'$nick'\" \
+ && git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nick\" \
 ;}; f "
 
 #Show log for current user sorted by date
@@ -167,9 +167,9 @@ unmerged = branch --no-merged
 
 # different list and logs
 ls = ls-files
-lg    = "! f() { git --no-pager log -p $* && echo  ; }; f "
-lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo  ; }; f "
-lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo  ; }; f "
+lg    = "! f() { git --no-pager log -p $* && echo ;}; f "
+lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo ;}; f "
+lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo ;}; f "
 
 
 type = cat-file -t
@@ -210,7 +210,7 @@ l-echo-l0 = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-2} \
  && BRIGHT=${3:-2} \
- && git l-check-debug-level 0 \
+ && git l-debug-level-check 0 \
  && git l-echo \"= $MESS\" \"$COLOR\" \"$BRIGHT\" \
  || : \
 ;}; f"
@@ -219,30 +219,30 @@ l-echo-l1 = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-6} \
  && BRIGHT=${3:-2} \
- && git l-check-debug-level 1 \
+ && git l-debug-level-check 1 \
  && git l-echo \"== $MESS\" \"$COLOR\" \"$BRIGHT\" \
  || : \
+;}; f"
+
+l-showlog-status = "! f(){ \
+ showlog=${1:-show} \
+ && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ]; exit $? \
 ;}; f"
 
 # Посмотреть последние коммиты текущей ветки, если $showlog=show|on|''
 # Конечная ветка: не меняется.
 l-last-check = "! f(){ \
  showlog=${1:-show} \
- && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ] && (git l-echo '--- Please check ---' 5; git last) || : \
+ && git l-showlog-status $showlog && (git l-echo '--- Please check ---' 5; git last) || : \
 ;}; f"
 
-l-check-debug-level = "! f() { \
- level=${1:-0} \
- && clevel=$(git l-get-mcf-param l-debug-level) \
- && [ \"$level\" -le \"$clevel\" ] && exit 0 || exit 1 \
+l-debug-level-check = "! f() { \
+ level=${1:-1} && [ \"$level\" -le \"$(git w-get-mcf-param l-debug-level)\" ]; exit $? \
 ;}; f"
 
-l-get-mcf-param = "! f() { \
- if [ $# -ne 1 ]; then git l-echo \"Error: l-get-mcf-param has to start with 1 parameter.\" 1 1 ; exit 1; fi \
- && param=$1 \
- && value=$(git config \"mcf.${param}\" ) || git l-echo \"Error: incorrect parameters '$param' when called 'l-get-mcf-param'.\" 1 1 \
- && [ ! -z \"$value\" ] && echo "$value" || exit 1\
-; }; f"
+l-list-mcf-param = "! f() { \
+ type=${1:-''} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-14.80s = %s\\n\",$1,$2 }' \
+;}; f"
 
 #################
 # Global commands
@@ -287,9 +287,9 @@ l-get-mcf-param = "! f() { \
 #  Конечная ветка: $fix.
   w-create-base = "! git mcf-create-base"
 mcf-create-base = "! f(){ \
-        fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&  master=${3:-$(git l-get-mcf-param l-master)} \
+        fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-create-base $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-create-base 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
@@ -304,9 +304,9 @@ mcf-create-base = "! f(){ \
 #  Конечная ветка: $fix.
   w-rebuild-base = "! git mcf-rebuild-base"
 mcf-rebuild-base = "! f(){ \
-        fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&  master=${3:-$(git l-get-mcf-param l-master)} \
+        fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-rebuild-base $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-rebuild-base 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
@@ -320,9 +320,9 @@ mcf-rebuild-base = "! f(){ \
 #  Конечная ветка: $master.
   w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
 mcf-load-fix-from-repo = "! f(){ \
-          master=${1:-$(git l-get-mcf-param l-master)} \
- &&         src1=${2:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${3:-$(git l-get-mcf-param l-src1-rbranch)} \
+          master=${1:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${2:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${3:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&       method=${4:-rebase} \
  &&      showlog=${5:-show} \
  && git l-echo-l0 \"w-load-fix-from-repo $master $src1 $src1_rbranch $method $showlog\" \
@@ -348,13 +348,13 @@ mcf-load-fix-from-repo = "! f(){ \
 #  Конечная ветка: $fix.
   w-update = "! git mcf-update"
 mcf-update = "! f(){ \
-             fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${3:-$(git l-get-mcf-param l-master)} \
- &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
- &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
- && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+             fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-show} \
  && git l-echo-l0 \"w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
@@ -380,13 +380,13 @@ mcf-update = "! f(){ \
 #  Конечная ветка: $fix.
   w-update2 = "! git mcf-update2"
 mcf-update2 = "! f(){ \
-            src2=${1:-$(git l-get-mcf-param l-src2)} \
- && src2_rbranch=${2:-$(git l-get-mcf-param l-src2-rbranch)} \
- &&          fix=${3:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${4:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${5:-$(git l-get-mcf-param l-master)} \
- &&         src1=${6:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${7:-$(git l-get-mcf-param l-src1-rbranch)} \
+            src2=${1:-$(git w-get-mcf-param l-src2)} \
+ && src2_rbranch=${2:-$(git w-get-mcf-param l-src2-rbranch)} \
+ &&          fix=${3:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${4:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${5:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${6:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${7:-$(git w-get-mcf-param l-src1-rbranch)} \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-show} \
  && git l-echo-l0 \"w-update2 $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog\" \
@@ -407,13 +407,13 @@ mcf-update2 = "! f(){ \
 #      ;}; f"
   w-update-extcmd = "! git mcf-update-extcmd"
 mcf-update-extcmd = "! f(){ \
-             fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${3:-$(git l-get-mcf-param l-master)} \
- &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
- &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
- && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+             fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  &&      showlog=${8:-show} \
  && git l-echo-l0 \"w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-last-check $showlog \
@@ -426,13 +426,13 @@ mcf-update-extcmd = "! f(){ \
 #  Конечная ветка: $fix.
   w-upload = "! git mcf-upload"
 mcf-upload = "! f(){ \
-             fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${3:-$(git l-get-mcf-param l-master)} \
- &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
- &&         src2=${6:-$(git l-get-mcf-param l-src2)} \
- && src2_rbranch=${7:-$(git l-get-mcf-param l-src2-rbranch)} \
+             fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
+ &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
+ && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  &&      showlog=${8:-show} \
  && git l-echo-l0 \"w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"w-upload 1-4:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
@@ -441,7 +441,6 @@ mcf-upload = "! f(){ \
  && git l-echo-l1 \"w-upload 4-4:\" && git w-backup-cfg $cfg $src1 off \
  && git l-last-check $showlog \
 ;}; f"
-# && git l-echo-l1 \"w-upload 3-5:\" && git w-rebuild-base $fix $cfg $master off \
 
 # w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
 #  Команда аналогична w-upload, но другой порядок парaметров.
@@ -450,13 +449,13 @@ mcf-upload = "! f(){ \
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
-            src2=${1:-$(git l-get-mcf-param l-src2)} \
- && src2_rbranch=${2:-$(git l-get-mcf-param l-src2-rbranch)} \
- &&          fix=${3:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${4:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${5:-$(git l-get-mcf-param l-master)} \
- &&         src1=${6:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${7:-$(git l-get-mcf-param l-src1-rbranch)} \
+            src2=${1:-$(git w-get-mcf-param l-src2)} \
+ && src2_rbranch=${2:-$(git w-get-mcf-param l-src2-rbranch)} \
+ &&          fix=${3:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${4:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${5:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${6:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${7:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&      showlog=${8:-show} \
  && git l-echo-l0 \"w-upload2 $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"w-upload2 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
@@ -467,9 +466,9 @@ mcf-upload2 = "! f(){ \
 #  Конечная ветка: $fix.
   w-apply-fix = "! git mcf-apply-fix"
 mcf-apply-fix = "! f(){ \
-        fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&     cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&  master=${3:-$(git l-get-mcf-param l-master)} \
+        fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-show} \
  && git l-echo-l0 \"w-apply-fix $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"w-apply-fix 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
@@ -484,11 +483,11 @@ mcf-apply-fix = "! f(){ \
 #  Конечная ветка: $fix.
   w-send-fix = "! git mcf-send-fix"
 mcf-send-fix = "! f(){ \
-             fix=${1:-$(git l-get-mcf-param l-fix)} \
- &&          cfg=${2:-$(git l-get-mcf-param l-cfg)} \
- &&       master=${3:-$(git l-get-mcf-param l-master)} \
- &&         src1=${4:-$(git l-get-mcf-param l-src1)} \
- && src1_rbranch=${5:-$(git l-get-mcf-param l-src1-rbranch)} \
+             fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&      showlog=${6:-show} \
  && git l-echo-l0 \"w-send-fix $fix $cfg $master $src1 $src1_rbranch $showlog\" \
  && git l-echo-l1 \"w-send-fix 1-2:\" && git w-apply-fix $fix $cfg $master off \
@@ -502,8 +501,8 @@ mcf-send-fix = "! f(){ \
 #  Конечная ветка: не меняется.
   w-backup-cfg = "! git mcf-backup-cfg"
 mcf-backup-cfg = "! f(){ \
-        cfg=${1:-$(git l-get-mcf-param l-cfg)} \
- &&    src1=${2:-$(git l-get-mcf-param l-src1)} \
+        cfg=${1:-$(git w-get-mcf-param l-cfg)} \
+ &&    src1=${2:-$(git w-get-mcf-param l-src1)} \
  && showlog=${3:-show} \
  &&    nick=$(git mynickname) \
  && src1_rbranch=_${nick}_${cfg}_backup \
@@ -520,7 +519,7 @@ mcf-backup-cfg = "! f(){ \
 #  Конечная ветка: не меняется.
   w-copy2tmp = "! git mcf-copy2tmp"
 mcf-copy2tmp = "! f(){ \
-       src1=${1:-$(git l-get-mcf-param l-src1)} \
+       src1=${1:-$(git w-get-mcf-param l-src1)} \
  && showlog=${2:-show} \
  &&    nick=$(git mynickname) \
  &&     cbr=$(git show-current-branch-name) \
@@ -553,6 +552,64 @@ mcf-fakecommit = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
+# w-get-mcf-param $name
+#  Показывает текущее значение параметра $name
+#  Если параметр не найден, то будет выведено сообщение об ошибке и список текущих параметров
+  w-get-mcf-param = "! git mcf-get-mcf-param "
+mcf-get-mcf-param = "! f(){ \
+ if [ $# -ne 1 ]; then git l-echo \"Error w-get-mcf-param: Parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && param=${1:-} \
+ && value=$(git config \"mcf.${param}\" ) || err=1 \
+ && if [ \"$err\" = '1' ]; then git l-echo \"Error w-get-mcf-param: incorrect parameter name '$param'.\" 1; exit 1 ;fi\
+ && if [ \"$value\" = '' ]; then git l-echo \"Error w-get-mcf-param: parameter '$param' is empty'.\" 1; exit 1 ;fi \
+ && echo "$value" \
+;}; f"
+
+# w-set-mcf-param $name $value [ $showlog ]
+#  Устанавливает новое значение $value для параметра $name. 
+#  Установка происходит в локальном конфиге.
+  w-set-mcf-param = "! git mcf-set-mcf-param "
+mcf-set-mcf-param = "! f(){ \
+ if [ $# -lt 2 ]; then git l-echo \"Error w-get-mcf-param: must be minimum 2 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
+ && param=${1:-} \
+ && value=${2:-} \
+ && showlog=${3:-show} \
+ && if [ \"$value\" = '' ]; then git l-echo \"Error w-set-mcf-param: value is empty.\" 1; exit 1; fi \
+ && oldvalue=$(git w-get-mcf-param \"$param\") \
+ && git config \"mcf.${param}\" "$value" || err=1 \
+ && if [ \"$err\" = '1' ]; then git l-echo \"Error w-set-mcf-param when set new value '$value' of param $param'.\" 1; exit 1; fi \
+ && git l-showlog-status $showlog || exit 0 \
+ && newvalue=$(git w-get-mcf-param \"$param\") \
+ && git l-echo \"Old: $param = $oldvalue\" 6 0\
+ && git l-echo \"New: $param = $newvalue\" 2 \
+;}; f"
+
+# w-del-mcf-param $name [ $showlog ]
+#  Удаляет локальное значение параметра c именем $name, если параметр существует в локальном конфиг файле git.
+  w-del-mcf-param = "! git mcf-del-mcf-param "
+mcf-del-mcf-param = "! f(){ \
+ if [ $# -lt 1 ]; then git l-echo \"Error w-del-mcf-param: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && param=${1:-} \
+ && showlog=${2:-show} \
+ && oldvalue=$(git w-get-mcf-param \"$param\") \
+ && git config --local --unset \"mcf.${param}\" || err=1 \
+ && git l-showlog-status $showlog || exit 0 \
+ && newvalue=$(git w-get-mcf-param \"$param\") \
+ && git l-echo \"Old: $param = $oldvalue\" 6 0\
+ && git l-echo \"New: $param = $newvalue\" 2 \
+;}; f"
+
+# w-list-mcf-param
+#  Показывает значения всех l-* параметров для текущего проекта.
+  w-list-mcf-param = "! git mcf-list-mcf-param "
+mcf-list-mcf-param = "! f() { \
+    git l-echo \"Current exists parameters:\" 5 \
+ && git l-echo \"Global:\" 6 0 \
+ && git l-list-mcf-param --global \
+ && git l-echo \"Local:\" 6 0 \
+ && git l-list-mcf-param --local \
+;}; f"
+
 #######################################
 # git-svn useful (old workflow)
 # TODO: Refacroting usiong new workflow
@@ -565,7 +622,7 @@ svnlog = !git svn log --oneline -20 | sort
 svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
 
 uploadsvn = "! f(){ \
- fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
+ fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
  && echo "=  uploadsvn $fix $cfg $master " \
  && git pushallforce \
  && git updatesvn $fix $cfg $master \
@@ -577,7 +634,7 @@ uploadsvn = "! f(){ \
  && echo "=====" && git svnlog ;}; f"
 
 updatesvn = "! f(){ \
- fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
+ fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
  && echo "=  updatesvn ${fix} ${cfg} ${master} " \
  && echo "== git checkout $master"    && git checkout $master  \
  && echo "== git svn rebase"          && git svn rebase \
@@ -585,7 +642,7 @@ updatesvn = "! f(){ \
  && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
 
 loadsvn = "! f(){ \
- fix=${1:-$(git l-get-mcf-param l-fix)} && cfg=${2:-$(git l-get-mcf-param l-cfg)} && master=${3:-$(git l-get-mcf-param l-master)} \
+ fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
  && echo "=  loadsvn $fix $cfg $master " \
  && echo "== git checkout $fix"                   && git checkout $fix \
  && echo "== git rebase --onto $master $cfg $fix" && git rebase --onto $master $cfg $fix  \
@@ -597,7 +654,7 @@ loadsvn = "! f(){ \
 ###################
 
 [mcf]
-# For get use commnad l-get-mcf-param $nameparam
+# Use commands w-(get,set,rm,list)-mcf-param for work with l-* parameters
 
 #  l-debug-level = $level
 #    $level : -1  is normal mode. Hide all diagnostic messages.
@@ -608,9 +665,9 @@ loadsvn = "! f(){ \
     l-debug-level = -1
 
 #  MCF main branches names
-    l-fix = fix
-    l-cfg = cfg
-    l-master       = master
+    l-fix    = fix
+    l-cfg    = cfg
+    l-master = master
 
 #  Main source 1
     l-src1         = origin
