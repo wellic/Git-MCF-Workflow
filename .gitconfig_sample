@@ -593,6 +593,7 @@ mcf-del-mcf-param = "! f(){ \
  && showlog=${2:-show} \
  && oldvalue=$(git w-get-mcf-param \"$param\") \
  && git config --local --unset \"mcf.${param}\" || err=1 \
+ && git config --local --get-regex mcf.l- || git config --local --remove-section mcf \
  && git l-showlog-status $showlog || exit 0 \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 6 0\
