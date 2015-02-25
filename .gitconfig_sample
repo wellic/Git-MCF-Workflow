@@ -145,7 +145,7 @@ gi-list="! git gi list"
 # get rules for gitignore: git gi netbeans
 gi = "! gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
 
-show-current-branch-name = "! git cbr"
+current-branch-name = "! git cbr"
 cbr = rev-parse --abbrev-ref HEAD
 
 # ignored
@@ -169,7 +169,6 @@ ls = ls-files
 lg    = "! f() { git --no-pager log -p $* && echo ;}; f "
 lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo ;}; f "
 lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo ;}; f "
-
 
 type = cat-file -t
 dump = cat-file -p
@@ -202,7 +201,8 @@ l-echo = "! f() { \
  && COLOR=\"\\033[${BRIGHT};3${COLOR}m\" \
  && NOCOLOR=\"\\033[0m\" \
  && MESS=\"${COLOR}${MESS}${NOCOLOR}\" \
- && [ \"$(uname)\" = 'Linux' ]  && echo \"$MESS\" || echo -e \"$MESS\" \
+ && [ \"$(uname)\" = 'Linux' ] && echo \"$MESS\" || echo -e \"$MESS\" \
+  ; exit 0 \
 ;}; f"
 
 l-echo-l0 = "! f() { \
@@ -211,7 +211,7 @@ l-echo-l0 = "! f() { \
  && BRIGHT=${3:-2} \
  && git l-debug-level-check 0 \
  && git l-echo \"= $MESS\" \"$COLOR\" \"$BRIGHT\" \
- || : \
+  ; exit 0 \
 ;}; f"
 
 l-echo-l1 = "! f() { \
@@ -220,23 +220,27 @@ l-echo-l1 = "! f() { \
  && BRIGHT=${3:-2} \
  && git l-debug-level-check 1 \
  && git l-echo \"== $MESS\" \"$COLOR\" \"$BRIGHT\" \
- || : \
-;}; f"
-
-l-showlog-status = "! f(){ \
- showlog=${1:-show} \
- && [ -z \"$showlog\" -o \"$showlog\" = 'on' -o \"$showlog\" = 'show' ]; exit $? \
+  ; exit 0 \
 ;}; f"
 
 # Посмотреть последние коммиты текущей ветки, если $showlog=show|on|''
 # Конечная ветка: не меняется.
 l-last-check = "! f(){ \
- showlog=${1:-show} \
- && git l-showlog-status $showlog && (git l-echo '--- Please check ---' 5; git last) || : \
+ showlog=${1:-on} \
+ && [ $(git l-check-is-on $showlog) = 'on' ] && (git l-echo '--- Please check ---' 5 && git last) || : \
 ;}; f"
 
 l-debug-level-check = "! f() { \
- level=${1:-1} && [ \"$level\" -le \"$(git w-get-mcf-param l-debug-level)\" ]; exit $? \
+ level=${1:-1} && [ \"$level\" -le \"$(git w-get-mcf-param l-debug-level)\" ] \
+;}; f"
+
+# Проверяет статус переменной: возвращает on или off
+l-check-is-on = "! f(){ \
+ value=${1:-''} \
+ && empty_is_true=${2:-1} \
+ && if [ \"$empty_is_true\" = '1' -a \"$value\" = '' ]; then status=on; \
+    elif [ \"$value\" = 'on' -o \"$value\" = '1' ]; then status=on; else status=off; fi \
+ && echo $status \
 ;}; f"
 
 l-list-mcf-param = "! f() { \
@@ -290,7 +294,7 @@ mcf-create-base = "! f(){ \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
- && showlog=${4:-show} \
+ && showlog=${4:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"$CMD 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
  && git l-echo-l1 \"$CMD 2-3:\";git l-echo \"git checkout -b $cfg\" && (git checkout $cfg || git checkout -b $cfg) \
@@ -308,7 +312,7 @@ mcf-rebuild-base = "! f(){ \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
- && showlog=${4:-show} \
+ && showlog=${4:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"$CMD 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
  && git l-echo-l1 \"$CMD 1-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
@@ -326,7 +330,7 @@ mcf-load-fix-from-repo = "! f(){ \
  &&         src1=${2:-$(git w-get-mcf-param l-src1)} \
  && src1_rbranch=${3:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&       method=${4:-rebase} \
- &&      showlog=${5:-show} \
+ &&      showlog=${5:-on} \
  && git l-echo-l0 \"$CMD $master $src1 $src1_rbranch $method $showlog\" \
  && if [ \"$method\" = \"rebase\" ] \
 ; then \
@@ -339,7 +343,6 @@ mcf-load-fix-from-repo = "! f(){ \
 ; fi \
  && git l-last-check $showlog \
 ;}; f"
-# && git l-echo-l1 \"$CMD 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit -m \"Merged with $src1/$src1_rbranch\" $param $src1/$src1_rbranch \
 
 # w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
 #  Залить обновление в $master из 2-х источников. 
@@ -359,7 +362,7 @@ mcf-update = "! f(){ \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-4:\" && git w-load-fix-from-repo $master $src1 $src1_rbranch rebase off \
  && if [ \"$src1\" = \"$src2\" -a \"$src1_rbranch\" = \"$src2_rbranch\" ] \
@@ -370,7 +373,7 @@ mcf-update = "! f(){ \
 ; then git l-echo-l1 \"$CMD 3-4:\" && git w-rebuild-base $fix $cfg $master off \
 ; else git l-echo-l1 \"$CMD 3-4: do not need to rebuild n\"\
 ; fi \
- && cbr=$(git show-current-branch-name) \
+ && cbr=$(git current-branch-name) \
  && git l-echo-l1 \"$CMD 4-4:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base off \
  && git checkout -q $cbr \
  && git l-last-check $showlog \
@@ -392,7 +395,7 @@ mcf-update2 = "! f(){ \
  &&         src1=${6:-$(git w-get-mcf-param l-src1)} \
  && src1_rbranch=${7:-$(git w-get-mcf-param l-src1-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog\" \
  && git l-echo-l1 \"$CMD 1-1:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
 ;}; f"
@@ -420,7 +423,7 @@ mcf-update-extcmd = "! f(){ \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-last-check $showlog \
 ;}; f"
@@ -440,18 +443,21 @@ mcf-upload = "! f(){ \
  && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
- &&      showlog=${8:-show} \
+ &&      showlog=${8:-on} \
+ &&    do_backup=$(git w-get-mcf-param l-backup-cfg off) \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-4:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
  && git l-echo-l1 \"$CMD 2-4:\" && git w-rebuild-base $fix $cfg $master off \
  && git l-echo-l1 \"$CMD 3-4:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
- && git l-echo-l1 \"$CMD 4-4:\" && git w-backup-cfg $cfg $src1 off \
+ && if [ $(git l-check-is-on $do_backup) = 'on' ] \
+; then git l-echo-l1 \"$CMD 4-4:\"; git w-backup-cfg $cfg $src1 off \
+; else git l-echo-l1 \"$CMD 4-4: skip backup $cfg\" ; fi \
  && git l-last-check $showlog \
 ;}; f"
 
 # w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
 #  Команда аналогична w-upload, но другой порядок парaметров.
-#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload. 
+#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload.
 #  Более удобна при работе с 2-мя источниками, чем w-upload, если используюся параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
@@ -464,7 +470,7 @@ mcf-upload2 = "! f(){ \
  &&       master=${5:-$(git w-get-mcf-param l-master)} \
  &&         src1=${6:-$(git w-get-mcf-param l-src1)} \
  && src1_rbranch=${7:-$(git w-get-mcf-param l-src1-rbranch)} \
- &&      showlog=${8:-show} \
+ &&      showlog=${8:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
 ;}; f"
@@ -478,7 +484,7 @@ mcf-apply-fix = "! f(){ \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
- && showlog=${4:-show} \
+ && showlog=${4:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"$CMD 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $fix \
  && git l-echo-l1 \"$CMD 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
@@ -498,7 +504,7 @@ mcf-send-fix = "! f(){ \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
  &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
  && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
- &&      showlog=${6:-show} \
+ &&      showlog=${6:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-2:\" && git w-apply-fix $fix $cfg $master off \
  && git l-echo-l1 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
@@ -521,7 +527,7 @@ mcf-repair-conflict-master = "! f(){ \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-2:\" && git w-rebuild-base $fix $cfg $master off \
  && git l-echo-l1 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
@@ -543,7 +549,7 @@ mcf-repair-conflict-cfg = "! f(){ \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l1 \"$CMD 1-1:\" && git w-rebuild-base $fix $cfg $master off \
  && git l-echo \"$CMD: All fixed. Please start conflicted command again.\"\
@@ -564,21 +570,21 @@ mcf-repair-conflict-fix = "! f(){ \
  &&         src2=${6:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
- &&      showlog=${9:-show} \
+ &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo    \"$CMD: All fixed. Please start conflicted command again.\"\
 ;}; f"
 
 # w-backup-cfg [ $cfg $src1 $showlog ]
 #  Сделать бекап ветки конфигурации
-#  Отправить копию ветки $cfg в репу $src1 c именем ветки '_{nickname}_{$cfg}_backup'. 
+#  Отправить копию ветки $cfg в репу $src1 c именем ветки '_{nickname}_{$cfg}_backup'.
 #  Конечная ветка: не меняется.
   w-backup-cfg = "! git mcf-backup-cfg"
 mcf-backup-cfg = "! f(){ \
  CMD='w-backup-cfg' \
- &&       cfg=${1:-$(git w-get-mcf-param l-cfg)} \
+ &&     cfg=${1:-$(git w-get-mcf-param l-cfg)} \
  &&    src1=${2:-$(git w-get-mcf-param l-src1)} \
- && showlog=${3:-show} \
+ && showlog=${3:-on} \
  &&    nick=$(git mynickname) \
  && src1_rbranch=_${nick}_${cfg}_backup \
  && git l-echo-l0 \"$CMD $cfg $src1 $showlog\" \
@@ -589,16 +595,16 @@ mcf-backup-cfg = "! f(){ \
 # w-copy2tmp [ $src1 $showlog ]
 #  Сделать временный бекап состояния текущей ветки.
 #  Создается текущее состояние рабочего каталога в репу $src1 с именем ветки '_{nickname}_{name_of_current_branch}_tmp'. При бекапе все несохраненные изменения также отправятся в репу.
-#  После завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды. 
+#  После завершения бекапа в рабочем катологе состояние файлов будет восстановлено, как до выполнения команды.
 #  Эта операция полезна, если вы не готовы коммитить изменения, но нужно сделать копию текущего состояния.
 #  Конечная ветка: не меняется.
   w-copy2tmp = "! git mcf-copy2tmp"
 mcf-copy2tmp = "! f(){ \
  CMD='w-copy2tmp' \
  &&     src1=${1:-$(git w-get-mcf-param l-src1)} \
- && showlog=${2:-show} \
+ && showlog=${2:-on} \
  &&    nick=$(git mynickname) \
- &&     cbr=$(git show-current-branch-name) \
+ &&     cbr=$(git current-branch-name) \
  && src1_rbranch=_${nick}_${cbr}_tmp \
  && CURDATE=$(date +"%y%m%d_%H%M%S") \
  && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
@@ -616,16 +622,16 @@ mcf-copy2tmp = "! f(){ \
 # w-fakecommit [ $mess $showlog ]
 #  Создает фейковый коммит.
 #  Создается коммит c пустым файлом и коментарием 'Fake: $mess'. По-умолчанию, комментарий - 'Fake: Added _fakefile_...'.
-#  Команда используется для тестов и при исследовании git команд. 
+#  Команда используется для тестов и при исследовании git команд.
 #  Конечная ветка: не меняется.
   w-fakecommit = "! git mcf-fakecommit "
 mcf-fakecommit = "! f(){ \
  CMD='w-fakecommit' \
  &&    mess=${1:-} \
- && showlog=${2:-show} \
+ && showlog=${2:-on} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
- && [ -z \"$mess\" ] && mess=\"Added $a\" || : \
- && sleep 1 && touch \"$a\" && git add \"$a\" --  && git commit -m \"Fake: $mess\" \
+ && if [ -z \"$mess\" ]; then mess=\"Added $a\"; fi \
+ && sleep 1 && touch \"$a\" && git add \"$a\" -- && git commit -m \"Fake: $mess\" \
  && git l-last-check $showlog \
 ;}; f"
 
@@ -635,29 +641,28 @@ mcf-fakecommit = "! f(){ \
   w-get-mcf-param = "! git mcf-get-mcf-param "
 mcf-get-mcf-param = "! f(){ \
  CMD='w-get-mcf-param' \
- && if [ $# -ne 1 ]; then git l-echo \"w-get-mcf-param Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-} \
- && value=$(git config \"mcf.${param}\" ) || err=1 \
- && if [ \"$err\" = '1' ]; then git l-echo \"w-get-mcf-param Error: incorrect parameter name '$param'.\" 1; exit 1 ;fi\
- && if [ \"$value\" = '' ]; then git l-echo \"w-get-mcf-param Error: parameter '$param' is empty'.\" 1; exit 1 ;fi \
+ && value=$(git config \"mcf.${param}\" ) \
+ && if [ \"$?\" != '0'   ]; then git l-echo \"$CMD Error: incorrect parameter name '$param'.\" 1; exit 1; fi\
+ && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: parameter '$param' is empty'.\" 1; exit 1; fi \
  && echo "$value" \
 ;}; f"
 
 # w-set-mcf-param $name $value [ $showlog ]
-#  Устанавливает новое значение $value для параметра $name. 
+#  Устанавливает новое значение $value для параметра $name.
 #  Установка происходит в локальном конфиге.
   w-set-mcf-param = "! git mcf-set-mcf-param "
 mcf-set-mcf-param = "! f(){ \
  CMD='w-set-mcf-param' \
- && if [ $# -lt 2 ]; then git l-echo \"w-get-mcf-param Error: must be minimum 2 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 2 ]; then git l-echo \"$CMD Error: must be minimum 2 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-} \
  && value=${2:-} \
- && showlog=${3:-show} \
- && if [ \"$value\" = '' ]; then git l-echo \"w-set-mcf-param Error: value is empty.\" 1; exit 1; fi \
+ && showlog=${3:-on} \
+ && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: value is empty.\" 1; exit 1; fi \
  && oldvalue=$(git w-get-mcf-param \"$param\") \
- && git config \"mcf.${param}\" "$value" || err=1 \
- && if [ \"$err\" = '1' ]; then git l-echo \"w-set-mcf-param Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
- && git l-showlog-status $showlog || exit 0 \
+ && if [ $(git config \"mcf.${param}\" "$value") ]; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
+ && if [ $(git l-check-is-on $showlog) != 'on' ]; then exit 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 6 0\
  && git l-echo \"New: $param = $newvalue\" 2 \
@@ -669,13 +674,13 @@ mcf-set-mcf-param = "! f(){ \
   w-del-mcf-param = "! git mcf-del-mcf-param "
 mcf-del-mcf-param = "! f(){ \
  CMD='w-del-mcf-param' \
- && if [ $# -lt 1 ]; then git l-echo \"w-del-mcf-param Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-} \
- && showlog=${2:-show} \
- && oldvalue=$(git w-get-mcf-param \"$param\") \
- && git config --local --unset \"mcf.${param}\" || err=1 \
- && git config --local --get-regex mcf.l- || git config --local --remove-section mcf \
- && git l-showlog-status $showlog || exit 0 \
+ && showlog=${2:-on} \
+ && oldvalue=$(git w-get-mcf-param $param) \
+ && ( git config --local mcf.$param && git config --local --unset mcf.$param || : ) \
+ && ( git config --local --get-regex 'mcf.l-' || git config --local --remove-section mcf || : ) \
+ && if [ $(git l-check-is-on $showlog) != 'on' ]; then exit 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 6 0\
  && git l-echo \"New: $param = $newvalue\" 2 \
@@ -749,7 +754,11 @@ loadsvn = "! f(){ \
 #    $level :  1  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
 #  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
 #  Необходим при отладке методов и при изучении работы команд.
-    l-debug-level = -1
+    l-debug-level = 1
+
+# Выполнять или нет копирование локальной ветки $cfg в основной источник $src1 при выполнении w-upload.  
+# l-backup-cfg = off - 0|off или 1|on
+   l-backup-cfg = off
 
 #  MCF main branches names
     l-fix    = fix
@@ -763,3 +772,4 @@ loadsvn = "! f(){ \
 #  Additional source 2
     l-src2         = origin
     l-src2-rbranch = master
+
