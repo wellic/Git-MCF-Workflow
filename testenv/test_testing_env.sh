@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEBUG_LEVEL_WUPLOAD2=0
+
 set -o nounset
 set -e
 
@@ -13,7 +15,6 @@ NAME_TESTDIR=${2:-_testgit_}
 NAME_SERVER=${3:-server}
 NAME_DEV=${4:-dev}
 
-
 CUR_DIR=$(dirname "$0")
 INSTALL_DIR=$1
 [ -z "$INSTALL_DIR" ] && INSTALL_DIR="$CUR_DIR"/.
@@ -21,7 +22,6 @@ cd $INSTALL_DIR
 CUR_DIR=$PWD
 
 ROOT="$CUR_DIR"/_testgit_
-
 
 ROOT="$CUR_DIR"/"$NAME_TESTDIR"
 DIR_SERVERS="$ROOT"/"$NAME_SERVER"s
@@ -31,9 +31,9 @@ DIR_DEVS="$ROOT"/"$NAME_DEV"s
 c_main='\033[7;35m'
 c_err='\033[1;31m'
 c_inf='\033[1;34m'
-c_cmd='\033[0;36m'
+c_cmd='\033[1;32m'
 c_cmdinf='\033[0;32m'
-c_cmdcd='\033[0;33m'
+c_cmdcd='\033[1;36m'
 c_clr='\033[0m'
 
 STATUS='Error'
@@ -71,8 +71,9 @@ do_cmd() {
     local MESS=${1:-''}
     local DO_CMD=${2:-''}
     local COLOR=${3:-$c_cmd}
-    showinfo "$MESS:"  "$c_cmdinf"
-    showcmd  "$DO_CMD" "$COLOR"
+    showinfo "$MESS: $DO_CMD"  "$COLOR"
+#    showinfo "$MESS:"  "$c_cmdinf"
+#    showcmd  "$DO_CMD" "$COLOR"
     [ "$DO_CMD" = '' ] && return 0
     $DO_CMD || exit_if_error $? "$MESS"
 }
@@ -101,23 +102,22 @@ start_test() {
     STEP_NUM=2
     STEP="Step ${STEP_NUM}."
     STEP_NAME="Initial."
-    CNT=10
+    CNT=9
     showinfo "$STEP $STEP_NAME"
       DEV=dev1
       do_cmd "$STEP 1-$CNT"  "cd $DEV" ${c_cmdcd}
-      pwd
-      do_cmd "$STEP 2-$CNT ($DEV)"  "git remote -v"
-      do_cmd "$STEP 3-$CNT ($DEV)"  "git w-fakecommit Initial_dev1_c1 off"
-      do_cmd "$STEP 4-$CNT ($DEV)"  "git w-fakecommit dev1_c2 off"
-      do_cmd "$STEP 5-$CNT ($DEV)"  "git w-fakecommit dev1_c3 off"
-      do_cmd "$STEP 6-$CNT ($DEV)"  "git push -u origin master"
-      do_cmd "$STEP 7-$CNT ($DEV)"  "git last"
+      
+      do_cmd "$STEP 2-$CNT ($DEV)"  "git w-fakecommit Initial_dev1_c1 off"
+      do_cmd "$STEP 3-$CNT ($DEV)"  "git w-fakecommit dev1_c2 off"
+      do_cmd "$STEP 4-$CNT ($DEV)"  "git w-fakecommit dev1_c3 off"
+      do_cmd "$STEP 5-$CNT ($DEV)"  "git push -u origin master"
+      do_cmd "$STEP 6-$CNT ($DEV)"  "git last"
 
       DEV=dev2
-      do_cmd "$STEP 8-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
-      pwd
-      do_cmd "$STEP 9-$CNT ($DEV)"  "git pull origin master"
-      do_cmd "$STEP 10-$CNT ($DEV)" "git w-create-base"
+      do_cmd "$STEP 7-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
+    
+      do_cmd "$STEP 8-$CNT ($DEV)"  "git pull origin master"
+      do_cmd "$STEP 9-$CNT ($DEV)"  "git w-create-base"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STEP_NUM=3
@@ -125,7 +125,7 @@ start_test() {
     STEP_NAME="Setup local config."
     CNT=4
     showinfo "$STEP $STEP_NAME"
-      pwd
+      
       do_cmd "$STEP 1-$CNT ($DEV)" "git checkout cfg"
       do_cmd "$STEP 2-$CNT ($DEV)" "git w-fakecommit dev2_cfg1 off"
       do_cmd "$STEP 3-$CNT ($DEV)" "git w-fakecommit dev2_cfg2 off"
@@ -137,40 +137,38 @@ start_test() {
     STEP_NAME="Work process in one group."
     CNT=7
     showinfo "$STEP $STEP_NAME"
-      pwd
       do_cmd "$STEP 1-$CNT ($DEV)" "git w-fakecommit dev2_fix1 off"
       do_cmd "$STEP 2-$CNT ($DEV)" "git w-fakecommit dev2_fix2 off"
-      do_cmd "$STEP 3-$CNT ($DEV)" "git last"
+      do_cmd "$STEP 3-$CNT ($DEV)" "git last -5"
 
       DEV=dev1
       do_cmd "$STEP 4-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
-      pwd
+      
       do_cmd "$STEP 5-$CNT ($DEV)" "git w-fakecommit dev1_c4 off"
       do_cmd "$STEP 6-$CNT ($DEV)" "git w-fakecommit dev1_c5 off"
-      do_cmd "$STEP 7-$CNT ($DEV)" "git last"
+      do_cmd "$STEP 7-$CNT ($DEV)" "git last -3"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STEP_NUM=5
     STEP="Step ${STEP_NUM}."
     STEP_NAME="Send and Load fixes in one group."
-    CNT=9
+    CNT=8
     showinfo "$STEP $STEP_NAME"
-      pwd
+      
       do_cmd "$STEP 1-$CNT ($DEV)" "git push origin master"
-      do_cmd "$STEP 2-$CNT ($DEV)" "git last"
+      do_cmd "$STEP 2-$CNT ($DEV)" "git last -2"
 
       DEV=dev2
       do_cmd "$STEP 3-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
-      pwd
-      do_cmd "$STEP 4-$CNT ($DEV)" "git w-set-mcf-param l-backup-cfg on"
-      do_cmd "$STEP 5-$CNT ($DEV)" "git w-list-mcf-param"
-      do_cmd "$STEP 6-$CNT ($DEV)" "git w-upload"
+      
+      do_cmd "$STEP 4-$CNT ($DEV)" "git w-set-mcf-param l-backup-cfg on off"
+      do_cmd "$STEP 5-$CNT ($DEV)" "git w-upload"
 
       DEV=dev1
-      do_cmd "$STEP 7-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
-      pwd
-      do_cmd "$STEP 8-$CNT ($DEV)" "git pull --rebase origin master"
-      do_cmd "$STEP 9-$CNT ($DEV)" "git last"
+      do_cmd "$STEP 6-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
+      
+      do_cmd "$STEP 7-$CNT ($DEV)" "git pull --rebase origin master"
+      do_cmd "$STEP 8-$CNT ($DEV)" "git last -3"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STEP_NUM=6
@@ -181,17 +179,17 @@ start_test() {
       DEV=dev2
       do_cmd "$STEP 1-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
       do_cmd "$STEP 2-$CNT ($DEV)" "touch test.file" ${c_cmdcd}
-      do_cmd "$STEP 3-$CNT ($DEV)" "git status"
+      do_cmd "$STEP 3-$CNT ($DEV)" "git status -sb"
       do_cmd "$STEP 4-$CNT ($DEV)" "git w-copy2tmp"
       do_cmd "$STEP 5-$CNT ($DEV)" "git br -r"
-      do_cmd "$STEP 6-$CNT ($DEV)" "git status"
+      do_cmd "$STEP 6-$CNT ($DEV)" "git status -sb"
       do_cmd "$STEP 7-$CNT ($DEV)" "rm -f test.file" ${c_cmdcd}
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STEP_NUM=7
     STEP_NAME="Update from dditional source."
     STEP="Step ${STEP_NUM}."
-    CNT=18
+    CNT=20
     showinfo "$STEP $STEP_NAME"
       DEV=dev3
       do_cmd "$STEP 1-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
@@ -207,15 +205,17 @@ start_test() {
       do_cmd "$STEP 9-$CNT ($DEV)"  "git w-fakecommit dev1_c6 off"
       do_cmd "$STEP 10-$CNT ($DEV)" "git w-fakecommit dev1_c7 off"
       do_cmd "$STEP 11-$CNT ($DEV)" "git push origin master"
-      do_cmd "$STEP 12-$CNT ($DEV)" "git last"
+      do_cmd "$STEP 12-$CNT ($DEV)" "git last -6"
 
       DEV=dev2
       do_cmd "$STEP 13-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
-      do_cmd "$STEP 14-$CNT ($DEV)" "git w-fakecommit dev2_fix3 off"
-      do_cmd "$STEP 15-$CNT ($DEV)" "git checkout cfg"
-      do_cmd "$STEP 16-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
-      do_cmd "$STEP 17-$CNT ($DEV)" "git w-upload2 server2"
-      do_cmd "$STEP 18-$CNT ($DEV)" "git w-del-mcf-param l-src2 off"
+      do_cmd "$STEP 14-$CNT ($DEV)"  "git remote -v"
+      do_cmd "$STEP 15-$CNT ($DEV)" "git w-fakecommit dev2_fix3 off"
+      do_cmd "$STEP 16-$CNT ($DEV)" "git checkout cfg"
+      do_cmd "$STEP 17-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
+      do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
+      do_cmd "$STEP 19-$CNT ($DEV)" "git w-upload2 server2"
+      do_cmd "$STEP 20-$CNT ($DEV)" "git w-del-mcf-param l-src2 off"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STATUS='Ok'
@@ -223,7 +223,6 @@ start_test() {
 }
 
 cd "$RET_DIR"
-
 
 showinfo 'Start test' $c_main
 start_test
@@ -250,4 +249,3 @@ cat << 'EOF'
 * ... | Fake commit: dev1_c2
 * ... | Fake commit: Initial_dev1_c1
 EOF
-

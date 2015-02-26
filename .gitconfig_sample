@@ -98,10 +98,10 @@ dfc = diff --cached
 visual = !gitk --all &
 
 # show history and log
-sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo ; }; f "
-hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"           --graph --date=short --decorate $* && echo  ; }; f "
-hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f "
+sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo  ; }; f"
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo ; }; f"
+hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $* && echo ; }; f"
+hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f"
 last  = "! git hist  -20 $* "
 last2 = "! git hist2 -20 $* "
 last3 = "! git hist3 -20 $* "
@@ -112,8 +112,7 @@ last3 = "! git hist3 -20 $* "
 
 myname     = "! git config user.name"
 myemail    = "! git config user.email"
-mynickname = "! git config mcf.l-nickname"
-myallname  = "! echo $(git myname)'\\|'$(git mynickname)"
+mynickname = "! git config mcf.l-nickname | sed 's/ /_/g'"
 
 #Check labels in sources. Useful look for nickname, f.e. in comments
 mycheck = "! f() { \
@@ -124,11 +123,10 @@ mycheck = "! f() { \
 
 #Show log for current user without sorte
 mylog = "! f() { \
-    allname=$(git myallname) \
- && name=$(git myname) \
- && nick=$(git mynickname) \
- && echo Log of users: \"'$allname'\" \"'$name'\" \"'$nick'\" \
- && git hist2 $* --author=\"$allname\" --author=\"=$name\" --author=\"$nick\" \
+ name=$(git myname) \
+ && name=$(echo $name | sed 's/ /./g') \
+ && echo \"Log for user (regex): '$name'\" \
+ && git hist2 --author=\"$name\" $* \
 ;}; f "
 
 #Show log for current user sorted by date
@@ -209,7 +207,7 @@ l-echo-l0 = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-2} \
  && BRIGHT=${3:-2} \
- && git l-debug-level-check 0 \
+ && git l-debug-level-check 1 \
  && git l-echo \"= $MESS\" \"$COLOR\" \"$BRIGHT\" \
   ; exit 0 \
 ;}; f"
@@ -218,7 +216,7 @@ l-echo-l1 = "! f() { \
  MESS=${1:-} \
  && COLOR=${2:-6} \
  && BRIGHT=${3:-2} \
- && git l-debug-level-check 1 \
+ && git l-debug-level-check 2 \
  && git l-echo \"== $MESS\" \"$COLOR\" \"$BRIGHT\" \
   ; exit 0 \
 ;}; f"
@@ -231,7 +229,7 @@ l-last-check = "! f(){ \
 ;}; f"
 
 l-debug-level-check = "! f() { \
- level=${1:-1} && [ \"$level\" -le \"$(git w-get-mcf-param l-debug-level)\" ] \
+ level=${1:-0} && [ \"$level\" -le \"$(git w-get-mcf-param l-debug-level)\" ] \
 ;}; f"
 
 # Проверяет статус переменной: возвращает on или off
@@ -244,7 +242,13 @@ l-check-is-on = "! f(){ \
 ;}; f"
 
 l-list-mcf-param = "! f() { \
- type=${1:-''} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-14.80s = %s\\n\",$1,$2 }' \
+ type=${1:-'--global'} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-14.80s = %s\\n\",$1,$2 }' \
+;}; f"
+
+l-fix-mcf-param = "! f() { \
+  s=${1-''} \
+  && s=$(echo \"$s\" | sed 's/ /_/g') \
+  ; echo $s \
 ;}; f"
 
 #################
@@ -371,7 +375,7 @@ mcf-update = "! f(){ \
 ; fi \
  && if [ \"$rebuild_base\" = 'on' ] \
 ; then git l-echo-l1 \"$CMD 3-4:\" && git w-rebuild-base $fix $cfg $master off \
-; else git l-echo-l1 \"$CMD 3-4: do not need to rebuild n\"\
+; else git l-echo-l1 \"$CMD 3-4: do not need to do rebuild base\"\
 ; fi \
  && cbr=$(git current-branch-name) \
  && git l-echo-l1 \"$CMD 4-4:\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base off \
@@ -606,16 +610,16 @@ mcf-copy2tmp = "! f(){ \
  &&    nick=$(git mynickname) \
  &&     cbr=$(git current-branch-name) \
  && src1_rbranch=_${nick}_${cbr}_tmp \
- && CURDATE=$(date +"%y%m%d_%H%M%S") \
+ && CURDATE=$(date +%y%m%d_%H%M%S) \
  && MESS=$(echo \"Tmp commit of branch '${cbr}'. Date: ${CURDATE}.\") \
  && TMPFILE='~__REMOVE_THIS_TMP_FILE__' \
- && touch "$TMPFILE" \
+ && touch \"$TMPFILE\" \
  && git l-echo-l0 \"$CMD $src1 $showlog\" \
  && git l-echo-l1 \"$CMD 1-4:\";git l-echo \"git add --all\"                   && git add --all \
  && git l-echo-l1 \"$CMD 2-4:\";git l-echo \"git commit -am '$MESS'\"          && git commit -m \"${MESS}\" \
  && git l-echo-l1 \"$CMD 3-4:\";git l-echo \"git push -f $src1 $cbr:$src1_rbranch\" && git push -f $src1 $cbr:$src1_rbranch \
  && git l-echo-l1 \"$CMD 4-4:\";git l-echo \"git reset HEAD~1\"                && git reset HEAD~1 \
- && rm -f "$TMPFILE" \
+ && rm -f \"$TMPFILE\" \
  && git l-last-check $showlog \
 ;}; f"
 
@@ -646,7 +650,7 @@ mcf-get-mcf-param = "! f(){ \
  && value=$(git config \"mcf.${param}\" ) \
  && if [ \"$?\" != '0'   ]; then git l-echo \"$CMD Error: incorrect parameter name '$param'.\" 1; exit 1; fi\
  && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: parameter '$param' is empty'.\" 1; exit 1; fi \
- && echo "$value" \
+ && echo \"$value\" \
 ;}; f"
 
 # w-set-mcf-param $name $value [ $showlog ]
@@ -661,12 +665,13 @@ mcf-set-mcf-param = "! f(){ \
  && showlog=${3:-on} \
  && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: value is empty.\" 1; exit 1; fi \
  && oldvalue=$(git w-get-mcf-param \"$param\") \
- && if [ $(git config \"mcf.${param}\" "$value") ]; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
+ && value=$(git l-fix-mcf-param \"$value\") \
+ && if [ $(git config \"mcf.${param}\" \"$value\") ]; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then exit 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
- && git l-echo \"Old: $param = $oldvalue\" 6 0\
- && git l-echo \"New: $param = $newvalue\" 2 \
- && git l-list-mcf-param --local \
+ && git l-echo \"Old: $param = $oldvalue\" 4 1\
+ && git l-echo \"New: $param = $newvalue\" 2 0\
+ && git w-list-mcf-param \
 ;}; f"
 
 # w-del-mcf-param $name [ $showlog ]
@@ -675,16 +680,16 @@ mcf-set-mcf-param = "! f(){ \
 mcf-del-mcf-param = "! f(){ \
  CMD='w-del-mcf-param' \
  && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
- && param=${1:-} \
+ && param=${1:-''} \
  && showlog=${2:-on} \
  && oldvalue=$(git w-get-mcf-param $param) \
- && ( git config --local mcf.$param && git config --local --unset mcf.$param || : ) \
- && ( git config --local --get-regex 'mcf.l-' || git config --local --remove-section mcf || : ) \
+ && ( t=$(git config --local mcf.$param) && git config --local --unset mcf.$param || : ) \
+ && if [ \"$(git config --local --get-regex 'mcf.l-')\" = '' ]; then git config --local --remove-section mcf || : ; fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then exit 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
- && git l-echo \"Old: $param = $oldvalue\" 6 0\
- && git l-echo \"New: $param = $newvalue\" 2 \
- && git l-list-mcf-param --local \
+ && git l-echo \"Old: $param = $oldvalue\" 4 1\
+ && git l-echo \"New: $param = $newvalue\" 2 0\
+ && git w-list-mcf-param \
 ;}; f"
 
 # w-list-mcf-param
@@ -692,10 +697,14 @@ mcf-del-mcf-param = "! f(){ \
   w-list-mcf-param = "! git mcf-list-mcf-param "
 mcf-list-mcf-param = "! f() { \
  CMD='w-list-mcf-param' \
- && git l-echo \"Current exists parameters:\" 5 \
- && git l-echo \"Global:\" 6 0 \
+ && type=${1:-} \
+ && git l-echo \"Current exists parameters:\" 5 0\
+ && if [ \"$type\" != 'local' ]; then \
+    git l-echo \"Global:\" 6 0 \
  && git l-list-mcf-param --global \
- && git config --local --get-regex mcf.l- && git l-echo \"Local:\" 6 0 \
+ ; fi \
+ && s=$(git config --local --get-regex mcf.l-) \
+ && git l-echo \"Local:\" 6 0 \
  && git l-list-mcf-param --local \
 ;}; f"
 
@@ -749,12 +758,12 @@ loadsvn = "! f(){ \
 	l-nickname = yournick
 
 #  l-debug-level = $level
-#    $level : -1  is normal mode. Hide all diagnostic messages.
-#    $level :  0  is debug mode 1. Show some diagnostic message in w-* and mcf-* functions.
-#    $level :  1  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
+#    $level :  0  is normal mode. Hide all diagnostic messages.
+#    $level :  1  is debug mode 1. Show some diagnostic message in w-* and mcf-* functions.
+#    $level :  2  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
 #  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
 #  Необходим при отладке методов и при изучении работы команд.
-    l-debug-level = 1
+	l-debug-level = 0
 
 # Выполнять или нет копирование локальной ветки $cfg в основной источник $src1 при выполнении w-upload.  
 # l-backup-cfg = off - 0|off или 1|on
