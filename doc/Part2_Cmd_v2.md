@@ -714,9 +714,11 @@
 
     **w-update-extcmd-default = "! f(){ \**
 
-      **fix=$1 && cfg=$2 && master=$3\**
+      **master=$3\**
 
-      **&& git push server3 $master:custom_branch \**
+      **&& git l-echo \"git push server3 $master:custom_branch\" \**
+
+      **&&              git push server3 $master:custom_branch   \**
 
     **;}; f"**
 
@@ -742,7 +744,9 @@
 
       **master=$3\**
 
-      **&& git push server2 $master:remote_branch \**
+      **&& git l-echo \"git push server2 $master:remote_branch\" \**
+
+      **&&              git push server2 $master:remote_branch    \**
 
     **;}; f"**
 

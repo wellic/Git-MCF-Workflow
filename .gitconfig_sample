@@ -431,7 +431,7 @@ mcf-upload = "! f(){ \
 ; then git l-echo-l1 \"$CMD 4-5:\"; git w-backup-cfg $cfg $src1 off \
 ; else git l-echo-l1 \"$CMD 4-5: skip backup $cfg\" ; fi \
  && cbr=$(git current-branch-name) \
- && git l-echo-l1 \"$CMD 5-5:\" 
+ && git l-echo-l1 \"$CMD 5-5:\" \
  && git l-echo-l0 \"w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
  && git w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
  && git checkout -q $cbr \
@@ -463,13 +463,15 @@ mcf-upload2 = "! f(){ \
 #  Эту команду нужно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. 
 #  Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
 #  Конечная ветка: зависит от переопределенной комманды.
-#    #Пример: дополнительная синхронизация с 3-м сервером server3
-#      vim /dir/to/project/.git/config 
-#      …
-#      [alias]
-#      w-update-extcmd = "! f(){ \
-#           git push server3 local_branch:custom_rbranch \
-#      ;}; f"
+#  # Пример: дополнительная синхронизация с 3-м сервером server3
+#  > vim /dir/to/project/.git/config 
+#    …
+#    [alias]
+#      w-update-extcmd-default = "! f(){ \
+#        master=$3\
+#        && l-echo \"git push server3 $master:custom_branch\" \
+#        &&          git push server3 $master:custom_branch   \
+#      ;}; f"#    #Пример: дополнительная синхронизация с 3-м сервером server3
   w-update-extcmd = "! git mcf-update-extcmd"
 mcf-update-extcmd = "! f(){ \
  CMD='w-update-extcmd' \
@@ -488,7 +490,7 @@ mcf-update-extcmd = "! f(){ \
 #  Эту команду нужно переопределить в локальном конфиге, чтобы можно было выполнить дополнительные действия. 
 #  Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
 #  Конечная ветка: зависит от переопределенной комманды.
-#  Пример: отправка $master после w-upload на дополнительный сервер server2 в ветку remote_branch.
+#  # Пример: отправка $master после w-upload на дополнительный сервер server2 в ветку remote_branch
 #  > vim /dir/to/project/.git/config
 #    …
 #    [remote "server2"]
@@ -496,7 +498,8 @@ mcf-update-extcmd = "! f(){ \
 #    [alias]
 #       w-upload-extcmd = "! f(){ \
 #          master=$3 \
-#          && git push server2 $master:remote_branch \
+#          && git l-echo \"git push server2 $master:remote_branch\" \
+#          &&              git push server2 $master:remote_branch   \
 #       ;}; f"
   w-upload-extcmd = "! git mcf-upload-extcmd"
 mcf-upload-extcmd = "! f(){ \
