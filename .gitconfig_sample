@@ -576,6 +576,7 @@ mcf-repair-conflict-fix = "! f(){ \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
+ && git l-echo-l1 \"$CMD 1-1:\" && git w-rebuild-base $fix $cfg $master off \
  && git l-echo    \"$CMD: All fixed. Please start conflicted command again.\"\
 ;}; f"
 
