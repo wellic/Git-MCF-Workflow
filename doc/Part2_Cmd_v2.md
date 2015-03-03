@@ -114,13 +114,10 @@
 
 1. Склонировать репозиторий системы команд в текущий каталог c нашего сервера [https://github.com/GiantLeapLab/myworkflow](https://github.com/GiantLeapLab/myworkflow). Например, в *~/mytest*:
 
-**cd ~/mytest && git clone git@github.com:GiantLeapLab/myworkflow.git mcf** 
-
-*Cloning into 'mcf'...*
-
-*…*
-
-*Checking connectivity... done.*
+**cd ~/mytest && git clone git@github.com:GiantLeapLab/myworkflow.git mcf**
+   **Cloning into 'mcf'...**
+   **…**
+   **Checking connectivity... done.**
 
 2. Входим в рабочий каталог для инсталляции проекта. Сделаем все скрипты в нем запускаемыми. Все дальнейшие действия будем описывать находясь в этом каталоге. 
 
@@ -129,72 +126,47 @@
 3. Запускаем скрипт для предварительной настройки:
 
 **./00_prepare_install.sh**
-
-*Check user info ...*
-
-*Check the file '/home/user/mytest/mcf/install/my_git_name_info':*
-
-*--------- START CHECK ---------*
-
-*git config --global user.name     "your name"*
-
-*git config --global user.email    "your@email.address"*
-
-*git config --global user.nickname "yournickname"*
-
-*---------- END CHECK ----------*
-
-*Edit user info:*
-
-   *vi "/home/user/mytest/mcf/install/my_git_name_info"*
-
-*Please, edit the file '/home/user/mytest/mcf/install/my_git_name_info'*
+   **Check user info ...**
+   **Check the file '/home/user/mytest/mcf/install/my_git_name_info':**
+   **--------- START CHECK ---------**
+   **git config --global user.name     "your name"**
+   **git config --global user.email    "your@email.address"**
+   **git config --global user.nickname "yournickname"**
+   **---------- END CHECK ----------**
+   **Edit user info:**
+      **vi "/home/user/mytest/mcf/install/my_git_name_info"**
+   **Please, edit the file '/home/user/mytest/mcf/install/my_git_name_info'**
 
 4. Редактируем файл с user info, вставляя корректную информацию о себе:
 
 **vi "my_git_name_info"**
-
-*… редактируем …*
+   **… редактируем …**
 
 5. Еще раз проверяем введенную информацию:
 
 **./00_prepare_install.sh**
-
-*…*
-
-*--------- START CHECK ---------*
-
-*git config --global user.name     "Valerii Savchenko"*
-
-*git config --global user.email    "valerii.s@giantleaplab.com"*
-
-*git config --global user.nickname "wellic"*
-
-*---------- END CHECK ----------*
-
-*…*
+   **…**
+   **--------- START CHECK ---------**
+   **git config --global user.name     "Valerii Savchenko"**
+   **git config --global user.email    "valerii.s@giantleaplab.com"**
+   **git config --global user.nickname "wellic"**
+   **---------- END CHECK ----------**
+   **…**
 
 6. Если user info ок, генерируем скрипт инсталяции, который берет шаблоны из папки *install.template*:
 
 **./01_create_install.sh**
-
-*…*
-
-*The install program was prepared.*
-
-*You have to run installation after checked user info correct:*
-
-   *bash "/home/user/Dropbox/github/myworkflow/install/02_install.sh"*
+   **…**
+   **The install program was prepared.**
+   **You have to run installation after checked user info correct:**
+      **bash "/home/user/Dropbox/github/myworkflow/install/02_install.sh"**
 
 7. Инсталлируем .gitconfig в систему. При установке будет создана копия существующего файла .gitconfig:
 
 **./02_install.sh**
-
-*Installing ...*
-
-*Please check your new '.gitconfig':*
-
-   *less ~/.gitconfig*
+   **Installing ...**
+   **Please check your new '.gitconfig':**
+      **less ~/.gitconfig**
 
 8. Проверяем содержимое установленного .gitconfig:
 
@@ -240,9 +212,8 @@
 
 Базируется на commit. Используется, когда нужно в предыдущий коммит добавить изменения, чтобы сохранился заголовок коммита.
 
-**#Добавить незакомиченные изменения в последний коммит на текущей ветке**
-
-**> git amend -a** 
+**# Добавить незакомиченные изменения в последний коммит на текущей ветке**
+**> git amend -a**
 
 ## Группа "Просмотр изменений"
 
@@ -273,15 +244,10 @@
 	Базируется на команды *show*. Команда позволяет посмотреть какие файлы менялись в указаном коммите. Удобно находить, какие файлы были использованы в указанном коммите. 
 
 **> git sshow ae39542**
-
-*** ae39542 2015-02-13 | Improved config [Valerii Savchenko]|** 
-
+*** ae39542 2015-02-13 | Improved config [Valerii Savchenko]|**
 **|  .gitconfig_sample              | 106 ++-**
-
 **|  tools/fix_win.bat              |   2 +-**
-
 **|  tools/setup_git_testing_env.sh |   2 +-**
-
 **|  3 files changed, 53 insertions(+), 57 deletions(-)**
 
 ### hist
@@ -289,15 +255,10 @@
 	Базируется на команде *log*. Команда позволяет в удобной форме посмотреть  список коммитов. Удобно использовать вместе с именем ветки и количеством коммитов для просмотра. Выводит по-умолчанию все записи.
 
 **> git hist**
-
 *** 14ce503 2015-02-16 (HEAD, origin/master, master) | Added config #2 [wellic]**
-
 *** a5bf1fe 2015-02-16 | Fixed create-base command [Valerii Savchenko]**
-
 **… commits …**
-
 *** 87363d5 2014-12-03 | Add workflow [Valerii Savchenko]**
-
 *** c50b514 2014-12-03 | Initial commit [wellic]**
 
 ### last 
@@ -305,9 +266,7 @@
 	Базируется на команде hist, но выводит, по-умолчанию, последние 20 коммитов. Удобно использовать вместе с именем ветки и количеством коммитов для просмотра. 
 
 **> git last master -2**
-
 *** 14ce503 2015-02-16 (HEAD, origin/master, master) | Added config #2 [wellic]**
-
 *** fba755e 2015-02-16 (gll/master, gh/master) | Added config [Valerii Savchenko]**
 
 ### hist2
@@ -315,11 +274,8 @@
 Базируется на команде hist, но выводит, список коммитов без показа имен веток, тегов и т.д.
 
 **> git hist2**
-
 *** 14ce503 2015-02-16 | Added config #2 [wellic]**
-
 **… commits …**
-
 *** c50b514 2014-12-03 | Initial commit [wellic]**
 
 ## Группа "Информация о пользователе"
@@ -329,19 +285,12 @@
 	Показывает имя текущего пользователя. Использует переменную user.name, Можно переопределять в локальном конфиге.
 
 **> git myname**
-
   **Valerii Savchenko**
-
-**> vim /dir/to/project/.git/config** 
-
+**> vim /dir/to/project/.git/config**
   **#Change default name**
-
   **[user]**
-
     **name = wellic**
-
 **> git myname**
-
   **wellic**
 
 ### myemail 
@@ -349,19 +298,12 @@
 	Показывает email текущего пользователя. Использует переменную user.email. Можно переопределять в локальном конфиге.
 
 **> git myemail**
-
   **valerii.s@giantleaplab.com**
-
-**> vim /dir/to/project/.git/config** 
-
+**> vim /dir/to/project/.git/config**
   **#Change default email**
-
   **[user]**
-
     **email = new@address**
-
 **> git myemail**
-
   **new@address.com**
 
 ### myniсkname 
@@ -369,19 +311,12 @@
 	Показывает niсkname текущего пользователя. Использует mcf-переменную l-niсkname. Можно локально переопределять для текущего проекта.
 
 **> git myniсkname**
-
   **wellic**
-
 **#Set local niсkname**
-
 **> git w-set-mcf-param l-nickname wellic2**
-
   **Old: l-nickname = wellic**
-
   **New: l-nickname = wellic2**
-
 **> git myniсkname**
-
   **wellic2**
 
 ### mycheck
@@ -389,9 +324,7 @@
 	Базируется на команде git grep. Команда проверяет на наличие в исходниках наличия nikname, по-умолчанию, но можно задавать и свое выражение. Например, удобно в отладочных целях поставить в исходниках метки ‘#DEBUG уоur_nikname’, и проверить, чтобы перед коммитом не забыть убрать не нужные метки. Выводит имена файлов и номера строк, где есть метки.
 
 **> git mycheck '#DEBUG'**
-
   **Find '#DEBUG' in sources**
-
   **README.md:9:if ($debug) echo '1'; #DEBUG wellic**
 
 ### mylog, mylogsort
@@ -420,24 +353,15 @@
 
 Получить с сайта gitignore.io список существующих правил и получить правила. Используется для заполнения .gitignore стандартными правилами
 
-**> git gi-list** 
-
+**> git gi-list**
   **…,bower,…,laravel,linux,…,netbeans,…,symfony,…,vim,…,wordpress,…yii…**
-
 **> git gi yii**
-
   **### Yii ###**
-
   **assets/***
-
   **!assets/.gitignore**
-
   **protected/runtime/***
-
   **!protected/runtime/.gitignore**
-
   **protected/data/*.db**
-
   **themes/classic/views/**
 
 ### fsckclear
@@ -452,28 +376,17 @@
 
 2. Расширенные команды выполняют работы с git согласно 3-веточной MCF-схемы. Все команды можно переопределять в локальных конфигах, чтобы изменить стандатное поведение. 
 
-**#включить бекап локального конфига (ветка $cfg) на удаленный сервер** 
-
-**#для команд w-upload и w-upload2.** 
-
-**> vim /dir/to/project/.git/config** 
-
+**#Включить бекап локального конфига (ветка $cfg) на удаленный сервер**
+**#для команд w-upload и w-upload2.**
+**> vim /dir/to/project/.git/config**
   **…**
-
   **[alias]**
-
     **w-command = "! f() { \**
-
 	**… read input your parameters … \**
-
 	**… do some commands … \**
-
 **#if necessary do base command**
-
 **mcf-command with parameters \**
-
 	**… your other commands … \**
-
     **;}; f"**
 
 3. При описании команд ниже запись $param = value  обозначает, что $param c параметром по-умолчанию value.
@@ -481,39 +394,24 @@
 4. Все команды используют параметры по-умолчанию:
 
 **$fix = l-fix** - имя ветки правок fix в схеме MCF
-
 **$cfg = l-cfg** - имя ветки конфигурации cfg в схеме MCF
-
 **$master = l-master** - имя основной ветки master в схеме MCF
-
 **$src1 = l-src1** -  имя основного источника
-
 **$src1_rbranch** **= l-src1-rbranc**h - имя удаленной (remote) ветки в основном источнике
-
 **$src2 = l-src2** - имя вспомогательного источника
-
 **$src2_rbranch = l-src2-rbranch** - имя удаленной (remote) ветки вспомогательного источника.
-
 **$showlog = on** - показывать или не показывать (off) log после выполнения команды
-
 **$rebuild_base = on** - делать(on) или не ltkfnm(off) после выполнения команды переустановку базовых веток
-
 **$method = rebase** - метод (rebase|merge), который использовать при получении новых изменений с удаленных (remote) источников
 
 5. Локальные константы *l-**?, которые находятся в секции [mcf], предназначены, для инициализации параметров команд по-умолчанию, а также для переопределения значений параметров в локальных конфигах.
 
 **#Изменить умолчательные имя локальных веток $master в work, $fix в dev**
-
 **# для текущего проекта.**
-
 **# vim /dir/to/project/.git/config.**
-
 **#   …**
-
 **#   [mcf]**
-
 **#     l-master = work**
-
 **#     l-fix    = dev**
 
 6. Все *mcf,w-** команды можно адаптировать для работы с git-svn.
@@ -705,21 +603,13 @@
 Конечная ветка: зависит от переопределенной команды.
 
 **#Пример: дополнительная синхронизация с 3-м сервером server3**
-
-**> vim /dir/to/project/.git/config** 
-
+**> vim /dir/to/project/.git/config**
   **…**
-
   **[alias]**
-
     **w-update-extcmd-default = "! f(){ \**
-
       **master=$3\**
-
       **&& git l-echo \"git push server3 $master:custom_branch\" \**
-
       **&&              git push server3 $master:custom_branch   \**
-
     **;}; f"**
 
 ### w-upload-extcmd
@@ -732,22 +622,14 @@
 
 Конечная ветка: зависит от переопределенной команды.
 
-**Пример: отправка $master после w-upload на дополнительный сервер server2 в ветку remote_branch**
-
-**> vim /dir/to/project/.git/config** 
-
+**#Пример: отправка $master после w-upload на дополнительный сервер server2 в ветку remote_branch**
+**> vim /dir/to/project/.git/config**
   **…**
-
   **[alias]**
-
     **w-upload-extcmd-default = "! f(){ \**
-
       **master=$3\**
-
       **&& git l-echo \"git push server2 $master:remote_branch\" \**
-
       **&&              git push server2 $master:remote_branch    \**
-
     **;}; f"**
 
 ## Команды для работы с l-* mcf-переменными
@@ -795,31 +677,24 @@
 ### Имена веток MCF-схемы
 
 **l-fix = fix**
-
 **l-cfg = cfg**
-
 **l-master = master**
 
 ### Основной источник обновлений
 
 **l-src1 = origin**
-
 **l-src1-rbranch = master**
 
 ### Дополнительный источник обновлений
 
 **l-src2         = origin**
-
 **l-src2-rbranch = master**
 
 ### Уровень детализации отладки
 
 **l-debug-level = 0**
-
 **$level :  0  is normal mode. Hide all diagnostic messages.**
-
 **$level :  1  is debug mode 1. Show some diagnostic message in w-* functions.**
-
 **$level :  2  is debug mode 2. Show all diagnostic message in w-* functions.**
 
 Переменная позволяет управлять выводом сообщений при работе w-* методов. Полезно при отладке методов и при изучении работы команд.
@@ -835,39 +710,22 @@
 В текущем проекте можно изменить умолчательные l-* mcf-параметры. При выполнении команд w-(set,del)-mcf-param изменения вносятся только в локальную конфигурацию git  текущего проекта.
 
 **#Измение детализации отладочной информации при выполнении mcf-команд**
-
 **> git w-set-mcf-param l-debug-level 1**
-
   **Old: l-debug-level = 0**
-
   **New: l-debug-level = 1**
-
 **> git w-set-mcf-param l-fix dev**
-
   **Old: l-fix = fix**
-
   **New: l-fix = dev**
-
 **> git w-list-mcf-param**
-
   **Global:**
-
   **l-debug-level  = 0**
-
   **l-fix          = fix**
-
   **…**
-
   **Local:**
-
   **l-debug-level  = 1**
-
   **l-fix          = dev**
-
 **> git w-del-mcf-param l-fix**
-
   **Old: l-fix = fix**
-
   **New: l-fix = dev**
 
 # Применение расширенных команд (cookbook)
@@ -881,7 +739,6 @@
 В качестве примера рассмотрим ситуацию когда есть 2 группы разработчиков: 
 
 * 1 группа - репозиторий server1, разработчики dev1 и dev2. 
-
 * 2 группа - репозиторий server2, разработчик dev3. 
 
 В примере, для упрощения, мы рассмотрим работу по схеме MCF только разработчика dev2.
@@ -889,7 +746,6 @@
 Его работа с репозиторием сводится к одной или двум командам:
 
 * git w-upload - если он работает только со своей командой (w-upload позволяет работать одновременно с 2-мя источниками, см. справочник).
-
 * git w-wupload2 - если нужно внести код второй команды в свои исходники (например, это код некоторой девелоперской версии CMS).
 
 ## Общий цикл разработки
@@ -901,8 +757,7 @@
 * Первичная настройка делается 1-й раз:
 
 	**git checkout master**
-
-	**git w-create-base** 
+	**git w-create-base**
 
 Последняя команда создает ветки *cfg* от *master* и потом *fix* от cfg.
 
@@ -915,9 +770,7 @@
 Настраиваем систему под себя, коммитимся
 
 	**… Edit configs …**
-
 	**git add ...**
-
 	**git commit …**
 
 Переустановим базовые коммиты на рабочих ветках MCF
@@ -928,9 +781,8 @@
 
 * Работаем всегда на ветке fix. Стандртный цикл разработки - пишем код и делаем коммиты:
 
-**git checkout fix;** 
-
-**{ … Create code … ; git add … ;** **git commit … } много раз** 
+**git checkout fix;**
+**{ … Create code … ; git add … ;** **git commit … } много раз**
 
 * Отправляем свой код в репозиторий, при этом произойдет подтягивание кода других разработчиков из основного источника, автоматическое перестроение веток, отправка своих изменений, бекап конфигурации и т.д. (см. справочник команд):
 
@@ -955,10 +807,8 @@
 * Допустим у нас программа склонирована в *~/mytest/mcf*. Переходим в каталог с генератором тестового окружения и запускаем его:
 
 **cd ~/mytest/mcf/testenv/**
-
 **./setup_git_testing_env.sh ~/mytest**
-
-	…
+	**…**
 
 *For testing go to:*
 
@@ -967,266 +817,166 @@
 * Скрипт сгенерит набор каталогов, которые позволяют эмулировать работу нескольких серверов и нескольких разработчиков. По-умолчанию: 2 сервера и 3 разработчика. (В скрипте генериции можно изменить эти параметры.). Перейдем в каталог разработчиков. Каждая папка в этом каталоге эмулирует работу рабочего места отдельного разработчика
 
 **cd ~/mytest/_testgit_**
-
 **cd devs**
-
-**ls** 
-
-*dev1 dev2 dev3*
-
+**ls**
+  **dev1 dev2 dev3**
 **cd ../servers**
-
-**ls** 
-
-*server1 server2*
+**ls**
+  **server1 server2**
 
 ### Первичное наполнение
 
 * Первый разработчик dev1, начинает выполнять работу делает 3 коммита и отправляет их в совместный с разработчиком dev2 репозиторий origin (при генерации у всех разработчиков origin привязан к server1):
 
 **(div3): cd ../dev1**
-
 **(div1/master): git remote -v**
-
 **(div1/master): git w-fakecommit 'Initial dev1 c1'**
-
 **(div1/master): git w-fakecommit 'dev1 c2'**
-
 **(div1/master): git w-fakecommit 'dev1 c3'**
-
 **(div1/master): git push -u origin master:master**
-
 **(div1/master): git last**
-
-** efabcd1 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c3 [V… ]*
-
-** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]*
-
-** 6c3aae9 2015-02-19 | Fake: Initial dev1 c1 [Valerii Savchenko]*
+** efabcd1 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c3 [V… ]**
+** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]**
+** 6c3aae9 2015-02-19 | Fake: Initial dev1 c1 [Valerii Savchenko]**
 
 * Второй разработчик dev2, сначала подтягивает к себе изменения, которые уже существует и включается в работу:
 
 **(div1): cd ../dev2**
-
 **(div2/master): git pull origin master:master**
-
 **(div2/master): git last**
-
-** efabcd1 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c3 [V...]*
-
-** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]*
-
-** 6c3aae9 2015-02-19 | Fake: Initial dev1 c1 [Valerii Savchenko]*
+** efabcd1 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c3 [V...]**
+** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]**
+** 6c3aae9 2015-02-19 | Fake: Initial dev1 c1 [Valerii Savchenko]**
 
 * Создаем базовые ветки:
 
 **(div2/master): git w-create-base**
-
-** efabcd1 2015-02-19 (origin/master, master, cfg, fix) | Fake: dev1 c3*
-
-*…*
+** efabcd1 2015-02-19 (origin/master, master, cfg, fix) | Fake: dev1 c3**
+**…**
 
 ### Настройка локальной конфигурации
 
 * Настраиваем конфиг:
 
 **(div2/fix): git checkout cfg**
-
 **(div2/cfg): git w-fakecommit cfg1**
-
 **(div2/cfg): git w-fakecommit cfg2**
-
 **(div2/cfg): git w-rebuild-base**
-
-** ec732ab 2015-02-19 (HEAD, fix, cfg) | Fake: dev2 cfg2 [Valerii Savchenko]*
-
-** 7bf5132 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]*
-
-** efabcd1 2015-02-19 (origin/master, master) | Fake: dev1 c3 [Val…]*
-
-*…*
+** ec732ab 2015-02-19 (HEAD, fix, cfg) | Fake: dev2 cfg2 [Valerii Savchenko]**
+** 7bf5132 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]**
+** efabcd1 2015-02-19 (origin/master, master) | Fake: dev1 c3 [Val…]**
+**…**
 
 ### Разработка внутри команды
 
 * Второй разработчик делает полезную работу:
 
 **(div2/fix): git w-fakecommit 'dev2 fix1'**
-
 **(div2/fix): git w-fakecommit 'dev2 fix2'**
-
-** 4fcd90c 2015-02-19 (HEAD, fix) | Fake: dev2 fix2 [Valerii Savchenko]*
-
-** 87d1334 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]*
-
-** ec732ab 2015-02-19 (cfg) | Fake: dev2 cfg2 [Valerii Savchenko]*
-
-*…*
+** 4fcd90c 2015-02-19 (HEAD, fix) | Fake: dev2 fix2 [Valerii Savchenko]**
+** 87d1334 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]**
+** ec732ab 2015-02-19 (cfg) | Fake: dev2 cfg2 [Valerii Savchenko]**
+**…**
 
 * Параллельно с ним работает dev1 и отправляет свои правки в хранилище:
 
 **(div2): cd ../dev1**
-
 **(div1/master): git w-fakecommit 'dev1 c4'**
-
 **(div1/master): git w-fakecommit 'dev1 c5'**
-
 **(div1/master): git push origin master:master**
-
 **(div1/master): git last**
-
-** e26301f 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c5 [Val…]*
-
-** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]*
-
-** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]*
-
-*…*
+** e26301f 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c5 [Val…]**
+** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]**
+** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]**
+**…**
 
 * dev2 решил отправить свои правки в хранилище без локального конфига:
 
 **(div1): cd ../dev2**
-
 **(div2/fix): git w-upload**
-
-** bade39a 2015-02-19 (HEAD, origin/_wellic_cfg_backup, fix, cfg) | Fake: cfg2…* 
-
-** 01c27a4 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]*
-
-** e2b8702 2015-02-19 (origin/master, master) | Fake: dev2 fix2 [Valerii…]*
-
-** 490ff3d 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]*
-
-** e26301f 2015-02-19 | Fake: dev1 c5 [Valerii Savchenko]*
-
-** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]*
-
-** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]*
-
-*…*
+** bade39a 2015-02-19 (HEAD, origin/_wellic_cfg_backup, fix, cfg) | Fake: cfg2…**
+** 01c27a4 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]**
+** e2b8702 2015-02-19 (origin/master, master) | Fake: dev2 fix2 [Valerii…]**
+** 490ff3d 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]**
+** e26301f 2015-02-19 | Fake: dev1 c5 [Valerii Savchenko]**
+** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]**
+** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]**
+**…**
 
 * dev1 обновляет свою локальную версию:
 
 **(div2): cd ../dev1**
-
 **(div1/master): git pull --rebase**
-
 **(div1/master): git last**
-
-** e2b8702 2015-02-19 (HEAD, origin/master, master) | Fake: dev2 fix2 [Val...]*
-
-** 490ff3d 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]*
-
-** e26301f 2015-02-19 | Fake: dev1 c5 [Valerii Savchenko]*
-
-** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]*
-
-** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]*
-
-** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]*
-
-** 6c3aae9 2015-02-19 | Fake: Initial commit [Valerii Savchenko]*
+** e2b8702 2015-02-19 (HEAD, origin/master, master) | Fake: dev2 fix2 [Val...]**
+** 490ff3d 2015-02-19 | Fake: dev2 fix1 [Valerii Savchenko]**
+** e26301f 2015-02-19 | Fake: dev1 c5 [Valerii Savchenko]**
+** 07d741a 2015-02-19 | Fake: dev1 c4 [Valerii Savchenko]**
+** efabcd1 2015-02-19 | Fake: dev1 c3 [Valerii Savchenko]**
+** 3c7ea62 2015-02-19 | Fake: dev1 c2 [Valerii Savchenko]**
+** 6c3aae9 2015-02-19 | Fake: Initial commit [Valerii Savchenko]**
 
 ### Работа с дополнительным источником
 
 * dev3 работает самостоятельно и ничего не знает про первую группу разработчиков. Его код автономный. Например, библиотека, фреймфорк, и т.д. Ее позже захотят использовать разработчики из первой группы dev1 и dev2. Разработчик dev3 сохраняет свои результаты на server2:
 
 **(div1): cd ../dev3**
-
 **(div3/master): git w-fakecommit 'dev3 c1'**
-
 **(div3/master): git w-fakecommit 'dev3 c2'**
-
 **(div3/master): git w-fakecommit 'dev3 c3'**
-
 **(div3/master): git push -u server2 master:master**
-
 **(div3/master): git last**
-
-** bb77be2 2015-02-19 (HEAD, server2/master, master) | Fake: dev3 c3 [Val…]*
-
-** f8b6a14 2015-02-19 | Fake: dev3 c2 [Valerii Savchenko]*
-
-** 8d7c094 2015-02-19 | Fake: dev3 c1 [Valerii Savchenko]*
-
-*…*
+** bb77be2 2015-02-19 (HEAD, server2/master, master) | Fake: dev3 c3 [Val…]**
+** f8b6a14 2015-02-19 | Fake: dev3 c2 [Valerii Savchenko]**
+** 8d7c094 2015-02-19 | Fake: dev3 c1 [Valerii Savchenko]**
+**…**
 
 * Разработчик dev1 продолжает в это время тоже работать
 
 **(div3): cd ../dev1**
-
 **(div1/master): git pull --rebase**
-
 **(div1/master): git w-fakecommit 'dev1 c6'**
-
 **(div1/master): git w-fakecommit 'dev1 c7'**
-
 **(div1/master): git push**
-
 **(div1/master): git last**
-
-** 1e9f606 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c6 [Val…]*
-
-** b42b4ca 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]*
-
-** e2b8702 2015-02-19 | Fake: dev2 fix2 [Valerii Savchenko]*
-
-*…*
+** 1e9f606 2015-02-19 (HEAD, origin/master, master) | Fake: dev1 c6 [Val…]**
+** b42b4ca 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]**
+** e2b8702 2015-02-19 | Fake: dev2 fix2 [Valerii Savchenko]**
+**…**
 
 * Разработчик dev2 также работает, кроме того ему понадобилось поправить конфигурацию:
 
 **(div1): cd ../dev2**
-
 **(div2/fix): git w-fakecommit fix3**
-
 **(div2/fix): git checkout cfg**
-
 **(div2/cfg): git w-fakecommit cfg3**
-
 **(div2/cfg): git w-rebuild-base**
-
-** 853c6b4 2015-02-19 (HEAD, fix) | Fake: fix3 [Valerii Savchenko]*
-
-** 1922ef8 2015-02-19 (cfg) | Fake: cfg3 [Valerii Savchenko]*
-
-** bade39a 2015-02-19 | Fake: dev2 cfg2 [Valerii Savchenko]*
-
-** 01c27a4 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]*
-
-** e2b8702 2015-02-19 (origin/master, master) | Fake: dev2 fix2 [Val...]*
-
-*…*
+** 853c6b4 2015-02-19 (HEAD, fix) | Fake: fix3 [Valerii Savchenko]**
+** 1922ef8 2015-02-19 (cfg) | Fake: cfg3 [Valerii Savchenko]**
+** bade39a 2015-02-19 | Fake: dev2 cfg2 [Valerii Savchenko]**
+** 01c27a4 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]**
+** e2b8702 2015-02-19 (origin/master, master) | Fake: dev2 fix2 [Val...]**
+**…**
 
 * Чтобы подтянуть код из второго источника server2, разработчик dev2 создает локальную ветку master_s2, которые учитываются при отправке его работы в свое хранилище:
 
 **(div2/fix): git fetch server2 master**
-
 **(div2/fix): git checkout -b master_s2 server2/master**
-
 **(div2/master_s2): git w-upload2 server2 master_s2 master**
+** 2fc40f8 2015-02-19 (HEAD, origin/_wellic_cfg_backup, fix, cfg) | Fake: cfg3 …**
 
-** 2fc40f8 2015-02-19 (HEAD, origin/_wellic_cfg_backup, fix, cfg) | Fake: cfg3 …* 
+** 0e475c2 2015-02-19 | Fake: dev2 cfg2 [Valerii Savchenko]**
+** acfc138 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]**
+** 2cfeda5 2015-02-19 (origin/master, master) | Fake: fix3 [Valerii Savchenko]**
+** 4f056f0 2015-02-19 | Merged with server2/master [Valerii Savchenko]**
+**|\**
 
-** 0e475c2 2015-02-19 | Fake: dev2 cfg2 [Valerii Savchenko]*
-
-** acfc138 2015-02-19 | Fake: dev2 cfg1 [Valerii Savchenko]*
-
-** 2cfeda5 2015-02-19 (origin/master, master) | Fake: fix3 [Valerii Savchenko]*
-
-** 4f056f0 2015-02-19 | Merged with server2/master [Valerii Savchenko]*
-
-*|\*  
-
-*| * bb77be2 2015-02-19 (server2/master, master_s2) | Fake: dev3 c3 [Va…]*
-
-*| * f8b6a14 2015-02-19 | Fake: dev3 c2 [Valerii Savchenko]*
-
-*| * 8d7c094 2015-02-19 | Fake: dev3 c1 [Valerii Savchenko]*
-
-** 1e9f606 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]*
-
-** b42b4ca 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]*
-
-*…*
+**| * bb77be2 2015-02-19 (server2/master, master_s2) | Fake: dev3 c3 [Va…]**
+**| * f8b6a14 2015-02-19 | Fake: dev3 c2 [Valerii Savchenko]**
+**| * 8d7c094 2015-02-19 | Fake: dev3 c1 [Valerii Savchenko]**
+** 1e9f606 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]**
+** b42b4ca 2015-02-19 | Fake: dev1 c6 [Valerii Savchenko]**
+**…**
 
 ## Пример из реальной задачи
 
@@ -1235,23 +985,16 @@
 Для этого мы используем 3 репозитория:
 
 1. presta - источник оригинального кода Prestashop
-
 2. gll - форк оригинала PrestaShop, необходим для контрибуции
-
 3. origin - наш репозиторий для текущего проекта.
 
 Стандартные задачи, которые нужно выполнять регулярно:
 
 * загружать обновления с presta;
-
 * синхронизировать presta c gll;
-
 * обновление локальной разработки origin обновлениями c presta;
-
 * вносить замеченные ошибки и улучшения в PrectsShop;
-
 * решение текущей задачи с PrestaShop;
-
 * бекап копии конфигурации для локальной разработки.
 
 ### Предварительная настройка
@@ -1259,13 +1002,13 @@
 Настройка репозиториев для работы:
 
 **#origin - our project
-git clone git@gitserver.giantleaplab.com:OurProject
+    **git clone git@gitserver.giantleaplab.com:OurProject**
 
-# presta - dev branch
-git remote add presta https://github.com/PrestaShop/PrestaShop.git
+**# presta - dev branch**
+    **git remote add presta https://github.com/PrestaShop/PrestaShop.git**
 
-# gll - fork presta
-git remote add gll git@github.com:GiantLeapLab/PrestaShop.git**
+**# gll - fork presta**
+    **git remote add gll git@github.com:GiantLeapLab/PrestaShop.git**
 
 ### Настройка веток разработки
 
@@ -1273,24 +1016,20 @@ git remote add gll git@github.com:GiantLeapLab/PrestaShop.git**
 
 Настроим окружение.
 
-1. '1.6' - ветка из presta, содержит последние изменения Prestashop. Эта же ветка используется в gll для дальнейшей контрибуции
+* '1.6' - ветка из presta, содержит последние изменения Prestashop. Эта же ветка используется в gll для дальнейшей контрибуции
 
-2. git fetch presta 1.6
-git checkout 1.6 presta/1.6
+    **git fetch presta 1.6**
+    **git checkout 1.6 presta/1.6**
 
-3. 'work' - ветка в origin, порождается от 1.6, содержит наши разработки
+* 'work' - ветка в origin, порождается от 1.6, содержит наши разработки
+    **git checkout -b work**
+* 'cfg' - локальная ветка, порождается от work, содержит настройки локальной конфигурации для разработки
+* 'fix' - локальная ветка, порождается от cfg, в ней ведется разработка
+    **git w-create-base fix cfg work**
 
-4. git checkout -b work
+* удаляем локальную ветку master, т.к. мы ее использовать не будем, а также чтобы она нас не запутывала
 
-5. 'cfg' - локальная ветка, порождается от work, содержит настройки локальной конфигурации для разработки
-
-6. 'fix' - локальная ветка, порождается от cfg, в ней ведется разработка
-
-7. git w-create-base fix cfg work
-
-8. удаляем локальную ветку master, т.к. мы ее использовать не будем, а также чтобы она нас не запутывала
-
-9. git branch -D master
+    **git branch -D master**
 
 ### Процесс разработки
 
@@ -1310,15 +1049,10 @@ git commit -m 'Issue 3'**
 Теперь нам нужно все перенести на ветку work и отправить в хранилище. Но за время нашей работы в presta/1.6 или в origin/work могли внести изменения. Поэтому нужно сделать достаточно много этапов для внесения новых изменений по веткам. А также синхронизировать репозитории presta и gll, т.е. нам нужно выполнить следующий список работ:
 
 * загрузить новые обновления, которые могли сделать коллеги из origin/work в work
-
 * загрузить новые обновления из presta/1.6 в ветки 1.6 и work
-
 * восстановить связи cfg и fix c work после обновления
-
 * залить изменения из ветки fix в ветку work, исключая настройки локальной конфигурации из cfg
-
 * отправить изменения в origin
-
 * сделать бекап локальной конфигурации в origin/cfg_backup
 
 Это все может быть выполнено следующей командой:
@@ -1329,14 +1063,10 @@ git commit -m 'Issue 3'**
 
 **> vi .git/config
   …**
-
   **[alias]
     w-update-extcmd =  = "! git co 1.6; git push gll 1.6:1.6"**
-
 **> git w-set-mcf-param l-master work**
-
 **> git w-set-mcf-param l-src2 presta**
-
 **> git w-set-mcf-param l-src2-rbranch 1.6**
 
 
@@ -1351,12 +1081,9 @@ git commit -m 'Issue 3'**
 **git checkout cfg
 git checkout -b fix_issue_presta
 …**
-
 **git commit -m 'Fixed issue in prestashop'
 git push gll fix_issue_presta:fix_issue_presta**
-
 **# Когда правку примут, то нужно удалить лишние ветки:**
-
 **git checkout cfg
 git branch -D fix_issue_presta
 git push gll :fix_issue_presta
@@ -1373,27 +1100,20 @@ git remote prune gll**
 * Посмотреть на какой операции произошел конфликт. Можно найти Видно в выводе команд.
 
 * Устранить конфликт.
-
-**git mergetool** 
-
+**git mergetool**
 **...resolve…**
 
 * Убедиться, что все ок.
-
 **git status**
-
 **git last**
 
 * Если на ветке $master есть не отправленные коммиты то сначала их отправить в собственное хранилище $src1/$src1_rbrach.
-
 **git push origin $master:$remote_master**
 
 * Переустановить базовые коммиты на $master для $cfg и $fix 
-
 **git w-rebuild-base**
 
 * Повторить начальную команду (w-update, w-upload).
-
 **git w-update/w-upload**
 
 ## Другие способы
@@ -1401,17 +1121,11 @@ git remote prune gll**
 Конфликты могут возникнуть между:
 
 1. master <-> cfg, cfg<->fix, master<->master_source2: устраняется по стандартной схеме или после устранения конфликта выполнить исправляющие команды и повторить первичную команду снова.
-
 2. master <-> origin/master: такой конфликт может возникнуть, если каким-то образом на локальную ветку $master попали коммиты, которые конфликтуют с origin/$remote_master. Решений несколько: либо пробовать стандартное решение, либо найти причину появления лишних коммитов на ветке $master, если они существуют на другой ветке:
-
     *  удалить с этой ветки
-
-**git reset --hard SHA1_FIRST_BAD_COMMIT**
-
+        **git reset --hard SHA1_FIRST_BAD_COMMIT**
     * повторить начальную команду:
-
-**git w-update/w-upload**
-
+        **git w-update/w-upload**
 3. fix<->master : обычно не возникает.
 
 # Дополнение
