@@ -98,10 +98,10 @@ dfc = diff --cached
 visual = !gitk --all &
 
 # show history and log
-sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo  ; }; f"
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo ; }; f"
-hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $* && echo ; }; f"
-hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(green)%h %C(yellow)%ad%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f"
+sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo  ; }; f"
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo ; }; f"
+hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $* && echo ; }; f"
+hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f"
 last  = "! git hist  -20 $* "
 last2 = "! git hist2 -20 $* "
 last3 = "! git hist3 -20 $* "
@@ -121,18 +121,21 @@ mycheck = "! f() { \
  && git --no-pager grep -nEe \"${allname}\" \
 ;}; f "
 
-#Show log for current user without sorte
+#Show log for current user without sort
 mylog = "! f() { \
  name=$(git myname) \
  && name=$(echo $name | sed 's/ /./g') \
  && echo \"Log for user (regex): '$name'\" \
- && git hist2 --author=\"$name\" $* \
+ && git hist2 --author=\"$name\" \
 ;}; f "
 
 #Show log for current user sorted by date
 mylogsort = "! f() { \
- git mylog $* | sort -k 3,3 -r \
+ git mylog $* | sort -k 2,2 -r \
 ;}; f"
+
+#Show log for current user without sort
+myreport = "! git mylog | head -n 20 "
 
 #################
 # Useful commands
@@ -249,6 +252,10 @@ l-fix-mcf-param = "! f() { \
   s=${1-''} \
   && s=$(echo \"$s\" | sed 's/ /_/g') \
   ; echo $s \
+;}; f"
+
+l-rev = "! f() { \
+  git rev-list "$1" | head -n 1 \
 ;}; f"
 
 #################
@@ -373,6 +380,7 @@ mcf-update = "! f(){ \
 ; then git l-echo-l1 \"$CMD 2-4: do not need to update from src2\" \
 ; else git l-echo-l1 \"$CMD 2-4:\" && git w-load-fix-from-repo $master $src2 $src2_rbranch merge off \
 ; fi \
+ && if [ \"$(git l-rev $master)\" != \"$(git l-rev $src1/$src1_rbranch)\"  ]; then git l-echo-l1 \"$CMD 2.2-4:\" && git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch ; fi \
  && if [ \"$rebuild_base\" = 'on' ] \
 ; then git l-echo-l1 \"$CMD 3-4:\" && git w-rebuild-base $fix $cfg $master off \
 ; else git l-echo-l1 \"$CMD 3-4: do not need to do rebuild base\"\
