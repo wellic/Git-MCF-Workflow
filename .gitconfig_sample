@@ -98,10 +98,10 @@ dfc = diff --cached
 visual = !gitk --all &
 
 # show history and log
-sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo  ; }; f"
-hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $* && echo ; }; f"
-hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $* && echo ; }; f"
-hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $* && echo  ; }; f"
+sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $@ && echo  ; }; f"
+hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $@ && echo ; }; f"
+hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $@ && echo ; }; f"
+hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
 last  = "! git hist  -20 $* "
 last2 = "! git hist2 -20 $* "
 last3 = "! git hist3 -20 $* "
@@ -126,12 +126,12 @@ mylog = "! f() { \
  name=$(git myname) \
  && name=$(echo $name | sed 's/ /./g') \
  && echo \"Log for user (regex): '$name'\" \
- && git hist2 --author=\"$name\" \
+ && git hist2 --author=\"$name\" $@ \
 ;}; f "
 
 #Show log for current user sorted by date
 mylogsort = "! f() { \
- git mylog $* | sort -k 2,2 -r \
+ git mylog $@ | sort -k 2,2 -r \
 ;}; f"
 
 #Show log for current user without sort
@@ -167,9 +167,9 @@ unmerged = branch --no-merged
 
 # different list and logs
 ls = ls-files
-lg    = "! f() { git --no-pager log -p $* && echo ;}; f "
-lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $*       && echo ;}; f "
-lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $* && echo ;}; f "
+lg    = "! f() { git --no-pager log -p $@ && echo ;}; f "
+lol   = "! f() { git --no-pager log       --graph --decorate --pretty=oneline --abbrev-commit $@       && echo ;}; f "
+lola  = "! f() { git --no-pager log --all --graph --decorate --pretty=oneline --abbrev-commit --all $@ && echo ;}; f "
 
 type = cat-file -t
 dump = cat-file -p

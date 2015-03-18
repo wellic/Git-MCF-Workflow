@@ -8,8 +8,8 @@ RET_DIR=$PWD
 TEST_PROG="test_testing_env.sh"
 
 # --- Input parameters
-INSTALL_DIR=${1:-}
-TEST_AFTER_INSTALL=${2:-0}
+INSTALL_DIR=${1:-.}
+TEST_AFTER_INSTALL=${2:-1}
 
 CUR_DIR=$(dirname "$0")
 INSTALL_DIR=$1
