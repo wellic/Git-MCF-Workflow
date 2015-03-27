@@ -102,6 +102,7 @@ sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yell
 hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $@ && echo ; }; f"
 hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $@ && echo ; }; f"
 hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
+hist4 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
 last  = "! git hist  -20 $* "
 last2 = "! git hist2 -20 $* "
 last3 = "! git hist3 -20 $* "
@@ -129,13 +130,26 @@ mylog = "! f() { \
  && git hist2 --author=\"$name\" $@ \
 ;}; f "
 
+mylogshort = "! f() { \
+ name=$(git myname) \
+ && name=$(echo $name | sed 's/ /./g') \
+ && echo \"Log for user (regex): '$name'\" \
+ && git hist4 --author=\"$name\" $@ \
+;}; f "
+
 #Show log for current user sorted by date
 mylogsort = "! f() { \
  git mylog $@ | sort -k 2,2 -r \
 ;}; f"
 
 #Show log for current user without sort
-myreport = "! git mylog | head -n 20 "
+myreport = "! f() { \
+ name=$(git myname) \
+ && name=$(echo $name | sed 's/ /./g') \
+ && echo \"Log for user (regex): '$name'\" \
+ && git hist4 --author-date-order --author=\"$name\" $@ \
+;}; f "
+
 
 #################
 # Useful commands
