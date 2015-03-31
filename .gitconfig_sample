@@ -147,7 +147,7 @@ myreport = "! f() { \
  name=$(git myname) \
  && name=$(echo $name | sed 's/ /./g') \
  && echo \"Log for user (regex): '$name'\" \
- && git hist4 --author-date-order --author=\"$name\" $@ \
+ && git hist4 --author-date-order --author=\"$name\" -20 $@ \
 ;}; f "
 
 
@@ -322,8 +322,8 @@ mcf-create-base = "! f(){ \
  && showlog=${4:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $showlog\" \
  && git l-echo-l1 \"$CMD 1-3:\";git l-echo \"git checkout $master\" && git checkout $master  \
- && git l-echo-l1 \"$CMD 2-3:\";git l-echo \"git checkout -b $cfg\" && (git checkout $cfg || git checkout -b $cfg) \
- && git l-echo-l1 \"$CMD 3-3:\";git l-echo \"git checkout -b $fix\" && (git checkout $fix || git checkout -b $fix) \
+ && git l-echo-l1 \"$CMD 2-3:\";git l-echo \"git checkout -b $cfg\" && (git checkout $cfg || git checkout -b $cfg $master) \
+ && git l-echo-l1 \"$CMD 3-3:\";git l-echo \"git checkout -b $fix\" && (git checkout $fix || git checkout -b $fix $cfg) \
  && git l-last-check $showlog \
 ;}; f"
 
