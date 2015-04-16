@@ -2,7 +2,7 @@
 #   user.name
 #   user.email
 #   mcf.nickname
-[user]  
+[user]
 	name = your_name
 	email = your@mail
 [commit]
@@ -165,7 +165,7 @@ cbr = rev-parse --abbrev-ref HEAD
 
 # ignored
 # Show files ignored by git:
-ign = "! git status --ignored --short | awk '/^!!/ { print $2 }'" 
+ign = "! git status --ignored --short | awk '/^!!/ { print $2 }'"
 ign-cd = ls-files -o -i --exclude-standard
 
 
@@ -276,13 +276,13 @@ l-rev = "! f() { \
 # Global commands
 #################
 
-#  Все команды имеют основную версию команды (mcf-*) и дополнительную с префиксом (w-*). 
+#  Все команды имеют основную версию команды (mcf-*) и дополнительную с префиксом (w-*).
 #  Эти команды равнозначны, пока они не переопределены в локальном конфиге. Если необходимо, то переопределять лучше команды w-*, т.к. именно эти команды вызываются в расширенных командах.
 #  Команды mcf-* нужно использовать, как команды с поведением по-умолчанию.
-#  Расширенные команды выполняют работы с git согласно 3-веточной схемы. Все команды можно переопределять в локальных конфигах, чтобы изменить стандатное поведение. 
+#  Расширенные команды выполняют работы с git согласно 3-веточной схемы. Все команды можно переопределять в локальных конфигах, чтобы изменить стандатное поведение.
 #    #Пример
-#    #Отключить бекап локального конфига (ветка $cfg) на удаленный сервер для команд w-upload и w-upload2. 
-#    > vim /dir/to/project/.git/config 
+#    #Отключить бекап локального конфига (ветка $cfg) на удаленный сервер для команд w-upload*.
+#    > vim /dir/to/project/.git/config
 #      …
 #      [alias]
 #        w-backup-cfg= "! : "
@@ -369,16 +369,16 @@ mcf-load-fix-from-repo = "! f(){ \
  && git l-last-check $showlog \
 ;}; f"
 
-# w-update [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
-#  Залить обновление в $master из 2-х источников. 
+# w-update-common [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog ]
+#  Залить обновление в $master из 2-х источников.
 #  Обновить $master из основного источника $src1/$src1_rbranch методом git pull --rebase.
-#  Если первый и второй источник одинаковые ($src1 = $src2 && $src1_rbranch = $src2_rbranch), то обновление из второго источника пропускается. 
+#  Если первый и второй источник одинаковые ($src1 = $src2 && $src1_rbranch = $src2_rbranch), то обновление из второго источника пропускается.
 #  Если первый и второй источник разные, то обновить $master из дополнительного источника $src2/$src2_rbranch методом git merge.
-#  Параметр $rebuild_base=on|off указывает, нужно ли после обновления делать переустановку базовых веток. 
+#  Параметр $rebuild_base=on|off указывает, нужно ли после обновления делать переустановку базовых веток.
 #  Конечная ветка: $fix.
-  w-update = "! git mcf-update"
-mcf-update = "! f(){ \
- CMD='w-update' \
+  w-update-common = "! git mcf-update-common"
+mcf-update-common = "! f(){ \
+ CMD='w-update-common' \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -388,7 +388,7 @@ mcf-update = "! f(){ \
  && src2_rbranch=${7:-$(git w-get-mcf-param l-src2-rbranch)} \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-on} \
- && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
+ && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog\" \
  && git l-echo-l1 \"$CMD 1-4:\" && git w-load-fix-from-repo $master $src1 $src1_rbranch rebase off \
  && if [ \"$src1\" = \"$src2\" -a \"$src1_rbranch\" = \"$src2_rbranch\" ] \
 ; then git l-echo-l1 \"$CMD 2-4: do not need to update from src2\" \
@@ -408,9 +408,9 @@ mcf-update = "! f(){ \
 ;}; f"
 
 # w-update2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog ]
-#  Команда аналогична w-update, но другой порядок парaметров.
-#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update. 
-#  Более удобна при работе с 2-мя источниками, чем w-update, когда используются параметры по-умолчанию, а нужно указать только параметры второго источника.
+#  Команда аналогична w-update-common, но другой порядок парaметров.
+#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-update-common.
+#  Более удобна при работе с 2-мя источниками, чем w-update-common, когда используются параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-update2 = "! git mcf-update2"
 mcf-update2 = "! f(){ \
@@ -425,17 +425,39 @@ mcf-update2 = "! f(){ \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-on} \
  && git l-echo-l0 \"$CMD $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog\" \
- && git l-echo-l1 \"$CMD 1-1:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
+ && git l-echo-l1 \"$CMD 1-1:\" && git w-update-common $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
 ;}; f"
 
-# w-upload [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
+# w-update [ $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog ]
+#  Залить обновление в $master из 1-го источника.
+#  Обновить $master из основного источника $src1/$src1_rbranch методом git pull --rebase.
+#  Используется w-update-common, но $src1 = $src2 && $src1_rbranch = $src2_rbranch, поэтому обновление из второго источника пропускается.
+#  Параметр $rebuild_base=on|off указывает, нужно ли после обновления делать переустановку базовых веток.
+#  Конечная ветка: $fix.
+  w-update = "! git mcf-update"
+mcf-update = "! f(){ \
+ CMD='w-update' \
+ &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
+ && rebuild_base=${6:-on} \
+ &&      showlog=${7:-on} \
+ && src2=$src1 \
+ && src2_rbranch=$src1_rbranch \
+ && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $rebuild_base $showlog\" \
+ && git l-echo-l1 \"$CMD 1-1:\" && git w-update-common $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog \
+;}; f"
+
+# w-upload-common [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Выгружает сделанные изменения из ветки $fix в ветку $master и на сервер $src1.
-#  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update).
+#  Сначала происходит обновление $master из источников $src1 и $src2 (см. w-update-common).
 #  Затем изменения из $fix заливаются в $master и отправляются в $src1/$src1_rbranch.
 #  Конечная ветка: $fix.
-  w-upload = "! git mcf-upload"
-mcf-upload = "! f(){ \
- CMD='w-upload' \
+  w-upload-common = "! git mcf-upload-common"
+mcf-upload-common = "! f(){ \
+ CMD='w-upload-common' \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -446,7 +468,7 @@ mcf-upload = "! f(){ \
  &&      showlog=${8:-on} \
  &&    do_backup=$(git w-get-mcf-param l-backup-cfg off) \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
- && git l-echo-l1 \"$CMD 1-5:\" && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
+ && git l-echo-l1 \"$CMD 1-5:\" && git w-update-common $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off off \
  && git l-echo-l1 \"$CMD 2-5:\" && git w-rebuild-base $fix $cfg $master off \
  && git l-echo-l1 \"$CMD 3-5:\" && git w-send-fix $fix $cfg $master $src1 $src1_rbranch off \
  && if [ $(git l-check-is-on $do_backup) = 'on' ] \
@@ -461,9 +483,9 @@ mcf-upload = "! f(){ \
 ;}; f"
 
 # w-upload2 [ $src2 $src2_rbranch $fix $cfg $master $src1 $src1_rbranch $showlog ]
-#  Команда аналогична w-upload, но другой порядок парaметров.
-#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload.
-#  Более удобна при работе с 2-мя источниками, чем w-upload, если используюся параметры по-умолчанию, а нужно указать только параметры второго источника.
+#  Команда аналогична w-upload-common, но другой порядок парaметров.
+#  Первые два параметра определяют второй источник, потом указываются остальные параметры или берутся по-умолчанию, как для w-upload-common.
+#  Более удобна при работе с 2-мя источниками, чем w-upload-common, если используюся параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
@@ -477,16 +499,36 @@ mcf-upload2 = "! f(){ \
  && src1_rbranch=${7:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&      showlog=${8:-on} \
  && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
- && git l-echo-l1 \"$CMD 1-1:\" && git w-upload $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
+ && git l-echo-l1 \"$CMD 1-1:\" && git w-upload-common $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
+;}; f"
+
+# w-upload [ $fix $cfg $master $src1 $src1_rbranch $showlog ]
+#  Выгружает сделанные изменения из ветки $fix в ветку $master и на сервер $src1.
+#  Сначала происходит обновление $master из источника $src1 (см. w-update).
+#  Затем изменения из $fix заливаются в $master и отправляются в $src1/$src1_rbranch.
+#  Конечная ветка: $fix.
+  w-upload = "! git mcf-upload"
+mcf-upload = "! f(){ \
+ CMD='w-upload' \
+ &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
+ &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
+ &&       master=${3:-$(git w-get-mcf-param l-master)} \
+ &&         src1=${4:-$(git w-get-mcf-param l-src1)} \
+ && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
+ &&      showlog=${6:-on} \
+ &&         src2=$src1 \
+ && src2_rbranch=$src1_rbranch \
+ && git l-echo-l0 \"$CMD $fix $cfg $master $src1 $src1_rbranch $showlog\" \
+ && git l-echo-l1 \"$CMD 1-1:\" && git w-upload-common $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog \
 ;}; f"
 
 # w-update-extcmd [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
-#  Эта команда выполняется после успешного выполнения обновления w-update.
-#  Эту команду нужно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия. 
+#  Эта команда выполняется после успешного выполнения обновления w-update-common.
+#  Эту команду нужно переопределить в локальном конфиге, чтобы при обновлении можно было выполнить дополнительные действия.
 #  Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
 #  Конечная ветка: зависит от переопределенной комманды.
 #  # Пример: дополнительная синхронизация с 3-м сервером server3
-#  > vim /dir/to/project/.git/config 
+#  > vim /dir/to/project/.git/config
 #    …
 #    [alias]
 #      w-update-extcmd-default = "! f(){ \
@@ -509,10 +551,10 @@ mcf-update-extcmd = "! f(){ \
 
 # w-upload-extcmd [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Эта команда выполняется после успешного выполнения w-upload.
-#  Эту команду нужно переопределить в локальном конфиге, чтобы можно было выполнить дополнительные действия. 
+#  Эту команду нужно переопределить в локальном конфиге, чтобы можно было выполнить дополнительные действия.
 #  Например, выполнить тесты, дополнительную синхронизацию, дополнительные системные программы и т.п.
 #  Конечная ветка: зависит от переопределенной комманды.
-#  # Пример: отправка $master после w-upload на дополнительный сервер server2 в ветку remote_branch
+#  # Пример: отправка $master после w-upload-common на дополнительный сервер server2 в ветку remote_branch
 #  > vim /dir/to/project/.git/config
 #    …
 #    [remote "server2"]
@@ -575,7 +617,7 @@ mcf-send-fix = "! f(){ \
 # w-repair-conflict-master [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Устранить возможные проблемы после устранения конфликта в $master.
 #  Отправить устраненные конфликты в $src1/$src1_rbranch
-#  Все параметры как для w-upload.
+#  Все параметры как для w-upload-common.
 #  Конечная ветка: $fix.
   w-repair-conflict-master = "! git mcf-repair-conflict-master"
 mcf-repair-conflict-master = "! f(){ \
@@ -597,7 +639,7 @@ mcf-repair-conflict-master = "! f(){ \
 
 # w-repair-conflict-cfg [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Устранить возмжные проблемы после устранения конфликта в $cfg
-#  Все параметры как для w-upload.
+#  Все параметры как для w-upload-common.
 #  Конечная ветка: $fix.
   w-repair-conflict-cfg = "! git mcf-repair-conflict-cfg"
 mcf-repair-conflict-cfg = "! f(){ \
@@ -618,7 +660,7 @@ mcf-repair-conflict-cfg = "! f(){ \
 
 # w-repair-conflict-fix [ $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog ]
 #  Устранить возмжные проблемы после устранения конфликта в $fix
-#  Все параметры как для w-upload.
+#  Все параметры как для w-upload-common.
 #  Конечная ветка: $fix.
   w-repair-conflict-fix = "! git mcf-repair-conflict-fix"
 mcf-repair-conflict-fix = "! f(){ \
@@ -823,7 +865,7 @@ loadsvn = "! f(){ \
 #  Необходим при отладке методов и при изучении работы команд.
 	l-debug-level = 0
 
-# Выполнять или нет копирование локальной ветки $cfg в основной источник $src1 при выполнении w-upload.  
+# Выполнять или нет копирование локальной ветки $cfg в основной источник $src1 при выполнении w-upload*.
 # l-backup-cfg = off - 0|off или 1|on
    l-backup-cfg = off
 
