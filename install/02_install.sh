@@ -17,11 +17,10 @@ FNAME_INSTALL=install.sh
 
 echo -e "\033[7;35mStart installing\n\033[0m"
 
-bash "$CUR_DIR/$DIR_INSTALL/$FNAME_INSTALL"
-
+bash "$CUR_DIR/$DIR_INSTALL/$FNAME_INSTALL" 
+STATUS=$?
 echo -e "\nPlease check your new '.gitconfig':"
 echo -e "\033[0;32m   less ~/.gitconfig\033[0m"
-
 echo -e "\033[7;35m\nFinish installing\033[0m"
 
-exit "$?"
+exit $STATUS

@@ -10,10 +10,20 @@ cd "$CUR_DIR"
 CUR_DIR=$PWD
 cd "$RET_DIR"
 
-bash "$CUR_DIR"/00_prepare_install.sh
-bash "$CUR_DIR"/01_create_install.sh
-bash "$CUR_DIR"/02_install.sh
-bash "$CUR_DIR"/99_clear.sh
+if_error() {
+  SRCIPT=$1
+  clear
+  echo -e "\033[7;31mError\033[0m"
+  echo -e "\033[1;31m\nRun manually again:\033[0m"
+  echo -e "\033[1;31m$CUR_DIR/$SRCIPT\033[0m"
+  echo -e "\033[7;31m\nInstall: Failed.\033[0m"
+  exit 1
+}
+
+bash "$CUR_DIR"/00_prepare_install.sh || if_error "00_prepare_install.sh"
+bash "$CUR_DIR"/01_create_install.sh  || if_error "01_create_install.sh"
+bash "$CUR_DIR"/02_install.sh         || if_error "02_install.sh"
+bash "$CUR_DIR"/99_clear.sh           || if_error "99_clear.sh"
 
 clear
 echo -e "\033[1;36mInstall finished: Ok.\033[0m"

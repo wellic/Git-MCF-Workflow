@@ -16,7 +16,7 @@ DIR_INSTALL=_install
 FNAME_INSTALL=install.sh
 FNAME_DO_INSTALL=02_install.sh
 FNAME_USER_INFO="my_git_name_info"
-CHECK_INFO='your name|your@email.address|yournickname'
+CHECK_INFO='your name|your.email.address|yournickname'
 
 SRC_DIR="$CUR_DIR"/install_template
 DST_DIR="$CUR_DIR"/"$DIR_INSTALL"
@@ -51,7 +51,8 @@ add_os_params() {
 }
 
 check_userinfo() {
-   grep -q -P "'$CHECK_INFO'" "$CUR_DIR/$FNAME_USER_INFO" || return 0
+   echo grep -q -P "$CHECK_INFO" "$CUR_DIR/$FNAME_USER_INFO"
+   grep -q -P "$CHECK_INFO" "$CUR_DIR/$FNAME_USER_INFO" || return 0
    clear
    echo -e "\033[1;31mThe user info was not filled corectly.\033[0m"
    echo -e "\033[0;31m\nYou have to check user info in \"$CUR_DIR/$FNAME_USER_INFO\"\033[0m"
