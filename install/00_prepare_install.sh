@@ -19,7 +19,7 @@ FNAME_FIX_WIN=fix_win.bat
 SRC_FNAME="git_name_info"
 DST_FNAME=my_"$SRC_FNAME"
 
-SRC_DIR="$CUR_DIR"/install.template
+SRC_DIR="$CUR_DIR"/install_template
 
 print_check() {
 echo -e "\033[1;36mCheck user info ...\033[0m"
