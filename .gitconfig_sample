@@ -37,18 +37,18 @@
     changed = cyan
     untracked = yellow
 [core]
-#    edit = mcedit
-    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	commentchar = ";"
     pager = less -FXRS
-#    FOR WIN
-#    autocrlf = true
+    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+#    edit = mcedit
+# FOR LINUX
 	autocrlf = input
     safecrlf = false
     eol = native
-#    FOR WIN
+# FOR WIN
 #    pager = more
-#    git config --global core.autocrlf true
-#    git config --global core.safecrlf true
+#    core.autocrlf true
+#    core.safecrlf true
 [blame]
     data = short
 [gui]
@@ -98,7 +98,7 @@ dfc = diff --cached
 visual = !gitk --all &
 
 # show history and log
-sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $@ && echo  ; }; f"
+sshow = "! f() { git --no-pager show --no-notes --stat --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --date=short --decorate $@ && echo  ; }; f"
 hist  = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%C(cyan)%d%Creset | %s %C(black bold)[%an]%Creset\"  --graph --date=short --decorate $@ && echo ; }; f"
 hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(black bold)[%an]%Creset\"            --graph --date=short --decorate $@ && echo ; }; f"
 hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
