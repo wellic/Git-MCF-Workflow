@@ -889,10 +889,11 @@ mcf-checkout = "! f(){ \
 ;}; f"
 
 
-# w-checkout-reset 
+# w-checkout-reset
 #  Сбросить l-...-prev переменные  и вернуть работу на стандартные ветки
   w-checkout-reset = "! git mcf-checkout-reset"
   w-co-reset       = "! git mcf-checkout-reset"
+  w-reset       = "! git mcf-checkout-reset"
 mcf-checkout-reset = "! f(){ \
  CMD='w-checkout-reset' \
  && showlog=${1:-on} \
@@ -993,4 +994,4 @@ loadsvn = "! f(){ \
 
 # Выполнять или нет создание удаленной ветки w-checkout.
 # l-checkout-autocreate-rbranch = off - 0|off или 1|on
-    l-checkout-autocreate-rbranch = on
+    l-checkout-autocreate-rbranch = off
