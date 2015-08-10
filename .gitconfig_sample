@@ -838,8 +838,8 @@ mcf-list-mcf-param = "! f() { \
 l-checkout-setprev = "! f(){ \
  CMD='l-checkout-setvar' \
  &&       master_new=${1:-$(git w-get-mcf-param l-master)} \
- && src1_rbranch_new=${2:-$master_new} \
- &&          fix_new=${3:-_fix_${master_new}} \
+ &&          fix_new=${2:-_fix_${master_new}} \
+ && src1_rbranch_new=${3:-$master_new} \
  && git l-echo-l1 \"$CMD $master_new $fix_new $src1_rbranch_new\" \
  && src1_rbranch=$(git w-get-mcf-param l-src1-rbranch) \
  &&       master=$(git w-get-mcf-param l-master) \
@@ -855,23 +855,24 @@ l-checkout-setprev = "! f(){ \
  && if [ \"$fix_prev\"          = '' ]; then git w-set-mcf-param l-prev-fix          \"$fix\"          off ; fi \
 ;}; f"
 
-# w-checkout $master_new [ $src1_rbranch_new $showlog $fix_new ]
+# w-checkout $master_new [ $master_new $fix_new $src1_rbranch_new $showlog ]
 #  Построить новую временную схему для выгрузки на удаленный сервер.
 #  Используется для создания hotfix веток.
 #  Конечная ветка: $fix_new.
   w-checkout = "! git mcf-checkout"
   w-co       = "! git mcf-checkout"
+  w-hotfix   = "! git mcf-checkout"
 mcf-checkout = "! f(){ \
  CMD='w-checkout' \
  &&        master_new=$1 \
- &&  src1_rbranch_new=${2:-$master_new} \
- &&           fix_new=${3:-_fix_${master_new}} \
+ &&           fix_new=${2:-_fix_${master_new}} \
+ &&  src1_rbranch_new=${3:-$master_new} \
  &&           showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $src1_rbranch_new $master_new $fix_new $showlog\" \
  && git l-echo-l2 \"$CMD 1: w-checkout-reset off \" && git w-checkout-reset off \
  && master=$(git w-get-mcf-param l-master) \
  && cfg=$(git w-get-mcf-param l-cfg) \
- && git l-echo-l2 \"$CMD: l-checkout-setprev $master_new $src1_rbranch_new $fix_new\" && git l-checkout-setprev $src1_rbranch_new $master_new $fix_new \
+ && git l-echo-l2 \"$CMD: l-checkout-setprev $master_new $fix_new $src1_rbranch_new \" && git l-checkout-setprev $master_new $fix_new $src1_rbranch_new \
  && if [ \"$(git l-check-exists-branch $master_new)\" = '0' ]; then \
       git l-echo \"git checkout $master_new\" && git checkout -q $master_new ; \
     else \
