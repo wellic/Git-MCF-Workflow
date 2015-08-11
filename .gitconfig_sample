@@ -271,7 +271,7 @@ l-check-is-on = "! f(){ \
 ;}; f"
 
 l-list-mcf-param = "! f() { \
- type=${1:-'--global'} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-20.80s = %s\\n\",$1,$2 }' \
+ type=${1:-'--global'} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-30.80s = %s\\n\",$1,$2 }' \
 ;}; f"
 
 l-fix-mcf-param = "! f() { \
@@ -282,6 +282,10 @@ l-fix-mcf-param = "! f() { \
 
 l-rev = "! f() { \
   git rev-list "$1" | head -n 1 \
+;}; f"
+
+l-quite = "! f() { \
+ if [ \"$(git w-get-mcf-param l-debug-level)\" != '0' ]; then echo ''; else echo '-q'; fi \
 ;}; f"
 
 #################
@@ -328,22 +332,23 @@ l-rev = "! f() { \
   w-create-base = "! git mcf-create-base"
 mcf-create-base = "! f(){ \
  CMD='w-create-base' \
+ && quite=$(git l-quite) \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $showlog\" \
- && git l-echo-l2 \"$CMD 1-3:\";git l-echo \"git checkout $master\" && git checkout -q $master  \
+ && git l-echo-l2 \"$CMD 1-3:\";git l-echo \"git checkout $master\" && git checkout $quite $master  \
  && git l-echo-l2 \"$CMD 2-3:\"; \
     if [ \"$(git l-check-exists-branch $cfg)\" = '0' ]; then \
-      git l-echo \"git checkout $cfg\" && git checkout -q $cfg ; \
+      git l-echo \"git checkout $cfg\" && git checkout $quite $cfg ; \
     else \
-      git l-echo \"git checkout -b $cfg $master\" && git checkout -b $cfg $master ; \
+      git l-echo \"git checkout -b $cfg $master\" && git checkout $quite -b $cfg $master ; \
     fi ; \
     if [ \"$(git l-check-exists-branch $fix)\" = '0' ]; then \
-      git l-echo \"git checkout $fix\" && git checkout -q $fix ; \
+      git l-echo \"git checkout $fix\" && git checkout $quite $fix ; \
     else \
-      git l-echo \"git checkout -b $fix $cfg\" && git checkout -b $fix $cfg ; \
+      git l-echo \"git checkout -b $fix $cfg\" && git checkout $quite -b $fix $cfg ; \
     fi \
  && git l-showlog $showlog \
 ;}; f"
@@ -355,14 +360,15 @@ mcf-create-base = "! f(){ \
   w-rebuild-base = "! git mcf-rebuild-base"
 mcf-rebuild-base = "! f(){ \
  CMD='w-rebuild-base' \
+ && quite=$(git l-quite) \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $showlog\" \
  && if [ \"$(git l-check-exists-branch $cfg)\" != '0' -o \"$(git l-check-exists-branch $fix)\" != '0' ]; then git w-create-base $fix $cfg $master off; fi \
- && git l-echo-l2 \"$CMD 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $master $cfg \
- && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $cfg $fix \
+ && git l-echo-l2 \"$CMD 1-2:\";git l-echo \"git rebase $master $cfg\" && git rebase $quite $master $cfg \
+ && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git rebase $cfg $fix\"    && git rebase $quite $cfg $fix \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -373,6 +379,7 @@ mcf-rebuild-base = "! f(){ \
   w-load-fix-from-repo = "! git mcf-load-fix-from-repo"
 mcf-load-fix-from-repo = "! f(){ \
  CMD='w-load-fix-from-repo' \
+ && quite=$(git l-quite) \
  &&       master=${1:-$(git w-get-mcf-param l-master)} \
  &&         src1=${2:-$(git w-get-mcf-param l-src1)} \
  && src1_rbranch=${3:-$(git w-get-mcf-param l-src1-rbranch)} \
@@ -381,12 +388,12 @@ mcf-load-fix-from-repo = "! f(){ \
  && git l-echo-l1 \"$CMD $master $src1 $src1_rbranch $method $showlog\" \
  && if [ \"$method\" = \"rebase\" ] \
 ; then \
-    git l-echo-l2 \"$CMD 1-2:\";git l-echo \"git checkout $master\"                   && git checkout -q $master \
- && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git pull --rebase $src1 $src1_rbranch \" && git pull --no-edit --rebase $src1 $src1_rbranch \
+    git l-echo-l2 \"$CMD 1-2:\";git l-echo \"git checkout $master\"                   && git checkout $quite $master \
+ && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git pull --rebase $src1 $src1_rbranch \" && git pull $quite --no-edit --rebase $src1 $src1_rbranch \
 ; else \
-    git l-echo-l2 \"$CMD 1-3:\";git l-echo \"git fetch $src1 $src1_rbranch \" && git fetch $src1 $src1_rbranch \
- && git l-echo-l2 \"$CMD 2-3:\";git l-echo \"git checkout $master\"           && git checkout -q $master \
- && git l-echo-l2 \"$CMD 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge --no-edit $src1/$src1_rbranch \
+    git l-echo-l2 \"$CMD 1-3:\";git l-echo \"git fetch $src1 $src1_rbranch \" && git fetch $quite $src1 $src1_rbranch \
+ && git l-echo-l2 \"$CMD 2-3:\";git l-echo \"git checkout $master\"           && git checkout $quite $master \
+ && git l-echo-l2 \"$CMD 3-3:\";git l-echo \"git merge $src1/$src1_rbranch \" && git merge $quite --no-edit $src1/$src1_rbranch \
 ; fi \
  && git l-showlog $showlog \
 ;}; f"
@@ -401,6 +408,7 @@ mcf-load-fix-from-repo = "! f(){ \
   w-update-common = "! git mcf-update-common"
 mcf-update-common = "! f(){ \
  CMD='w-update-common' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -416,7 +424,7 @@ mcf-update-common = "! f(){ \
 ; then git l-echo-l2 \"$CMD 2-4: do not need to update from src2\" \
 ; else git l-echo-l2 \"$CMD 2-4:\" && git w-load-fix-from-repo $master $src2 $src2_rbranch merge off \
 ; fi \
- && if [ \"$(git l-rev $master)\" != \"$(git l-rev $src1/$src1_rbranch)\"  ]; then git l-echo-l2 \"$CMD 2.2-4:\" && git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch ; fi \
+ && if [ \"$(git l-rev $master)\" != \"$(git l-rev $src1/$src1_rbranch)\"  ]; then git l-echo-l2 \"$CMD 2.2-4:\" && git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch ; fi \
  && if [ \"$rebuild_base\" = 'on' ] \
 ; then git l-echo-l2 \"$CMD 3-4:\" && git w-rebuild-base $fix $cfg $master off \
 ; else git l-echo-l2 \"$CMD 3-4: do not need to do rebuild base\"\
@@ -425,7 +433,7 @@ mcf-update-common = "! f(){ \
  && git l-echo-l2 \"$CMD 4-4:\" \
  && git l-echo-l1 \"w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
  && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
- && git checkout -q $cbr \
+ && git checkout $quite $cbr \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -437,6 +445,7 @@ mcf-update-common = "! f(){ \
   w-update2 = "! git mcf-update2"
 mcf-update2 = "! f(){ \
  CMD='w-update2' \
+ && quite=$(git l-quite) \
  &&         src2=${1:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${2:-$(git w-get-mcf-param l-src2-rbranch)} \
  &&          fix=${3:-$(git w-get-mcf-param l-fix)} \
@@ -459,6 +468,7 @@ mcf-update2 = "! f(){ \
   w-update = "! git mcf-update"
 mcf-update = "! f(){ \
  CMD='w-update' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -480,6 +490,7 @@ mcf-update = "! f(){ \
   w-upload-common = "! git mcf-upload-common"
 mcf-upload-common = "! f(){ \
  CMD='w-upload-common' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -500,7 +511,7 @@ mcf-upload-common = "! f(){ \
  && git l-echo-l2 \"$CMD 5-5:\" \
  && git l-echo-l1 \"w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
  && git w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
- && git checkout -q $cbr \
+ && git checkout $quite $cbr \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -512,6 +523,7 @@ mcf-upload-common = "! f(){ \
   w-upload2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
  CMD='w-upload2' \
+ && quite=$(git l-quite) \
  &&         src2=${1:-$(git w-get-mcf-param l-src2)} \
  && src2_rbranch=${2:-$(git w-get-mcf-param l-src2-rbranch)} \
  &&          fix=${3:-$(git w-get-mcf-param l-fix)} \
@@ -532,6 +544,7 @@ mcf-upload2 = "! f(){ \
   w-upload = "! git mcf-upload"
 mcf-upload = "! f(){ \
  CMD='w-upload' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -561,6 +574,7 @@ mcf-upload = "! f(){ \
   w-update-extcmd = "! git mcf-update-extcmd"
 mcf-update-extcmd = "! f(){ \
  CMD='w-update-extcmd' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -590,6 +604,7 @@ mcf-update-extcmd = "! f(){ \
   w-upload-extcmd = "! git mcf-upload-extcmd"
 mcf-upload-extcmd = "! f(){ \
  CMD='w-upload-extcmd' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -606,14 +621,15 @@ mcf-upload-extcmd = "! f(){ \
   w-apply-fix = "! git mcf-apply-fix"
 mcf-apply-fix = "! f(){ \
  CMD='w-apply-fix' \
+ && quite=$(git l-quite) \
  &&     fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&     cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&  master=${3:-$(git w-get-mcf-param l-master)} \
  && showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $showlog\" \
- && git l-echo-l2 \"$CMD 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout -q $fix \
- && git l-echo-l2 \"$CMD 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase --onto $master $cfg $fix  \
- && git l-echo-l2 \"$CMD 3-4:\";git l-echo \"git rebase $fix $master\"             && git rebase $fix $master \
+ && git l-echo-l2 \"$CMD 1-4:\";git l-echo \"git checkout $fix\"                   && git checkout $quite $fix \
+ && git l-echo-l2 \"$CMD 2-4:\";git l-echo \"git rebase --onto $master $cfg $fix\" && git rebase $quite --onto $master $cfg $fix  \
+ && git l-echo-l2 \"$CMD 3-4:\";git l-echo \"git rebase $fix $master\"             && git rebase $quite $fix $master \
  && git l-echo-l2 \"$CMD 4-4:\"                                                    && git w-rebuild-base $fix $cfg $master off \
  && git l-showlog $showlog \
 ;}; f"
@@ -624,6 +640,7 @@ mcf-apply-fix = "! f(){ \
   w-send-fix = "! git mcf-send-fix"
 mcf-send-fix = "! f(){ \
  CMD='w-send-fix' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -632,7 +649,7 @@ mcf-send-fix = "! f(){ \
  &&      showlog=${6:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $src1 $src1_rbranch $showlog\" \
  && git l-echo-l2 \"$CMD 1-2:\" && git w-apply-fix $fix $cfg $master off \
- && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+ && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -644,6 +661,7 @@ mcf-send-fix = "! f(){ \
   w-repair-conflict-master = "! git mcf-repair-conflict-master"
 mcf-repair-conflict-master = "! f(){ \
  CMD='w-repair-conflict-master' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -655,7 +673,7 @@ mcf-repair-conflict-master = "! f(){ \
  &&      showlog=${9:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $showlog\" \
  && git l-echo-l2 \"$CMD 1-2:\" && git w-rebuild-base $fix $cfg $master off \
- && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $src1 $master:$src1_rbranch \
+ && git l-echo-l2 \"$CMD 2-2:\";git l-echo \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch \
  && git l-echo \"$CMD: All fixed. Please start conflicted command again.\"\
 ;}; f"
 
@@ -666,6 +684,7 @@ mcf-repair-conflict-master = "! f(){ \
   w-repair-conflict-cfg = "! git mcf-repair-conflict-cfg"
 mcf-repair-conflict-cfg = "! f(){ \
  CMD='w-repair-conflict-cfg' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -687,6 +706,7 @@ mcf-repair-conflict-cfg = "! f(){ \
   w-repair-conflict-fix = "! git mcf-repair-conflict-fix"
 mcf-repair-conflict-fix = "! f(){ \
  CMD='w-repair-conflict-fix' \
+ && quite=$(git l-quite) \
  &&          fix=${1:-$(git w-get-mcf-param l-fix)} \
  &&          cfg=${2:-$(git w-get-mcf-param l-cfg)} \
  &&       master=${3:-$(git w-get-mcf-param l-master)} \
@@ -708,13 +728,14 @@ mcf-repair-conflict-fix = "! f(){ \
   w-backup-cfg = "! git mcf-backup-cfg"
 mcf-backup-cfg = "! f(){ \
  CMD='w-backup-cfg' \
+ && quite=$(git l-quite) \
  &&     cfg=${1:-$(git w-get-mcf-param l-cfg)} \
  &&    src1=${2:-$(git w-get-mcf-param l-src1)} \
  && showlog=${3:-on} \
  &&    nick=$(git mynickname) \
  && src1_rbranch=_${nick}_${cfg}_backup \
  && git l-echo-l1 \"$CMD $cfg $src1 $showlog\" \
- && git l-echo-l2 \"$CMD 1-1:\";git l-echo \"git push -f $src1 $cfg:$src1_rbranch\" && git push -f $src1 $cfg:$src1_rbranch \
+ && git l-echo-l2 \"$CMD 1-1:\";git l-echo \"git push -f $src1 $cfg:$src1_rbranch\" && git push $quite -f $src1 $cfg:$src1_rbranch \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -727,6 +748,7 @@ mcf-backup-cfg = "! f(){ \
   w-copy2tmp = "! git mcf-copy2tmp"
 mcf-copy2tmp = "! f(){ \
  CMD='w-copy2tmp' \
+ && quite=$(git l-quite) \
  &&     src1=${1:-$(git w-get-mcf-param l-src1)} \
  && showlog=${2:-on} \
  &&    nick=$(git mynickname) \
@@ -739,7 +761,7 @@ mcf-copy2tmp = "! f(){ \
  && git l-echo-l1 \"$CMD $src1 $showlog\" \
  && git l-echo-l2 \"$CMD 1-4:\";git l-echo \"git add --all\"                   && git add --all \
  && git l-echo-l2 \"$CMD 2-4:\";git l-echo \"git commit -am '$MESS'\"          && git commit -m \"${MESS}\" \
- && git l-echo-l2 \"$CMD 3-4:\";git l-echo \"git push -f $src1 $cbr:$src1_rbranch\" && git push -f $src1 $cbr:$src1_rbranch \
+ && git l-echo-l2 \"$CMD 3-4:\";git l-echo \"git push -f $src1 $cbr:$src1_rbranch\" && git push $quite -f $src1 $cbr:$src1_rbranch \
  && git l-echo-l2 \"$CMD 4-4:\";git l-echo \"git reset HEAD~1\"                && git reset HEAD~1 \
  && rm -f \"$TMPFILE\" \
  && git l-showlog $showlog \
@@ -753,11 +775,12 @@ mcf-copy2tmp = "! f(){ \
   w-fakecommit = "! git mcf-fakecommit "
 mcf-fakecommit = "! f(){ \
  CMD='w-fakecommit' \
+ && quite=$(git l-quite) \
  &&    mess=${1:-} \
  && showlog=${2:-on} \
  && a=_fakefile_.$(basename $PWD).$(date +%Y%m%d_%H%M%S) \
  && if [ -z \"$mess\" ]; then mess=\"Added $a\"; fi \
- && sleep 1 && touch \"$a\" && git add \"$a\" -- && git commit -m \"Fake: $mess\" \
+ && sleep 1 && touch \"$a\" && git add \"$a\" -- && git commit $quite -m \"Fake: $mess\" \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -864,6 +887,7 @@ l-checkout-setprev = "! f(){ \
   w-hotfix   = "! git mcf-checkout"
 mcf-checkout = "! f(){ \
  CMD='w-checkout' \
+ && quite=$(git l-quite) \
  &&        master_new=$1 \
  &&           fix_new=${2:-_fix_${master_new}} \
  &&  src1_rbranch_new=${3:-$master_new} \
@@ -874,13 +898,13 @@ mcf-checkout = "! f(){ \
  && cfg=$(git w-get-mcf-param l-cfg) \
  && git l-echo-l2 \"$CMD: l-checkout-setprev $master_new $fix_new $src1_rbranch_new \" && git l-checkout-setprev $master_new $fix_new $src1_rbranch_new \
  && if [ \"$(git l-check-exists-branch $master_new)\" = '0' ]; then \
-      git l-echo \"git checkout $master_new\" && git checkout -q $master_new ; \
+      git l-echo \"git checkout $master_new\" && git checkout $quite $master_new ; \
     else \
-      git l-echo \"git checkout -b $master_new $master\" && git checkout -b $master_new $master; \
+      git l-echo \"git checkout -b $master_new $master\" && git checkout $quite -b $master_new $master; \
       do_rbranch=$(git w-get-mcf-param l-checkout-autocreate-rbranch); \
       if [ $(git l-check-is-on $do_rbranch) = 'on' ]; then \
         src1=$(git w-get-mcf-param l-src1) \
-        && git l-echo \"git push -u ${src1} ${master_new}:${src1_rbranch_new}\" && git push -u ${src1} ${master_new}:${src1_rbranch_new} ; \
+        && git l-echo \"git push -u ${src1} ${master_new}:${src1_rbranch_new}\" && git push $quite -u ${src1} ${master_new}:${src1_rbranch_new} ; \
       fi \
     fi \
  && git l-echo-l2 \"$CMD 3: git w-rebuild-base $fix_new $cfg $master_new off\" && git w-rebuild-base $fix_new $cfg $master_new off \
@@ -889,7 +913,6 @@ mcf-checkout = "! f(){ \
  && git l-showlog $showlog \
 ;}; f"
 
-
 # w-checkout-reset
 #  Сбросить l-...-prev переменные  и вернуть работу на стандартные ветки
   w-checkout-reset = "! git mcf-checkout-reset"
@@ -897,6 +920,7 @@ mcf-checkout = "! f(){ \
   w-reset       = "! git mcf-checkout-reset"
 mcf-checkout-reset = "! f(){ \
  CMD='w-checkout-reset' \
+ && quite=$(git l-quite) \
  && showlog=${1:-on} \
  && src1_rbranch_prev=$(git w-get-mcf-param l-prev-src1-rbranch --local 1) \
  &&       master_prev=$(git w-get-mcf-param l-prev-master       --local 1) \
@@ -940,7 +964,7 @@ uploadsvn = "! f(){ \
 updatesvn = "! f(){ \
  fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
  && echo "=  updatesvn ${fix} ${cfg} ${master} " \
- && echo "== git checkout $master"    && git checkout -q $master  \
+ && echo "== git checkout $master"    && git checkout $quite $master  \
  && echo "== git svn rebase"          && git svn rebase \
  && echo "== git rebase $master $cfg" && git rebase $master $cfg \
  && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
@@ -948,9 +972,9 @@ updatesvn = "! f(){ \
 loadsvn = "! f(){ \
  fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
  && echo "=  loadsvn $fix $cfg $master " \
- && echo "== git checkout $fix"                   && git checkout -q $fix \
- && echo "== git rebase --onto $master $cfg $fix" && git rebase --onto $master $cfg $fix  \
- && echo "== git checkout $master"                && git checkout -q $master \
+ && echo "== git checkout $fix"                   && git checkout $quite $fix \
+ && echo "== git rebase --onto $master $cfg $fix" && git rebase $quite --onto $master $cfg $fix  \
+ && echo "== git checkout $master"                && git checkout $quite $master \
  && echo "== git rebase $fix $master"             && git rebase $fix $master ;}; f"
 
 ###################
