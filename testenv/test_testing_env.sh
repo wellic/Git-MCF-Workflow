@@ -110,13 +110,13 @@ start_test() {
       do_cmd "$STEP 2-$CNT ($DEV)"  "git w-fakecommit Initial_dev1_c1 off"
       do_cmd "$STEP 3-$CNT ($DEV)"  "git w-fakecommit dev1_c2 off"
       do_cmd "$STEP 4-$CNT ($DEV)"  "git w-fakecommit dev1_c3 off"
-      do_cmd "$STEP 5-$CNT ($DEV)"  "git push -u origin master"
+      do_cmd "$STEP 5-$CNT ($DEV)"  "git push -q -u origin master"
       do_cmd "$STEP 6-$CNT ($DEV)"  "git last"
 
       DEV=dev2
       do_cmd "$STEP 7-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
     
-      do_cmd "$STEP 8-$CNT ($DEV)"  "git pull origin master"
+      do_cmd "$STEP 8-$CNT ($DEV)"  "git pull -q origin master"
       do_cmd "$STEP 9-$CNT ($DEV)"  "git w-create-base"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
@@ -126,7 +126,7 @@ start_test() {
     CNT=4
     showinfo "$STEP $STEP_NAME"
       
-      do_cmd "$STEP 1-$CNT ($DEV)" "git checkout cfg"
+      do_cmd "$STEP 1-$CNT ($DEV)" "git checkout -q cfg"
       do_cmd "$STEP 2-$CNT ($DEV)" "git w-fakecommit dev2_cfg1 off"
       do_cmd "$STEP 3-$CNT ($DEV)" "git w-fakecommit dev2_cfg2 off"
       do_cmd "$STEP 4-$CNT ($DEV)" "git w-rebuild-base"
@@ -155,7 +155,7 @@ start_test() {
     CNT=8
     showinfo "$STEP $STEP_NAME"
       
-      do_cmd "$STEP 1-$CNT ($DEV)" "git push origin master"
+      do_cmd "$STEP 1-$CNT ($DEV)" "git push -q origin master"
       do_cmd "$STEP 2-$CNT ($DEV)" "git last -2"
 
       DEV=dev2
@@ -167,7 +167,7 @@ start_test() {
       DEV=dev1
       do_cmd "$STEP 6-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
       
-      do_cmd "$STEP 7-$CNT ($DEV)" "git pull --rebase origin master"
+      do_cmd "$STEP 7-$CNT ($DEV)" "git pull -q --rebase origin master"
       do_cmd "$STEP 8-$CNT ($DEV)" "git last -3"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
@@ -196,22 +196,22 @@ start_test() {
       do_cmd "$STEP 2-$CNT ($DEV)"  "git w-fakecommit dev3_c1 off"
       do_cmd "$STEP 3-$CNT ($DEV)"  "git w-fakecommit dev3_c2 off"
       do_cmd "$STEP 4-$CNT ($DEV)"  "git w-fakecommit dev3_c3 off"
-      do_cmd "$STEP 5-$CNT ($DEV)"  "git push -u server2 master"
+      do_cmd "$STEP 5-$CNT ($DEV)"  "git push -q -u server2 master"
       do_cmd "$STEP 6-$CNT ($DEV)"  "git last"
 
       DEV=dev1
       do_cmd "$STEP 7-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
-      do_cmd "$STEP 8-$CNT ($DEV)"  "git pull --rebase origin master"
+      do_cmd "$STEP 8-$CNT ($DEV)"  "git pull -q --rebase origin master"
       do_cmd "$STEP 9-$CNT ($DEV)"  "git w-fakecommit dev1_c6 off"
       do_cmd "$STEP 10-$CNT ($DEV)" "git w-fakecommit dev1_c7 off"
-      do_cmd "$STEP 11-$CNT ($DEV)" "git push origin master"
+      do_cmd "$STEP 11-$CNT ($DEV)" "git push -q origin master"
       do_cmd "$STEP 12-$CNT ($DEV)" "git last -6"
 
       DEV=dev2
       do_cmd "$STEP 13-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
-      do_cmd "$STEP 14-$CNT ($DEV)"  "git remote -v"
+      do_cmd "$STEP 14-$CNT ($DEV)" "git remote -v"
       do_cmd "$STEP 15-$CNT ($DEV)" "git w-fakecommit dev2_fix3 off"
-      do_cmd "$STEP 16-$CNT ($DEV)" "git checkout cfg"
+      do_cmd "$STEP 16-$CNT ($DEV)" "git checkout -q cfg"
       do_cmd "$STEP 17-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
       do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
       do_cmd "$STEP 19-$CNT ($DEV)" "git w-upload2 server2"
