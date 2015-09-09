@@ -900,6 +900,7 @@ mcf-hotfix = "! f(){ \
  CMD='w-hotfix' \
  && quite=$(git l-quite) \
  &&        master_hf=$1 \
+ && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&           fix_hf=${2:-_fix/${master_hf}} \
  &&  src1_rbranch_hf=${3:-$master_hf} \
  &&           showlog=${4:-on} \
@@ -928,6 +929,7 @@ mcf-hotfix = "! f(){ \
 #  Сбросить l-...-prev переменные  и вернуть работу на стандартные ветки
   w-hotfix-reset = "! git mcf-hotfix-reset"
   w-hf-reset     = "! git mcf-hotfix-reset"
+  w-reset        = "! git mcf-hotfix-reset"
 mcf-hotfix-reset = "! f(){ \
  CMD='w-hotfix-reset' \
  && quite=$(git l-quite) \
@@ -942,7 +944,7 @@ mcf-hotfix-reset = "! f(){ \
  && fix=$(git w-get-mcf-param l-fix) \
  && cfg=$(git w-get-mcf-param l-cfg) \
  && master=$(git w-get-mcf-param l-master) \
- && git l-echo-lc \"$CMD 1:\" \"git checkout $master\"  && git checkout $master \
+ && git l-echo-lc \"$CMD 1:\" \"git checkout $master\"  && git checkout $quite $master \
  && git l-echo-l2 \"$CMD 2:\"                           && git w-rebuild-base $fix $cfg $master off \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && git w-list-mcf-param local \
@@ -958,6 +960,7 @@ mcf-hotfix-update = "! f(){ \
  CMD='w-hotfix-update' \
  && quite=$(git l-quite) \
  &&        master_hf=$1 \
+ && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&           fix_hf=${2:-_fix/${master_hf}} \
  &&  src1_rbranch_hf=${3:-$master_hf} \
  &&           showlog=${4:-on} \
