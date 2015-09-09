@@ -59,7 +59,7 @@ showcmd() {
 
 exit_if_error() {
     local STATUS=$1
-    [ $STATUS = '0' ] && return 0
+    [ $STATUS == '0' ] && return 0
     local MESS=${2:-}
     [ ! -z "$MESS" ] && MESS="$MESS "
     MESS="${MESS}It was error."
@@ -74,7 +74,7 @@ do_cmd() {
     showinfo "$MESS: $DO_CMD"  "$COLOR"
 #    showinfo "$MESS:"  "$c_cmdinf"
 #    showcmd  "$DO_CMD" "$COLOR"
-    [ "$DO_CMD" = '' ] && return 0
+    [ "$DO_CMD" == '' ] && return 0
     $DO_CMD || exit_if_error $? "$MESS"
 }
 

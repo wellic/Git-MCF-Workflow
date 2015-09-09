@@ -73,7 +73,7 @@ make_devs() {
 }
 
 do_test() {
-    [ "$TEST_AFTER_INSTALL" = '1' ] && "$SCR_DIR"/"$TEST_PROG" "$INSTALL_DIR" "$NAME_TESTDIR" "$NAME_SERVER" "$NAME_DEV"
+    [ "$TEST_AFTER_INSTALL" == '1' ] && "$SCR_DIR"/"$TEST_PROG" "$INSTALL_DIR" "$NAME_TESTDIR" "$NAME_SERVER" "$NAME_DEV"
 }
 
 make_repos
