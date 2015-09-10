@@ -982,6 +982,12 @@ mcf-hotfix-update = "! f(){ \
  && git l-showlog $showlog \
 ;}; f"
 
+  w-fix-old-names = "! f(){ \
+ CMD='w-fix-old-names' \
+ && if [ \"$(git l-check-exists-branch cfg)\" = '0' ]; then git l-echo \"git branch -m cfg _cfg\" && git branch -m cfg _cfg ; fi\
+ && if [ \"$(git l-check-exists-branch fix)\" = '0' ]; then git l-echo \"git branch -m fix _fix\" && git branch -m fix _fix ; fi\
+;}; f"
+
 #######################################
 # git-svn useful (old workflow)
 # TODO: Refacroting usiong new workflow
@@ -1044,8 +1050,8 @@ mcf-hotfix-update = "! f(){ \
     l-backup-cfg = off
 
 #  MCF main branches names
-    l-fix    = fix
-    l-cfg    = cfg
+    l-fix    = _fix
+    l-cfg    = _cfg
     l-master = master
 
 #  Main source 1
@@ -1059,7 +1065,7 @@ mcf-hotfix-update = "! f(){ \
 #  MCF prev branches names
     l-prev-master       = master
     l-prev-src1-rbranch = master
-    l-prev-fix          = fix
+    l-prev-fix          = _fix
 
 # Выполнять или нет создание удаленной ветки w-hotfix.
 # l-hotfix-autocreate-rbranch = off - 0|off или 1|on
