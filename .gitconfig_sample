@@ -473,17 +473,20 @@ mcf-update-common = "! f(){ \
  && rebuild_base=${8:-on} \
  &&      showlog=${9:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch $rebuild_base $showlog\" \
+ && rev=$(git l-rev $master)\
  && git l-echo-l2 \"$CMD 1:\" && git w-load-fix-from-repo $master $src1 $src1_rbranch rebase off \
  && if [ \"$src1\" != \"$src2\" -o \"$src1_rbranch\" != \"$src2_rbranch\" ]; then \
       git l-echo-l2 \"$CMD 2:\" && git w-load-fix-from-repo $master $src2 $src2_rbranch merge off \
  ;  fi \
  && if [ \"$(git l-rev $master)\" != \"$(git l-rev $src1/$src1_rbranch)\"  ]; then git l-echo-lc \"$CMD 3:\" \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch ; fi \
  && if [ \"$rebuild_base\" = 'on' ]; then \
-      git l-echo-l2 \"$CMD 4:\" && git w-rebuild-base $fix $cfg $master off \
- ;  fi \
+       if [ \"$(git l-rev $master)\" != \"$rev\" ]; then\
+         git l-echo-l2 \"$CMD 4:\" && git w-rebuild-base $fix $cfg $master off \
+    ;  fi\
+ ;  fi\
  && cbr=$(git current-branch-name) \
  && git l-echo-l2 \"$CMD 5: w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" && git w-update-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
- && git l-echo-l2 \"$CMD 6:\" && git l-checkout $cbr \
+ && git l-echo-l2 \"$CMD 6:\" && git l-checkout $fix \
  && git l-showlog $showlog \
 ;}; f"
 
@@ -564,7 +567,7 @@ mcf-upload-common = "! f(){ \
  && git l-echo-l2 \"$CMD 6:\" \
  && git l-echo-l1 \"w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
  && git w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
- && git l-echo-l2 \"$CMD 7:\" && git l-checkout $cbr \
+ && git l-echo-l2 \"$CMD 7:\" && git l-checkout $fix \
  && git l-showlog $showlog \
 ;}; f"
 
