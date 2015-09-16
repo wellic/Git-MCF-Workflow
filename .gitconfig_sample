@@ -686,9 +686,8 @@ mcf-apply-fix = "! f(){ \
  && showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $showlog\" \
  && git l-echo-l2 \"$CMD 1:\"                                          && git l-checkout $fix \
- && rev=$(git l-rev $master)\
  && git l-echo-lc \"$CMD 2:\" \"git rebase --onto $master $cfg $fix\"  && git rebase $quite --onto $master $cfg $fix  \
- && if [ \"$(git l-rev $master)\" != \"$rev\" ]; then\
+ && if [ \"$(git l-rev $master)\" != \"$(git l-rev $fix)\" ]; then\
        git l-echo-lc \"$CMD 3:\" \"git rebase $fix $master\"           && git rebase $quite $fix $master \
     && git l-echo-l2 \"$CMD 4:\"                                       && git w-rebuild-base $fix $cfg $master off \
  ;  fi\
