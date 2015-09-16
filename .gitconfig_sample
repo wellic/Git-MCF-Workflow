@@ -563,10 +563,12 @@ mcf-upload-common = "! f(){ \
  && if [ $(git l-check-is-on $do_backup) = 'on' ] \
 ; then git l-echo-l2 \"$CMD 4:\"; git w-backup-cfg $cfg $src1 off \
 ; else git l-echo-l2 \"$CMD 5: skip backup $cfg\" ; fi \
- && cbr=$(git current-branch-name) \
- && git l-echo-l2 \"$CMD 6:\" \
- && git l-echo-l1 \"w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
- && git w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
+ && if [ \"$(git l-rev $master)\" != \"$rev\" ]; then\
+          cbr=$(git current-branch-name) \
+       && git l-echo-l2 \"$CMD 6:\" \
+       && git l-echo-l1 \"w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off\" \
+       && git w-upload-extcmd $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch off \
+ ;  fi\
  && git l-echo-l2 \"$CMD 7:\" && git l-checkout $fix \
  && git l-showlog $showlog \
 ;}; f"
@@ -686,9 +688,9 @@ mcf-apply-fix = "! f(){ \
  && git l-echo-l2 \"$CMD 1:\"                                          && git l-checkout $fix \
  && rev=$(git l-rev $master)\
  && git l-echo-lc \"$CMD 2:\" \"git rebase --onto $master $cfg $fix\"  && git rebase $quite --onto $master $cfg $fix  \
- && git l-echo-lc \"$CMD 3:\" \"git rebase $fix $master\"              && git rebase $quite $fix $master \
  && if [ \"$(git l-rev $master)\" != \"$rev\" ]; then\
-      git l-echo-l2 \"$CMD 4:\"                                        && git w-rebuild-base $fix $cfg $master off \
+       git l-echo-lc \"$CMD 3:\" \"git rebase $fix $master\"           && git rebase $quite $fix $master \
+    && git l-echo-l2 \"$CMD 4:\"                                       && git w-rebuild-base $fix $cfg $master off \
  ;  fi\
  && git l-echo-l2 \"$CMD 5:\"                                          && git l-checkout $fix \
  && git l-showlog $showlog \
@@ -708,8 +710,11 @@ mcf-send-fix = "! f(){ \
  && src1_rbranch=${5:-$(git w-get-mcf-param l-src1-rbranch)} \
  &&      showlog=${6:-on} \
  && git l-echo-l1 \"$CMD $fix $cfg $master $src1 $src1_rbranch $showlog\" \
+ && rev=$(git l-rev $master)\
  && git l-echo-l2 \"$CMD 1:\" && git w-apply-fix $fix $cfg $master off \
- && git l-echo-lc \"$CMD 2:\" \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch \
+ && if [ \"$(git l-rev $master)\" != \"$rev\" ]; then\
+      git l-echo-lc \"$CMD 2:\" \"git push $src1 $master:$src1_rbranch\" && git push $quite $src1 $master:$src1_rbranch \
+ ;  fi\
  && git l-showlog $showlog \
 ;}; f"
 
