@@ -936,9 +936,9 @@ mcf-hotfix = "! f(){ \
  && cfg=$(git w-get-mcf-param l-cfg) \
  && git l-echo-l2 \"$CMD 2:\"                                                          && git l-hotfix-setprev $master_hf $fix_hf $src1_rbranch_hf \
  && if git l-check-exists-branch $master_hf; then \
-      git l-echo-l2 \"$CMD 3:\"                                                        && git l-checkout $master_hf $master_hf ; \
+      git l-echo-l2 \"$CMD 3:\"                                                        && git l-checkout $master_hf ; \
     else \
-      git l-echo-l2 \"$CMD 1:\"                                                        && git l-checkout $master; \
+      git l-echo-lc \"$CMD 4:\" \"git checkout -b $master_hf $master\"                 && git checkout $quite -b $master_hf $master; \
       do_rbranch=$(git w-get-mcf-param l-hotfix-autocreate-rbranch); \
       if [ $(git l-check-is-on $do_rbranch) = 'on' ]; then \
         src1=$(git w-get-mcf-param l-src1) \
