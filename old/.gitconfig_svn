@@ -1,0 +1,41 @@
+[alias]
+
+#######################################
+# git-svn useful (old workflow)
+# TODO: Refacroting usiong new workflow
+#######################################
+#
+ pushall      = ! echo "=  pushall"         && git push --all origin
+ pushallforce = ! echo "=  pushallforce"    && git push --all --force origin
+
+ svnlog = !git svn log --oneline -20 | sort
+ svndcommit   = ! echo "=  git svn dcommit" && git svn dcommit
+
+ uploadsvn = "! f(){ \
+  fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
+  && echo "=  uploadsvn $fix $cfg $master " \
+  && git pushallforce \
+  && git updatesvn $fix $cfg $master \
+  && git loadsvn $fix $cfg $master \
+  && git svndcommit \
+  && git updatesvn $fix $cfg $master  \
+  && git pushallforce \
+  && echo "=====" && git last \
+  && echo "=====" && git svnlog ;}; f"
+
+ updatesvn = "! f(){ \
+  fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
+  && echo "=  updatesvn ${fix} ${cfg} ${master} " \
+  && echo "== git checkout $master"    && git checkout $quite $master  \
+  && echo "== git svn rebase"          && git svn rebase \
+  && echo "== git rebase $master $cfg" && git rebase $master $cfg \
+  && echo "== git rebase $cfg $fix"    && git rebase $cfg $fix ;}; f"
+
+ loadsvn = "! f(){ \
+  fix=${1:-$(git w-get-mcf-param l-fix)} && cfg=${2:-$(git w-get-mcf-param l-cfg)} && master=${3:-$(git w-get-mcf-param l-master)} \
+  && echo "=  loadsvn $fix $cfg $master " \
+  && echo "== git checkout $fix"                   && git checkout $quite $fix \
+  && echo "== git rebase --onto $master $cfg $fix" && git rebase $quite --onto $master $cfg $fix  \
+  && echo "== git checkout $master"                && git checkout $quite $master \
+  && echo "== git rebase $fix $master"             && git rebase $fix $master ;}; f"
+

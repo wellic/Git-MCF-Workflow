@@ -2,6 +2,9 @@
 
 DEBUG_LEVEL_WUPLOAD2=0
 
+CFG_BRANCH=$(git w-get-mcf-param l-cfg)
+FIX_BRANCH=$(git w-get-mcf-param l-fix)
+
 set -o nounset
 set -e
 
@@ -126,7 +129,7 @@ start_test() {
     CNT=4
     showinfo "$STEP $STEP_NAME"
       
-      do_cmd "$STEP 1-$CNT ($DEV)" "git checkout -q _cfg"
+      do_cmd "$STEP 1-$CNT ($DEV)" "git checkout -q $CFG_BRANCH"
       do_cmd "$STEP 2-$CNT ($DEV)" "git w-fakecommit dev2_cfg1 off"
       do_cmd "$STEP 3-$CNT ($DEV)" "git w-fakecommit dev2_cfg2 off"
       do_cmd "$STEP 4-$CNT ($DEV)" "git w-rebuild-base"
@@ -211,7 +214,7 @@ start_test() {
       do_cmd "$STEP 13-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
       do_cmd "$STEP 14-$CNT ($DEV)" "git remote -v"
       do_cmd "$STEP 15-$CNT ($DEV)" "git w-fakecommit dev2_fix3 off"
-      do_cmd "$STEP 16-$CNT ($DEV)" "git checkout -q _cfg"
+      do_cmd "$STEP 16-$CNT ($DEV)" "git checkout -q $CFG_BRANCH"
       do_cmd "$STEP 17-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
       do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
       do_cmd "$STEP 19-$CNT ($DEV)" "git w-upload2 server2"
@@ -229,13 +232,13 @@ start_test
 showinfo "Finish test: $STATUS" ${STATUS_COLOR}
 
 showinfo "Please check"
-cat << 'EOF'
-* ... | Fake: dev2_cfg3 (HEAD -> _fix, origin/_user_cfg_backup, _cfg)
+cat << EOF
+* ... | Fake: dev2_cfg3 (HEAD -> $FIX_BRANCH, origin/_user_cfg_backup, $CFG_BRANCH)
 * ... | Fake: dev2_cfg2
 * ... | Fake: dev2_cfg1
 * ... | Fake: dev2_fix3 (origin/master, master)
 * ... | Merge remote-tracking branch 'server2/master'
-|\
+|\\
 | * ... | Fake: dev3_c3 (server2/master)
 | * ... | Fake: dev3_c2
 | * ... | Fake: dev3_c1
