@@ -219,6 +219,10 @@ start_test() {
       do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
       do_cmd "$STEP 19-$CNT ($DEV)" "git w-upload2 server2"
       do_cmd "$STEP 20-$CNT ($DEV)" "git w-del-mcf-param l-src2 off"
+
+      DEV=dev1
+      do_cmd "$STEP 21-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
+      do_cmd "$STEP 22-$CNT ($DEV)"  "git pull -q --rebase origin master"
     showinfo "$STEP $STEP_NAME Status: Finished\n"
 
     STATUS='Ok'

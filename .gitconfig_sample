@@ -273,7 +273,7 @@ l-check-exists-branch = "! f(){ \
  showstatus=${2:-off} \
  ; status=1 \
  && if [ \"$1\" != '' ]; then \
-       git branch | grep -w $1 >/dev/null; \
+       git branch | grep -P \"\\s$1$\" >/dev/null; \
        status=$?; \
     fi; \
  if [ $(git l-check-is-on $showstatus) = 'on' ]; then echo $status; fi; \
@@ -304,16 +304,18 @@ l-list-mcf-param = "! f() { \
  type=${1:-'--global'} && git config \"$type\" --get-regex mcf.l- | sed 's/^mcf.//' | awk '{printf \"%-30.80s = %s\\n\",$1,$2 }' \
 ;}; f"
 
-# l-set-mcf-param $param $value [$type]
+# l-set-mcf-param $param $value $type [$level]
 # Показать список глобальных или локальных переменных
 # $type : --global|'' Default:'' for local
 l-set-mcf-param = "! f() { \
     param=${1:-''} \
  && value=${2:-''} \
- && type=${3:-''} \
+ &&  type=${3:-'--local'} \
+ && level=${4:-0} \
  && if [ $param = '' ]; then return 1; fi\
- && git l-echo \"git config $type mcf.${param} $value\" \
+ && git l-echo-l$level \"git config $type mcf.${param} $value\" \
  && git config \"$type\" \"mcf.${param}\" \"$value\" \
+ && return 0 \
 ;}; f"
 
 
@@ -328,21 +330,21 @@ l-fix-mcf-param = "! f() { \
 l-hotfix-setprev = "! f(){ \
  CMD='l-hotfix-setvar' \
  &&       master_new=${1:-$(git w-get-mcf-param l-master)} \
- &&          fix_new=${2:-_hf/_fix/${master_new}} \
+ &&          fix_new=${2:-_hfix/${master_new}} \
  && src1_rbranch_new=${3:-$master_new} \
  && git l-echo-l1 \"$CMD $master_new $fix_new $src1_rbranch_new\" \
  && src1_rbranch=$(git w-get-mcf-param l-src1-rbranch) \
  &&       master=$(git w-get-mcf-param l-master) \
  &&          fix=$(git w-get-mcf-param l-fix) \
- && git w-set-mcf-param l-src1-rbranch \"$src1_rbranch_new\" off \
- && git w-set-mcf-param l-master       \"$master_new\"       off \
- && git w-set-mcf-param l-fix          \"$fix_new\"          off \
+ && git l-set-mcf-param l-src1-rbranch \"$src1_rbranch_new\" '--local' \
+ && git l-set-mcf-param l-master       \"$master_new\"       '--local' \
+ && git l-set-mcf-param l-fix          \"$fix_new\"          '--local' \
  && src1_rbranch_prev=$(git w-get-mcf-param l-prev-src1-rbranch --local 1) \
  &&       master_prev=$(git w-get-mcf-param l-prev-master       --local 1) \
  &&          fix_prev=$(git w-get-mcf-param l-prev-fix          --local 1) \
- && if [ \"$src1_rbranch_prev\" = '' ]; then git w-set-mcf-param l-prev-src1-rbranch \"$src1_rbranch\" off ; fi \
- && if [ \"$master_prev\"       = '' ]; then git w-set-mcf-param l-prev-master       \"$master\"       off ; fi \
- && if [ \"$fix_prev\"          = '' ]; then git w-set-mcf-param l-prev-fix          \"$fix\"          off ; fi \
+ && if [ \"$src1_rbranch_prev\" = '' ]; then git l-set-mcf-param l-prev-src1-rbranch \"$src1_rbranch\" '--local'; fi \
+ && if [ \"$master_prev\"       = '' ]; then git l-set-mcf-param l-prev-master       \"$master\"       '--local'; fi \
+ && if [ \"$fix_prev\"          = '' ]; then git l-set-mcf-param l-prev-fix          \"$fix\"          '--local'; fi \
 ;}; f"
 
 l-checkout = "! f(){ \
@@ -891,7 +893,7 @@ mcf-set-mcf-param = "! f(){ \
  && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: value is empty.\" 1; exit 1; fi \
  && oldvalue=$(git w-get-mcf-param \"$param\") \
  && value=$(git l-fix-mcf-param \"$value\") \
- && if [ $(git config \"mcf.${param}\" \"$value\") ]; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
+ && if ! git l-set-mcf-param \"$param\" \"$value\" '--local'; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 4 1\
@@ -933,18 +935,19 @@ mcf-list-mcf-param = "! f() {\
 #  Построить новую временную схему для выгрузки на удаленный сервер.
 #  Используется для создания hotfix веток.
 #  Конечная ветка: $fix_hf.
-  w-hotfix = "! git mcf-hotfix"
-  w-hf     = "! git mcf-hotfix"
+  w-hotfix      = "! git mcf-hotfix"
+  w-hf          = "! git mcf-hotfix"
+  w-hf-checkout = "! git mcf-hotfix"
 mcf-hotfix = "! f(){ \
  CMD='w-hotfix' \
  && quite=$(git l-quite) \
  &&        master_hf=$1 \
  && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
- &&           fix_hf=${2:-_hf/_fix/${master_hf}} \
+ &&           fix_hf=${2:-_hfix/${master_hf}} \
  &&  src1_rbranch_hf=${3:-$master_hf} \
  &&           showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $master_hf $fix_hf $src1_rbranch_hf $showlog\" \
- && git l-echo-l2 \"$CMD 1:\"                                                          && git w-hotfix-reset off \
+ && git l-echo-l2 \"$CMD 1:\"                                                          && git w-hotfix-reset 1 off \
  && master=$(git w-get-mcf-param l-master) \
  && cfg=$(git w-get-mcf-param l-cfg) \
  && git l-echo-l2 \"$CMD 2:\"                                                          && git l-hotfix-setprev $master_hf $fix_hf $src1_rbranch_hf \
@@ -972,19 +975,22 @@ mcf-hotfix = "! f(){ \
 mcf-hotfix-reset = "! f(){ \
  CMD='w-hotfix-reset' \
  && quite=$(git l-quite) \
- && showlog=${1:-on} \
+ && do_rb=${1:-1} \
+ && showlog=${2:-on} \
  && src1_rbranch_prev=$(git w-get-mcf-param l-prev-src1-rbranch --local 1) \
  &&       master_prev=$(git w-get-mcf-param l-prev-master       --local 1) \
  &&          fix_prev=$(git w-get-mcf-param l-prev-fix          --local 1) \
  && git l-echo-l1 \"$CMD $showlog\" \
- && if [ \"$src1_rbranch_prev\" != '' ]; then git w-set-mcf-param l-src1-rbranch \"$src1_rbranch_prev\" off && git w-del-mcf-param l-prev-src1-rbranch off; fi \
- && if [ \"$master_prev\"       != '' ]; then git w-set-mcf-param l-master       \"$master_prev\"       off && git w-del-mcf-param l-prev-master       off; fi \
- && if [ \"$fix_prev\"          != '' ]; then git w-set-mcf-param l-fix          \"$fix_prev\"          off && git w-del-mcf-param l-prev-fix          off; fi \
+ && if [ \"$src1_rbranch_prev\" != '' ]; then git l-set-mcf-param l-src1-rbranch \"$src1_rbranch_prev\" --local && git w-del-mcf-param l-prev-src1-rbranch '--local'; fi \
+ && if [ \"$master_prev\"       != '' ]; then git l-set-mcf-param l-master       \"$master_prev\"       --local && git w-del-mcf-param l-prev-master       '--local'; fi \
+ && if [ \"$fix_prev\"          != '' ]; then git l-set-mcf-param l-fix          \"$fix_prev\"          --local && git w-del-mcf-param l-prev-fix          '--local'; fi \
  && fix=$(git w-get-mcf-param l-fix) \
  && cfg=$(git w-get-mcf-param l-cfg) \
  && master=$(git w-get-mcf-param l-master) \
  && git l-echo-l2 \"$CMD 1:\"                           && git l-checkout $master \
- && git l-echo-l2 \"$CMD 2:\"                           && git w-rebuild-base $fix $cfg $master off \
+ && if [ \"$do_rb\" = '1' ] ; then \
+      git l-echo-l2 \"$CMD 2:\"                         && git w-rebuild-base $fix $cfg $master off \
+ ;  fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && git w-list-mcf-param --local \
  && git l-showlog $showlog \
@@ -998,54 +1004,62 @@ mcf-hotfix-reset = "! f(){ \
 mcf-hotfix-update = "! f(){ \
  CMD='w-hotfix-update' \
  && quite=$(git l-quite) \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&        master_hf=$1 \
- && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
- &&           fix_hf=${2:-_hf/_fix/${master_hf}} \
+ &&           fix_hf=${2:-_hfix/$master_hf} \
  &&  src1_rbranch_hf=${3:-$master_hf} \
- &&           showlog=${4:-on} \
+ &&          showlog=${4:-on} \
  && git l-echo-l1 \"$CMD $master_hf $fix_hf $src1_rbranch_hf $showlog\" \
  && if git l-check-exists-branch $master_hf; then \
-         git l-echo-l2 \"$CMD 1:\"                                   && git w-hotfix-reset off \
-      &&          fix=$(git w-get-mcf-param l-fix) \
-      &&          cfg=$(git w-get-mcf-param l-cfg) \
-      &&       master=$(git w-get-mcf-param l-master) \
-      &&         src1=$(git w-get-mcf-param l-src1) \
-      && src1_rbranch=$(git w-get-mcf-param l-src1-rbranch ) \
-      &&         src2=$(git w-get-mcf-param l-src2 ) \
-      && src2_rbranch=$(git w-get-mcf-param l-src2-rbranch) \
-      && git l-echo-l2 \"$CMD 2:\"                                   && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch on off \
-      && git l-echo-l2 \"$CMD 3:\"                                   && git w-hotfix $master_hf $fix_hf $src1_rbranch_hf off \
-      && git l-echo-lc \"$CMD 4:\" \"git rebase $master $master_hf\" && git rebase $quite $master $master_hf \
+         git l-echo-l2 \"$CMD 1:\"                                 && git w-hotfix-reset 0 off \
  ;  fi \
- && git l-echo-l2 \"$CMD 5:\"                                        && git w-hotfix $master_hf $fix_hf $src1_rbranch_hf off \
+ &&          fix=$(git w-get-mcf-param l-fix) \
+ &&          cfg=$(git w-get-mcf-param l-cfg) \
+ &&       master=$(git w-get-mcf-param l-master) \
+ &&         src1=$(git w-get-mcf-param l-src1) \
+ && src1_rbranch=$(git w-get-mcf-param l-src1-rbranch ) \
+ &&         src2=$(git w-get-mcf-param l-src2 ) \
+ && src2_rbranch=$(git w-get-mcf-param l-src2-rbranch) \
+ && git l-echo-l2 \"$CMD 2:\"                                      && git w-update $fix $cfg $master $src1 $src1_rbranch $src2 $src2_rbranch on off \
+ && if git l-check-exists-branch $master_hf; then \
+       git l-echo-l2 \"$CMD 3:\"                                   && git l-checkout $master_hf \
+    && git l-echo-lc \"$CMD 4:\" \"git merge $src1/$src1_rbranch\" && git merge $quite --no-edit $src1/$src1_rbranch \
+ ;  fi \
+ && git l-echo-l2 \"$CMD 5:\"                                      && git w-hotfix $master_hf $fix_hf $src1_rbranch_hf off \
  && git l-showlog $showlog \
 ;}; f"
 
-# w-hotfix-remove [ $master_hf $fix_hf $src1_rbranch_hf $showlog ]
-#  Обновить hotfix ветку из удаленного репозитория
+# w-hotfix-purge [ $master_hf $fix_hf $src1_rbranch_hf $showlog ]
+#  Удалить локальные ветки для hotfiч
 #  Конечная ветка: не меняется
-  w-hotfix-remove = "! git mcf-hotfix-remove"
-  w-hf-remove     = "! git mcf-hotfix-remove"
-  w-hotfix-delete = "! git mcf-hotfix-remove"
-  w-hf-delete     = "! git mcf-hotfix-remove"
-mcf-hotfix-remove = "! f(){ \
- CMD='w-hotfix-delete' \
+  w-hotfix-purge = "! git mcf-hotfix-purge"
+  w-hf-purge     = "! git mcf-hotfix-purge"
+mcf-hotfix-purge = "! f(){ \
+ CMD='w-hotfix-purge' \
  && quite=$(git l-quite) \
- &&        master_hf=$1 \
- &&           fix_hf=${2:-_hf/_fix/${master_hf}} \
- &&          showlog=${3:-on} \
- && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && master_hf=$1 \
+ &&    fix_hf=${2:-_hfix/${master_hf}} \
+ &&   showlog=${3:-on} \
+ &&       cfg=$(git w-get-mcf-param l-cfg) \
  && git l-echo-l1 \"$CMD $master_hf $fix_hf $showlog\" \
- && git l-echo-l2 \"$CMD 1:\"                                && git w-hotfix-reset off\
- && if git l-check-exists-branch $master_hf; then \
-     git l-echo-cmd \"$CMD 2:\" \"git branch -d $master_hf\" && git branch $quite -d $master_hf\
+ && git l-echo-l2 \"$CMD 1:\"                                && git w-hotfix-reset 1 off\
+ && master=$(git w-get-mcf-param l-master) \
+ &&    cfg=$(git w-get-mcf-param l-cfg) \
+ && if git l-check-exists-branch $fix_hf; then \
+      if [ \"$(git l-rev $cfg)\" = \"$(git l-rev $fix_hf)\"  ]; then \
+        git l-echo-cmd \"$CMD 3:\" \"git branch -D $fix_hf\"    && git branch $quite -D $fix_hf\
+    ; fi\
  ;  fi\
  && if git l-check-exists-branch $master_hf; then \
-     git l-echo-cmd \"$CMD 3:\" \"git branch -d $fix_hf\"    && git branch $quite -d $fix_hf\
+      if [ \"$(git l-rev $master)\" = \"$(git l-rev $master_hf)\"  ]; then \
+        git l-echo-cmd \"$CMD 2:\" \"git branch -D $master_hf\" && git branch $quite -D $master_hf\
+    ; fi\
  ;  fi\
  && git l-showlog $showlog \
 ;}; f"
 
+### Attention!!!
 l-fix-old-param = "! f(){ \
  CMD='l-fix-old-param' \
  && paramname=$1 \
@@ -1056,14 +1070,14 @@ l-fix-old-param = "! f(){ \
  ; git l-echo-l2 \"$CMD 1: name=$paramname type=$type cur_value=$cur\" \
  ; if [ \"$cur\" != '' -a \"$cur\" = \"$old\" ]; then \
        git l-echo-l2 \"$CMD 2:\"\
-     && git l-set-mcf-param \"$paramname\" \"$new\" \"$type\" \
+     && git l-set-mcf-param \"$paramname\" \"$new\" \"$type\" 0 \
  ; fi \
  && type=--global\
  && cur=$(git w-get-mcf-param $paramname $type 1) \
  ; git l-echo-l2 \"$CMD 3: name=$paramname type=$type cur_value=$cur\" \
  ; if [ \"$cur\" != '' -a \"$cur\" = \"$old\" ]; then \
        git l-echo-l2 \"$CMD 4:\"\
-     && git l-set-mcf-param \"$paramname\" \"$new\" \"$type\" \
+     && git l-set-mcf-param \"$paramname\" \"$new\" \"$type\" 0 \
  ; fi \
 ;}; f"
 
