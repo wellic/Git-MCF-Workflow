@@ -96,6 +96,7 @@ df = diff
 df0 = diff -U0
 dfc = diff --cached
 dfc0 = diff --cached -U0
+df0c = diff --cached -U0
 visual = !LANG=C gitk --all &
 
 # show history and log
