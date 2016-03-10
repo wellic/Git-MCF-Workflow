@@ -1060,17 +1060,17 @@ mcf-hotfix-purge = "! f(){ \
  && master=$(git w-get-mcf-param l-master) \
  &&    cfg=$(git w-get-mcf-param l-cfg) \
  && if git l-check-exists-branch $fix_hf; then \
-      if [ \"$(git l-rev $cfg)\" = \"$(git l-rev $fix_hf)\"  ]; then \
+      if [ \"$fix\" != \"$fix_hf\"  ]; then \
         git l-echo-cmd \"$CMD 2:\" \"git branch -D $fix_hf\"    && git branch $quite -D $fix_hf\
     ; fi\
  ;  fi\
  && if git l-check-exists-branch $cfg_hf; then \
-      if [ \"$(git l-rev $cfg)\" = \"$(git l-rev $cfg_hf)\"  ]; then \
+      if [ \"$cfg\" != \"$cfg_hf\"  ]; then \
         git l-echo-cmd \"$CMD 3:\" \"git branch -D $cfg_hf\"    && git branch $quite -D $cfg_hf\
     ; fi\
  ;  fi\
  && if git l-check-exists-branch $master_hf; then \
-      if [ \"$(git l-rev $master)\" = \"$(git l-rev $master_hf)\"  ]; then \
+      if [ \"$master\" != \"$master_hf\"  ]; then \
         git l-echo-cmd \"$CMD 4:\" \"git branch -D $master_hf\" && git branch $quite -D $master_hf\
     ; fi\
  ;  fi\
