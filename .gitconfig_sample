@@ -908,6 +908,20 @@ mcf-set-mcf-param = "! f(){ \
  && git w-list-mcf-param \
 ;}; f"
 
+# w-set-mcf-new-master $value [ $showlog ]
+#  Устанавливает новое значение $value для параметров master и src1_rbranch.
+#  Установка происходит в локальном конфиге.
+  w-set-mcf-new-master = "! git mcf-set-mcf-new-master "
+mcf-set-mcf-new-master = "! f(){ \
+ CMD='w-set-mcf-new-master' \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
+ && value=${1:-} \
+ && showlog=${2:-on} \
+ && git w-set-mcf-param \"l-master\" \"$value\" 0 \
+ && git w-set-mcf-param \"l-src1-rbranch\" \"$value\" 0 \
+ && git w-list-mcf-param \
+;}; f"
+
 # w-del-mcf-param $name [ $showlog ]
 #  Удаляет локальное значение параметра c именем $name, если параметр существует в локальном конфиг файле git.
   w-del-mcf-param = "! git mcf-del-mcf-param "
