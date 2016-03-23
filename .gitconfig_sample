@@ -313,7 +313,7 @@ l-set-mcf-param = "! f() { \
     param=${1:-''} \
  && value=${2:-''} \
  &&  type=${3:-'--local'} \
- && level=${4:-0} \
+ && level=${4:-1} \
  && if [ $param = '' ]; then return 1; fi\
  && git l-echo-l$level \"git config $type mcf.${param} $value\" \
  && git config \"$type\" \"mcf.${param}\" \"$value\" \
@@ -908,18 +908,32 @@ mcf-set-mcf-param = "! f(){ \
  && git w-list-mcf-param \
 ;}; f"
 
-# w-set-mcf-new-master $value [ $showlog ]
+# w-set-new-master $value [ $showlog ]
 #  Устанавливает новое значение $value для параметров master и src1_rbranch.
 #  Установка происходит в локальном конфиге.
-  w-set-mcf-new-master = "! git mcf-set-mcf-new-master "
-mcf-set-mcf-new-master = "! f(){ \
- CMD='w-set-mcf-new-master' \
+  w-set-new-master = "! git mcf-set-new-master "
+mcf-set-new-master = "! f(){ \
+ CMD='w-set-new-master' \
  && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
  && value=${1:-} \
  && showlog=${2:-on} \
- && git w-set-mcf-param \"l-master\" \"$value\" 0 \
- && git w-set-mcf-param \"l-src1-rbranch\" \"$value\" 0 \
+ && git l-echo-l1 \"$CMD $value $showlog\" \
+ && git l-echo-l2 \"$CMD 1:\" && git w-set-mcf-param \"l-master\" \"$value\" 0 \
+ && git l-echo-l2 \"$CMD 2:\" && git w-set-mcf-param \"l-src1-rbranch\" \"$value\" 0 \
+ && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && git w-list-mcf-param \
+;}; f"
+
+# w-set-new-master-cbr [ $showlog ]
+#  Устанавливает новое значение $value для параметров master и src1_rbranch как текущая ветка.
+#  Установка происходит в локальном конфиге.
+  w-set-new-master-cbr = "! git mcf-set-new-master-cbr "
+mcf-set-new-master-cbr = "! f(){ \
+ CMD='w-set-new-master-cbr' \
+ && showlog=${1:-on} \
+ && git l-echo-l1 \"$CMD $showlog\" \
+ && cbr=$(git current-branch-name)\
+ && git l-echo-l2 \"$CMD 1:\" && git w-set-new-master \"$cbr\" $showlog \
 ;}; f"
 
 # w-del-mcf-param $name [ $showlog ]
@@ -932,13 +946,39 @@ mcf-del-mcf-param = "! f(){ \
  && showlog=${2:-on} \
  && oldvalue=$(git w-get-mcf-param $param) \
  && ( t=$(git config --local mcf.$param) && git config --local --unset mcf.$param || : ) \
- && if [ \"$(git config --local --get-regex 'mcf.l-')\" = '' ]; then git config --local --remove-section mcf || : ; fi \
+ && mcf=$(git config --local --get-regex 'mcf.l-')\
+ && if [ \"$mcf\" = '' ]; then \
+      git config --local --remove-section mcf \
+ ;  fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\")\
  && git l-echo \"Old: $param = $oldvalue\" 4 1\
  && git l-echo \"New: $param = $newvalue\" 2 0\
  && git w-list-mcf-param \
 ;}; f"
+
+# w-clear-mcf-local-branch [ $showlog ]
+#  Удаляет локальные значения имен mcf-веток.
+  w-clear-mcf-local-branch = "! git mcf-clear-mcf-local-branch "
+mcf-clear-mcf-local-branch = "! f(){ \
+ CMD='w-clear-mcf-local-branch' \
+ && showlog=${1:-on} \
+ && git l-echo-l1 \"$CMD $value $showlog\" \
+ ;  git l-echo-l2 \"$CMD 1: \"  && git w-del-mcf-param \"l-fix\" 0 \
+ ;  git l-echo-l2 \"$CMD 2: \"  && git w-del-mcf-param \"l-cfg\" 0 \
+ ;  git l-echo-l2 \"$CMD 3: \"  && git w-del-mcf-param \"l-master\" 0 \
+ ;  git l-echo-l2 \"$CMD 4: \"  && git w-del-mcf-param \"l-src1\" 0 \
+ ;  git l-echo-l2 \"$CMD 5: \"  && git w-del-mcf-param \"l-src1-rbranch\" 0 \
+ ;  git l-echo-l2 \"$CMD 6: \"  && git w-del-mcf-param \"l-src2\" 0 \
+ ;  git l-echo-l2 \"$CMD 7: \"  && git w-del-mcf-param \"l-src2-rbranch\" 0 \
+ ;  git l-echo-l2 \"$CMD 8: \"  && git w-del-mcf-param \"l-prev-fix\" 0 \
+ ;  git l-echo-l2 \"$CMD 9: \"  && git w-del-mcf-param \"l-prev-cfg\" 0 \
+ ;  git l-echo-l2 \"$CMD 10:\"  && git w-del-mcf-param \"l-prev-master\" 0 \
+ ;  git l-echo-l2 \"$CMD 11:\"  && git w-del-mcf-param \"l-prev-src1-rbranch\" 0 \
+ ;  if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
+ && git w-list-mcf-param \
+;}; f"
+
 
 # w-list-mcf-param
 #  Показывает значения всех l-* параметров для текущего проекта.
