@@ -908,12 +908,12 @@ mcf-set-mcf-param = "! f(){ \
  && git w-list-mcf-param \
 ;}; f"
 
-# w-set-new-master $value [ $showlog ]
+# w-new-master $value [ $showlog ]
 #  Устанавливает новое значение $value для параметров master и src1_rbranch.
 #  Установка происходит в локальном конфиге.
-  w-set-new-master = "! git mcf-set-new-master "
-mcf-set-new-master = "! f(){ \
- CMD='w-set-new-master' \
+  w-new-master = "! git mcf-new-master "
+mcf-new-master = "! f(){ \
+ CMD='w-new-master' \
  && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
  && value=${1:-} \
  && showlog=${2:-on} \
@@ -924,16 +924,16 @@ mcf-set-new-master = "! f(){ \
  && git w-list-mcf-param \
 ;}; f"
 
-# w-set-new-master-cbr [ $showlog ]
+# w-new-master-cbr [ $showlog ]
 #  Устанавливает новое значение $value для параметров master и src1_rbranch как текущая ветка.
 #  Установка происходит в локальном конфиге.
-  w-set-new-master-cbr = "! git mcf-set-new-master-cbr "
-mcf-set-new-master-cbr = "! f(){ \
- CMD='w-set-new-master-cbr' \
+  w-new-master-cbr = "! git mcf-new-master-cbr "
+mcf-new-master-cbr = "! f(){ \
+ CMD='w-new-master-cbr' \
  && showlog=${1:-on} \
  && git l-echo-l1 \"$CMD $showlog\" \
  && cbr=$(git current-branch-name)\
- && git l-echo-l2 \"$CMD 1:\" && git w-set-new-master \"$cbr\" $showlog \
+ && git l-echo-l2 \"$CMD 1:\" && git w-new-master \"$cbr\" $showlog \
 ;}; f"
 
 # w-del-mcf-param $name [ $showlog ]
