@@ -1066,7 +1066,7 @@ mcf-hotfix-lite = "! f(){ \
 ;}; f"
 
 # Проверяет наличие локальной ветки 0-существует, 1-нет
-l-remove-merged-branch = "! f(){ \
+w-remove-merged-branch = "! f(){ \
  BR=${1:-''} \
  && if [ \"$1\" = '' ]; then return 0; fi\
  && if ! git l-check-exists-branch $BR; then return 0; fi\
@@ -1098,8 +1098,8 @@ mcf-hotfix-reset = "! f(){ \
  && master=$(git w-get-mcf-param l-master) \
  && git l-echo-l2 \"$CMD 1:\"                           && git l-checkout $master \
  && if [ \"$do_rb\" = '1' ] ; then \
-      git l-remove-merged-branch $fix; \
-      git l-remove-merged-branch $cfg; \
+      git w-remove-merged-branch $fix; \
+      git w-remove-merged-branch $cfg; \
       git l-echo-l2 \"$CMD 2:\"                         && git w-create-base $fix $cfg $master off \
  ;  fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
