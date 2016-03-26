@@ -85,7 +85,10 @@
 
 br = branch
 br-info = branch -vv --list
-br-info-all = branch -ravv --list
+br-info-all = branch -vv --list -ra
+bri = branch -vv --list
+bria = branch -vv --list -ra
+
 co = checkout
 ci = commit
 amend = commit --amend -C HEAD
