@@ -1027,13 +1027,11 @@ mcf-hotfix = "! f(){ \
  && src1=$(git w-get-mcf-param l-src1) \
  && if git l-check-exists-branch $master_hf; then \
         git l-echo-l2 \"$CMD 3:\"                                                           && git l-checkout $master_hf; \
-        if git l-check-exists-branch $src1/$master_hf; then \
-            git l-echo-lc \"$CMD 2:\" \"git branch --set-upstream-to=$src1/$master_hf\"     && git branch $quite --set-upstream-to=$src1/$master_hf;\
-        fi;\
     else \
-        git l-echo-lc \"$CMD 4:\" \"git checkout -b $master_hf $master\"                    && git checkout $quite -b $master_hf $master; \
         if git l-check-exists-branch $src1/$master_hf; then \
-            git l-echo-lc \"$CMD 2:\" \"git branch --set-upstream-to=$src1/$master_hf\"     && git branch $quite --set-upstream-to=$src1/$master_hf;\
+            git l-echo-lc \"$CMD 4:\" \"git checkout -b $master_hf $src1/$master_hf\"       && git checkout $quite -b $master_hf $src1/$master_hf; \
+        else\
+            git l-echo-lc \"$CMD 4:\" \"git checkout -b $master_hf $master\"                && git checkout $quite -b $master_hf $master; \
         fi\
         && git l-echo-lc \"$CMD 5:\" \"git checkout -b $cfg_hf $master_hf\"                 && git checkout $quite -b $cfg_hf $master_hf \
         && git l-echo-lc \"$CMD 6:\" \"git rebase --onto $cfg_hf $master $cfg\"             && git rebase $quite --onto $cfg_hf $master $cfg  \
@@ -1201,24 +1199,22 @@ mcf-flow-feature = "! f(){ \
     fi\
  && if git l-check-exists-branch $DEV; then\
         git l-echo-l2 \"$CMD 5:\"                                                   && git l-checkout $DEV; \
-        if git l-check-exists-branch $ORIGIN/$DEV; then\
-            git l-echo-lc \"$CMD 6:\" \"git branch --set-upstream-to=$ORIGIN/$DEV\" && git branch $quite --set-upstream-to=$ORIGIN/$DEV;\
-        fi;\
     else \
-        git l-echo-lc \"$CMD 7:\" \"git checkout -b $DEV\"                          && git checkout $quite -b $DEV; \
+        if git l-check-exists-branch $ORIGIN/$DEV; then\
+          git l-echo-lc \"$CMD 7:\" \"git checkout -b $DEV $ORIGIN/$DEV\"           && git checkout $quite -b $DEV $ORIGIN/$DEV; \
+        else \
+          git l-echo-lc \"$CMD 7:\" \"git checkout -b $DEV\"                        && git checkout $quite -b $DEV; \
+        fi;\
     fi\
  && if git l-check-exists-branch $ORIGIN/$DEV; then\
         git l-echo-lc \"$CMD 8:\" \"git branch --set-upstream-to=$ORIGIN/$DEV\"     && git branch $quite --set-upstream-to=$ORIGIN/$DEV;\
     fi\
  && git l-echo-l2 \"$CMD 9:\"                                                       && git w-new-master $DEV 0\
  && git l-echo-l2 \"$CMD 10:\"                                                      && git w-hotfix-lite $FEATURE 0\
- && if git l-check-exists-branch $ORIGIN/$FEATURE; then\
-      git l-echo-lc \"$CMD 11:\" \"git branch --set-upstream-to=$ORIGIN/$FEATURE\"  && git branch $quite --set-upstream-to=$ORIGIN/$FEATURE;\
-    fi\
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
- && git l-echo-l2 \"$CMD 12:\"                                                      && git w-list-mcf-param \
+ && git l-echo-l2 \"$CMD 11:\"                                                      && git w-list-mcf-param --local\
  && git l-echo \"Check branches upstream:\" 5 0\
- && git l-echo-l2 \"$CMD 13:\"                                                      && git br-info $BR $DEV $FEATURE \
+ && git l-echo-l2 \"$CMD 12:\"                                                      && git br-info $BR $DEV $FEATURE \
 ;}; f"
 
 
