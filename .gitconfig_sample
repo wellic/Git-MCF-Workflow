@@ -597,6 +597,7 @@ mcf-update = "! f(){ \
 #  Затем изменения из $fix заливаются в $master и отправляются в $src1/$src1_rbranch.
 #  Конечная ветка: $fix.
   w-upload-common = "! git mcf-upload-common"
+  w-publish-common = "! git mcf-upload-common"
 mcf-upload-common = "! f(){ \
  CMD='w-upload-common' \
  && quite=$(git l-quite) \
@@ -635,6 +636,7 @@ mcf-upload-common = "! f(){ \
 #  Более удобна при работе с 2-мя источниками, чем w-upload-common, если используюся параметры по-умолчанию, а нужно указать только параметры второго источника.
 #  Конечная ветка: $fix.
   w-upload2 = "! git mcf-upload2"
+  w-publish2 = "! git mcf-upload2"
 mcf-upload2 = "! f(){ \
  CMD='w-upload2' \
  && quite=$(git l-quite) \
@@ -656,6 +658,7 @@ mcf-upload2 = "! f(){ \
 #  Затем изменения из $fix заливаются в $master и отправляются в $src1/$src1_rbranch.
 #  Конечная ветка: $fix.
   w-upload = "! git mcf-upload"
+  w-publish = "! git mcf-upload"
 mcf-upload = "! f(){ \
  CMD='w-upload' \
  && quite=$(git l-quite) \
