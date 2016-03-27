@@ -719,6 +719,7 @@ mcf-update-extcmd = "! f(){ \
 #          &&              git push server2 $master:remote_branch   \
 #       ;}; f"
   w-upload-extcmd = "! git mcf-upload-extcmd"
+  w-publish-extcmd = "! git mcf-upload-extcmd"
 mcf-upload-extcmd = "! f(){ \
  CMD='w-upload-extcmd' \
  && quite=$(git l-quite) \
