@@ -377,6 +377,28 @@ l-checkout = "! f(){ \
  ;  fi\
 ;}; f"
 
+l-remove-all-local-branch = "! f(){ \
+ CMD='l-remove-all-local-branch'\
+ && force=${1:-}\
+ && quite=$(git l-quite) \
+ && git w-reset 0 0\
+ && src1=$(git w-get-mcf-param l-src1) \
+ && rbranch=$(git w-get-mcf-param l-src1-rbranch) \
+ && if ! git l-check-exists-branch $src1/$rbranch ; then\
+        src1=$(git w-get-mcf-param l-src1 --global) \
+        && rbranch=$(git w-get-mcf-param l-src1-rbranch --global); \
+    fi\
+ && git l-checkout $src1/$rbranch \
+ && mode=-d\
+ && if [ \"$force\" = '-f' ]; then mode=-D; fi \
+ && branches=$(git branch | grep -v '*')\
+ && if [ $? ]; then\
+           git l-echo-lc \"$CMD 1:\" \"git branch | grep -v '*' | xargs git branch $mode\" \
+        && echo "$branches" | xargs git branch $mode; \
+    fi\
+ && git br-info-all\
+;}; f"
+
 #################
 # Global commands
 #################
@@ -888,13 +910,13 @@ mcf-fakecommit = "! f(){ \
   w-get-mcf-param = "! git mcf-get-mcf-param "
 mcf-get-mcf-param = "! f(){ \
  CMD='w-get-mcf-param' \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nParameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-} \
  && typevar=${2:-} \
  && emptyok=${3:-'0'} \
  && value=$(git config ${typevar} \"mcf.${param}\" ) \
- ;  if [ \"$?\" != '0'   -a  \"$emptyok\" = '0' ]; then git l-echo \"$CMD Error: incorrect parameter name '$param'.\" 1; exit 1; fi\
- ;  if [ \"$value\" = '' -a  \"$emptyok\" = '0' ]; then git l-echo \"$CMD Error: parameter '$param' is empty'.\" 1; exit 1; fi \
+ ;  if [ \"$?\" != '0'   -a  \"$emptyok\" = '0' ]; then git l-echo \"$CMD Error!!!\nIncorrect parameter name '$param'.\" 1; exit 1; fi\
+ ;  if [ \"$value\" = '' -a  \"$emptyok\" = '0' ]; then git l-echo \"$CMD Error!!!\nParameter '$param' is empty'.\" 1; exit 1; fi \
  ;  echo \"$value\" \
 ;}; f"
 
@@ -905,14 +927,14 @@ mcf-get-mcf-param = "! f(){ \
   w-set-mcf-param = "! git mcf-set-mcf-param "
 mcf-set-mcf-param = "! f(){ \
  CMD='w-set-mcf-param' \
- && if [ $# -lt 2 ]; then git l-echo \"$CMD Error: must be minimum 2 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 2 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 2 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-} \
  && value=${2:-} \
  && showlog=${3:-on} \
- && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error: value is empty.\" 1; exit 1; fi \
+ && if [ \"$value\" = '' ]; then git l-echo \"$CMD Error!!!\nSecond parameter is empty.\" 1; exit 1; fi \
  && oldvalue=$(git w-get-mcf-param \"$param\") \
  && value=$(git l-fix-mcf-param \"$value\") \
- && if ! git l-set-mcf-param \"$param\" \"$value\" '--local'; then git l-echo \"$CMD Error when set new value '$value' of param $param'.\" 1; exit 1; fi \
+ && if ! git l-set-mcf-param \"$param\" \"$value\" '--local'; then git l-echo \"$CMD Error!!!\nError occurs when setting the new value '$value' of param $param'.\" 1; exit 1; fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && newvalue=$(git w-get-mcf-param \"$param\") \
  && git l-echo \"Old: $param = $oldvalue\" 4 1\
@@ -927,7 +949,7 @@ mcf-set-mcf-param = "! f(){ \
   w-new-master = "! git mcf-new-master "
 mcf-new-master = "! f(){ \
  CMD='w-new-master' \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameters name and value.\" 1; git w-list-mcf-param; exit 1;fi \
  && value=${1:-} \
  && showlog=${2:-on} \
  && git l-echo-l1 \"$CMD $value $showlog\" \
@@ -954,7 +976,7 @@ mcf-new-master-cbr = "! f(){ \
   w-del-mcf-param = "! git mcf-del-mcf-param "
 mcf-del-mcf-param = "! f(){ \
  CMD='w-del-mcf-param' \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: parameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nParameter name is absent.\" 1; git w-list-mcf-param; exit 1;fi \
  && param=${1:-''} \
  && showlog=${2:-on} \
  && oldvalue=$(git w-get-mcf-param $param) \
@@ -1017,7 +1039,7 @@ mcf-hotfix = "! f(){ \
  CMD='w-hotfix' \
  && quite=$(git l-quite) \
  &&        master_hf=$1 \
- && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && if [ -z $master_hf ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&           cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
  &&           fix_hf=${3:-_hfix/${master_hf}/_fix} \
  &&  src1_rbranch_hf=${4:-$master_hf} \
@@ -1052,8 +1074,8 @@ mcf-hotfix = "! f(){ \
 
 # w-hotfix-lite $master_hf [$showlog ]
 #  Построить новую временную схему для выгрузки на удаленный сервер.
-#  Используется для создания hotfix веток.
-#  Конечная ветка: $fix_hf.
+#  Используется для создания hotfix веток c дефолтными именами вспомогательных веток (_cfg,_fix).
+#  Конечная ветка: _hfix/$master_hf/_fix
   w-hotfix-lite = "! git mcf-hotfix-lite"
   w-hf-lite     = "! git mcf-hotfix-lite"
 mcf-hotfix-lite = "! f(){ \
@@ -1062,7 +1084,7 @@ mcf-hotfix-lite = "! f(){ \
  &&          master_hf=$1 \
  &&          showlog=${2:-on} \
  && git l-echo-l1 \"$CMD $master_hf $showlog\" \
- && if [ -z $master_hf ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && if [ -z $master_hf ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  && git l-echo-l2 \"$CMD 1:\" && git w-hotfix $master_hf '' '' '' $showlog \
 ;}; f"
 
@@ -1094,17 +1116,20 @@ mcf-hotfix-reset = "! f(){ \
  && if [ \"$master_prev\"       != '' ]; then git l-set-mcf-param l-master       \"$master_prev\"       --local && git w-del-mcf-param l-prev-master       '--local'; fi \
  && if [ \"$cfg_prev\"          != '' ]; then git l-set-mcf-param l-cfg          \"$cfg_prev\"          --local && git w-del-mcf-param l-prev-cfg          '--local'; fi \
  && if [ \"$fix_prev\"          != '' ]; then git l-set-mcf-param l-fix          \"$fix_prev\"          --local && git w-del-mcf-param l-prev-fix          '--local'; fi \
- && fix=$(git w-get-mcf-param l-fix) \
- && cfg=$(git w-get-mcf-param l-cfg) \
  && master=$(git w-get-mcf-param l-master) \
- && git l-echo-l2 \"$CMD 1:\"                           && git l-checkout $master \
- && if [ \"$do_rb\" = '1' ] ; then \
-      git w-remove-merged-branch $fix; \
-      git w-remove-merged-branch $cfg; \
-      git l-echo-l2 \"$CMD 2:\"                         && git w-create-base $fix $cfg $master off \
- ;  fi \
+ && if git l-check-exists-branch $master ; then\
+         fix=$(git w-get-mcf-param l-fix) \
+      && cfg=$(git w-get-mcf-param l-cfg) \
+      && if [ \"$do_rb\" = '1' ] ; then \
+            git l-echo-l2 \"$CMD 1:\"         && git l-checkout $master ;\
+            git l-echo-l2 \"$CMD 2:\"      && git w-remove-merged-branch $fix; \
+            git l-echo-l2 \"$CMD 3:\"      && git w-remove-merged-branch $cfg; \
+            git l-echo-l2 \"$CMD 4:\"      && git w-create-base $fix $cfg $master off; \
+         fi; \
+    fi \
  && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && git w-list-mcf-param --local \
+ && git br-info\
  && git l-showlog $showlog \
 ;}; f"
 
@@ -1116,7 +1141,7 @@ mcf-hotfix-reset = "! f(){ \
 mcf-hotfix-update = "! f(){ \
  CMD='w-hotfix-update' \
  && quite=$(git l-quite) \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&        master_hf=$1 \
  &&           cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
  &&           fix_hf=${3:-_hfix/${master_hf}/_fix} \
@@ -1150,7 +1175,7 @@ mcf-hotfix-update = "! f(){ \
 mcf-hotfix-purge = "! f(){ \
  CMD='w-hotfix-purge' \
  && quite=$(git l-quite) \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  && master_hf=$1 \
  &&    cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
  &&    fix_hf=${3:-_hfix/${master_hf}/_fix} \
@@ -1178,11 +1203,12 @@ mcf-hotfix-purge = "! f(){ \
  && git l-showlog $showlog \
 ;}; f"
 
-# w-flow-feature $branch [$dev $feature $origin]
-  w-flow-feature = "! git mcf-flow-feature "
-mcf-flow-feature = "! f(){ \
- CMD='w-flow-feature' \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error: must be minimum 1 parameters. Select main branch.\" 1; git branch -ra; exit 1;fi \
+# w-flow-master-dev-feature $branch [$dev $feature $origin]
+  w-flow-master-dev-feature = "! git mcf-flow-master-dev-feature "
+  w-flow-mdf = "! git mcf-flow-master-dev-feature "
+mcf-flow-master-dev-feature = "! f(){ \
+ CMD='w-flow-master-dev-feature' \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameters. Select main branch.\" 1; git branch -ra; exit 1;fi \
  && quite=$(git l-quite) \
  && cbr=$(git current-branch-name) \
  && BR=${1:-$cbr} \
@@ -1194,7 +1220,7 @@ mcf-flow-feature = "! f(){ \
  && if git l-check-exists-branch $BR; then\
         git l-echo-l2 \"$CMD 2:\"                                                   && git l-checkout $BR; \
     else \
-        if ! git l-check-exists-branch $ORIGIN/$BR; then echo \"Error!!! Check exist branch: '$ORIGIN/$BR'\"; return 1; fi; \
+        if ! git l-check-exists-branch $ORIGIN/$BR; then echo \"Error!!!\nCheck existing branches '$BR' or '$ORIGIN/$BR'\nor try create manually '$BR' from any existing branch\"; return 1; fi; \
         git l-echo-lc \"$CMD 3:\" \"git checkout -b $BR $ORIGIN/$BR\"               && git checkout $quite -b $BR $ORIGIN/$BR; \
     fi\
  && if git l-check-exists-branch $ORIGIN/$BR; then\
@@ -1219,7 +1245,6 @@ mcf-flow-feature = "! f(){ \
  && git l-echo \"Check branches upstream:\" 5 0\
  && git l-echo-l2 \"$CMD 12:\"                                                      && git br-info $BR $DEV $FEATURE \
 ;}; f"
-
 
 ### Attention!!!
 l-fix-old-param = "! f(){ \
