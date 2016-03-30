@@ -42,7 +42,7 @@
 	commentchar = ";"
     pager = less -FXRS
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-#    edit = mcedit
+#    editor = mcedit
 # FOR LINUX
 	autocrlf = input
     safecrlf = false
@@ -292,7 +292,7 @@ l-check-exists-branch = "! f(){ \
           if git branch -r | grep -qP \"\\s$1\\s*$\"; then\
             status=$?; \
           fi;\
-       fi;\
+         fi;\
     fi; \
  if [ $(git l-check-is-on $showstatus) = 'on' ]; then echo $status; fi; \
  return $status \
@@ -348,8 +348,8 @@ l-fix-mcf-param = "! f() { \
 l-hotfix-setprev = "! f(){ \
  CMD='l-hotfix-setvar' \
  &&       master_new=${1:-$(git w-get-mcf-param l-master)} \
- &&          cfg_new=${2:-_hfix/${master_new}/_cfg} \
- &&          fix_new=${3:-_hfix/${master_new}/_fix} \
+ &&          cfg_new=${2:-_/${master_new}/_cfg} \
+ &&          fix_new=${3:-_/${master_new}/_fix} \
  && src1_rbranch_new=${4:-$master_new} \
  && git l-echo-l1 \"$CMD $master_new $fix_new $src1_rbranch_new\" \
  && src1_rbranch=$(git w-get-mcf-param l-src1-rbranch) \
@@ -384,8 +384,10 @@ l-checkout = "! f(){ \
 l-remove-all-local-branch = "! f(){ \
  CMD='l-remove-all-local-branch'\
  && force=${1:-}\
+ && showlog=${2:-on} \
  && quite=$(git l-quite) \
  && git w-reset 0 0\
+ && git l-echo-l1 \"$CMD $force $showlog\" \
  && src1=$(git w-get-mcf-param l-src1) \
  && rbranch=$(git w-get-mcf-param l-src1-rbranch) \
  && if ! git l-check-exists-branch $src1/$rbranch ; then\
@@ -395,11 +397,12 @@ l-remove-all-local-branch = "! f(){ \
  && git l-checkout $src1/$rbranch \
  && mode=-d\
  && if [ \"$force\" = '-f' ]; then mode=-D; fi \
- && branches=$(git branch | grep -v '*')\
- && if [ $? ]; then\
+ && branches=$(git branch | grep -v '*');\
+    if [ ! $? ]; then\
            git l-echo-lc \"$CMD 1:\" \"git branch | grep -v '*' | xargs git branch $mode\" \
         && echo "$branches" | xargs git branch $mode; \
     fi\
+ && if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi \
  && git br-info-all\
 ;}; f"
 
@@ -1048,8 +1051,8 @@ mcf-hotfix = "! f(){ \
  && quite=$(git l-quite) \
  &&        master_hf=$1 \
  && if [ -z $master_hf ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
- &&           cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
- &&           fix_hf=${3:-_hfix/${master_hf}/_fix} \
+ &&           cfg_hf=${2:-_/${master_hf}/_cfg} \
+ &&           fix_hf=${3:-_/${master_hf}/_fix} \
  &&  src1_rbranch_hf=${4:-$master_hf} \
  &&          showlog=${5:-on} \
  && git l-echo-l1 \"$CMD $master_hf $cfg_hf $fix_hf $src1_rbranch_hf $showlog\" \
@@ -1083,7 +1086,7 @@ mcf-hotfix = "! f(){ \
 # w-hotfix-lite $master_hf [$showlog ]
 #  Построить новую временную схему для выгрузки на удаленный сервер.
 #  Используется для создания hotfix веток c дефолтными именами вспомогательных веток (_cfg,_fix).
-#  Конечная ветка: _hfix/$master_hf/_fix
+#  Конечная ветка: _/$master_hf/_fix
   w-hotfix-lite = "! git mcf-hotfix-lite"
   w-hf-lite     = "! git mcf-hotfix-lite"
 mcf-hotfix-lite = "! f(){ \
@@ -1151,8 +1154,8 @@ mcf-hotfix-update = "! f(){ \
  && quite=$(git l-quite) \
  && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  &&        master_hf=$1 \
- &&           cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
- &&           fix_hf=${3:-_hfix/${master_hf}/_fix} \
+ &&           cfg_hf=${2:-_/${master_hf}/_cfg} \
+ &&           fix_hf=${3:-_/${master_hf}/_fix} \
  &&  src1_rbranch_hf=${4:-$master_hf} \
  &&          showlog=${5:-on} \
  && git l-echo-l1 \"$CMD $master_hf $cfg_hf $fix_hf $src1_rbranch_hf $showlog\" \
@@ -1185,8 +1188,8 @@ mcf-hotfix-purge = "! f(){ \
  && quite=$(git l-quite) \
  && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi \
  && master_hf=$1 \
- &&    cfg_hf=${2:-_hfix/${master_hf}/_cfg} \
- &&    fix_hf=${3:-_hfix/${master_hf}/_fix} \
+ &&    cfg_hf=${2:-_/${master_hf}/_cfg} \
+ &&    fix_hf=${3:-_/${master_hf}/_fix} \
  &&   showlog=${4:-on} \
  &&       cfg=$(git w-get-mcf-param l-cfg) \
  && git l-echo-l1 \"$CMD $master_hf $fix_hf $showlog\" \
@@ -1211,28 +1214,29 @@ mcf-hotfix-purge = "! f(){ \
  && git l-showlog $showlog \
 ;}; f"
 
-# w-flow-master-dev-feature $branch [$dev $feature $origin]
-  w-flow-master-dev-feature = "! git mcf-flow-master-dev-feature "
-  w-flow-mdf = "! git mcf-flow-master-dev-feature "
-mcf-flow-master-dev-feature = "! f(){ \
- CMD='w-flow-master-dev-feature' \
- && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameters. Select main branch.\" 1; git branch -ra; exit 1;fi \
+######################
+### master-dev-feature
+######################
+# l-create-master-dev-feature $branch [$dev $feature $origin $showlog]
+  l-create-master-dev-feature = "! f(){ \
+ CMD='l-flow-master-dev-feature' \
  && quite=$(git l-quite) \
- && cbr=$(git current-branch-name) \
  && BR=${1:-$cbr} \
  && DEV=${2:-${BR}-dev} \
  && FEATURE=${3:-${DEV}-feature} \
  && ORIGIN=${4:-origin} \
  && showlog=${5:-on} \
- && git l-echo-l2 \"$CMD 1:\"                                                       && git w-clear-mcf-local-branch 0 \
  && if git l-check-exists-branch $BR; then\
         git l-echo-l2 \"$CMD 2:\"                                                   && git l-checkout $BR; \
     else \
-        if ! git l-check-exists-branch $ORIGIN/$BR; then echo \"Error!!!\nCheck existing branches '$BR' or '$ORIGIN/$BR'\nor try create manually '$BR' from any existing branch\"; return 1; fi; \
+        if ! git l-check-exists-branch $ORIGIN/$BR; then l-echo \"$CMD Error!!!\nCheck existing branches '$BR' or '$ORIGIN/$BR'\nor try create manually '$BR' from any existing branch\"; return 1; fi; \
         git l-echo-lc \"$CMD 3:\" \"git checkout -b $BR $ORIGIN/$BR\"               && git checkout $quite -b $BR $ORIGIN/$BR; \
     fi\
  && if git l-check-exists-branch $ORIGIN/$BR; then\
         git l-echo-lc \"$CMD 4:\" \"git branch --set-upstream-to=$ORIGIN/$BR\"      && git branch $quite --set-upstream-to=$ORIGIN/$BR;\
+        if [ \"$(git l-rev $BR)\" != \"$(git l-rev $ORIGIN/$BR)\" ]; then \
+            git l-echo-lc \"$CMD 5:\" \"git pull --rebase $ORIGIN $BR\" && git pull $quite --rebase $ORIGIN $BR;\
+        fi; \
     fi\
  && if git l-check-exists-branch $DEV; then\
         git l-echo-l2 \"$CMD 5:\"                                                   && git l-checkout $DEV; \
@@ -1245,6 +1249,9 @@ mcf-flow-master-dev-feature = "! f(){ \
     fi\
  && if git l-check-exists-branch $ORIGIN/$DEV; then\
         git l-echo-lc \"$CMD 8:\" \"git branch --set-upstream-to=$ORIGIN/$DEV\"     && git branch $quite --set-upstream-to=$ORIGIN/$DEV;\
+        if [ \"$(git l-rev $DEV)\" != \"$(git l-rev $ORIGIN/$DEV)\" ]; then \
+            git l-echo-lc \"$CMD 5:\" \"git pull --rebase $ORIGIN $DEV\" && git pull $quite --rebase $ORIGIN $DEV;\
+        fi; \
     fi\
  && git l-echo-l2 \"$CMD 9:\"                                                       && git w-new-master $DEV 0\
  && git l-echo-l2 \"$CMD 10:\"                                                      && git w-hotfix-lite $FEATURE 0\
@@ -1252,6 +1259,40 @@ mcf-flow-master-dev-feature = "! f(){ \
  && git l-echo-l2 \"$CMD 11:\"                                                      && git w-list-mcf-param --local\
  && git l-echo \"Check branches upstream:\" 5 0\
  && git l-echo-l2 \"$CMD 12:\"                                                      && git br-info $BR $DEV $FEATURE \
+;}; f"
+
+# w-flow-build-master-dev-feature $branch [$dev $feature $origin]
+  w-flow-build-master-dev-feature = "! git mcf-flow-build-master-dev-feature "
+mcf-flow-build-master-dev-feature = "! f(){ \
+ CMD='w-flow-build-master-dev-feature' \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameters. Select main branch.\" 1; git branch -ra; exit 1;fi \
+ && quite=$(git l-quite) \
+ && cbr=$(git current-branch-name) \
+ && BR=${1:-$cbr} \
+ && DEV=${2:-${BR}-dev} \
+ && FEATURE=${3:-${DEV}-feature} \
+ && ORIGIN=${4:-origin} \
+ && showlog=${5:-on} \
+ && git l-echo-lc \"$CMD 1:\" \"git fetch --all --prune\"                           && git fetch $quite --all --prune\
+ && git l-echo-l2 \"$CMD 2:\"                                                       && git l-remove-all-local-branch -f 0 \
+ && git l-echo-l2 \"$CMD 3:\"                                                       && git l-create-master-dev-feature $BR $DEV $FEATURE $ORIGIN $showlog \
+;}; f"
+
+# w-flow-update-master-dev-feature $branch [$dev $feature $origin]
+  w-flow-update-master-dev-feature = "! git mcf-flow-update-master-dev-feature "
+  mcf-flow-update-master-dev-feature = "! f(){ \
+ CMD='w-flow-update-master-dev-feature' \
+ && if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameters. Select main branch.\" 1; git branch -ra; exit 1;fi \
+ && quite=$(git l-quite) \
+ && cbr=$(git current-branch-name) \
+ && BR=${1:-$cbr} \
+ && DEV=${2:-${BR}-dev} \
+ && FEATURE=${3:-${DEV}-feature} \
+ && ORIGIN=${4:-origin} \
+ && showlog=${5:-on} \
+ && git l-echo-lc \"$CMD 1:\" \"git fetch --all --prune\"                           && git fetch $quite --all --prune\
+ && git l-echo-l2 \"$CMD 2:\"                                                       && git l-remove-all-local-branch '' 0 \
+ && git l-echo-l2 \"$CMD 3:\"                                                       && git l-create-master-dev-feature $BR $DEV $FEATURE $ORIGIN $showlog \
 ;}; f"
 
 ### Attention!!!
