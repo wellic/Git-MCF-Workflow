@@ -155,7 +155,7 @@ mylogsort = "! f() { \
 ;}; f"
 
 #Show log for current user without sort
-myreport = "! f() { \
+myreport-cbr = "! f() { \
  name=$(git myname) && \
  name=$(echo $name | sed 's/ /./g') && \
  git remote -v && \
@@ -163,6 +163,44 @@ myreport = "! f() { \
  git hist5 --author-date-order --author=\"$name\" -20 $@ \
 ;}; f "
 
+myreport = "! f() { \
+ name=$(git myname) && \
+ name=$(echo $name | sed 's/ /./g') && \
+ git l-echo \"Log for user (regex): '$name'\n\" 6 1 && \
+ git l-echo \"$(git remote -v)\n\" 6 0 && \
+ cbr=$(git current-branch-name) && \
+ res1='' ;\
+ res2='' ;\
+ pr='' ;\
+ rbr=$(git branch -r | sed -r -e 's/[*>]|->//g' | sed -r -e 's/^\\s*-\\s*$//g' | sort -ru ) && \
+ for br in $rbr; do\
+	rev=$(git l-rev $br) ;\
+	if echo \"$pr\" | grep -vqw $rev ; then \
+		pr=\"$pr $rev\" ;\
+		s=$(git hist5 --author-date-order --author=\"$name\" $br $@ | sed '/^$/d' ) ;\
+		if [ \"$s\" != '' ]; then \
+			res1=$(git l-echo \"$res1\n$br\n\") ;\
+			res2=$(git l-echo \"$res2\n$s\n\") ;\
+		fi ;\
+	fi ;\
+ done &&\
+ lbr=$(git branch | sed -r -e 's/[*>]//g' | sed -r -e 's/^\\s*-\\s*$//g' | sort -u ) && \
+ for br in $lbr; do\
+	rev=$(git l-rev $br) ;\
+	if echo \"$pr\" | grep -vqw $rev ; then \
+		pr=\"$pr $rev\" ;\
+		s=$(git hist5 --author-date-order --author=\"$name\" $br $@ | sed '/^$/d' ) ;\
+		if [ \"$s\" != '' ]; then \
+			res1=$(git l-echo \"$res1\n$br\n\") ;\
+			res2=$(git l-echo \"$res2\n$s\n\") ;\
+		fi ;\
+	fi ;\
+ done &&\
+ echo \"$res2\" | sort -ru | sed -r 's/^(\\x1B\\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K])+$//ig'| sed '/^$/d' ;\
+ res1=$(echo \"$res1\" | sort -u  | sed -r 's/^(\\x1B\\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K])+$//ig'| sed '/^$/d') ;\
+ git l-echo \"\n$res1\" ;\
+ git l-checkout '' $cbr \
+ ;}; f "
 
 #################
 # Useful commands
@@ -346,7 +384,6 @@ l-set-mcf-param = "! f() { \
  git config \"$type\" \"mcf.${param}\" \"$value\" && \
  return 0 \
 ;}; f"
-
 
 # l-fix-mcf-param $value
 # Заменить в значении пробелы на '_'
@@ -1466,7 +1503,7 @@ w-flow-setup = "! f(){\
  src1=${4:-$(git w-get-mcf-param l-src1)} && \
  showlog=${5:-on} && \
  git l-echo-l1 \"$CMD $master $dev $feature $src1 $showlog\" && \
- git l-echo-l2 \"$CMD 1:\"       && git l-fetch \"--all --prune\" && \
+ git l-echo-l2 \"$CMD 1:\"       && git l-fetch \"--all --prune --tags\" && \
  if [ \"$src1\" != '' ]; then \
 	git l-echo-l2 \"$CMD 2:\"    && git w-set-mcf-param \"l-src1\" \"$src1\" 0 ;\
  else \
