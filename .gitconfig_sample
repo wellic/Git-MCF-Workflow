@@ -625,9 +625,9 @@ l-rebuild-base-lite = "! f(){ \
  CMD='w-rebuild-base-lite' && \
  quite=$(git l-quite) && \
  showlog=${1:-on} && \
- fix=$(git w-get-mcf-param l-fix) && \
- cfg=$(git w-get-mcf-param l-cfg) && \
  master=$(git w-get-mcf-param l-master) && \
+ fix=\"_/$master/_fix\" && \
+ cfg=\"_/$master/_cfg\" && \
  git l-echo-l1 \"$CMD $showlog\" && \
  git l-echo-l2 \"$CMD 1:\" && git w-rebuild-base $fix $cfg $master $showlog \
 ;}; f"
@@ -1124,16 +1124,16 @@ mcf-new-master = "! f(){ \
  if [ $# -lt 1 ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter name and value.\" 1; git w-list-mcf-param; exit 1; fi && \
  master=${1:-} && \
  showlog=${2:-on} && \
- git l-echo-l1 \"$CMD $value $showlog\" && \
+ git l-echo-l1 \"$CMD $master $showlog\" && \
  src1=$(git w-get-mcf-param \"l-src1\" --local 1) && \
  src2=$(git w-get-mcf-param \"l-src2\" --local 1) && \
  src2_rbranch=$(git w-get-mcf-param \"l-src2-rbranch\" --local 1) && \
  git l-echo-l2 \"$CMD 1:\"                                   && git w-clear-mcf-local-branch off && \
- git l-echo-l2 \"$CMD 2:\"                                   && git w-set-mcf-param \"l-master\" \"$value\" 0 && \
- git l-echo-l2 \"$CMD 3:\"                                   && git w-set-mcf-param \"l-src1-rbranch\" \"$value\" 0 && \
- if [ \"$src1\" != '' ]; then git l-echo-l2 \"$CMD 4:\"      && git w-set-mcf-param \"l-src1\" \"$src1\" 0 && \
- if [ \"$src2\" != '' ]; then git l-echo-l2 \"$CMD 5:\"      && git w-set-mcf-param \"l-src2\" \"$src2\" 0 && \
- if [ \"$src2_src2\" != '' ]; then git l-echo-l2 \"$CMD 6:\" && git w-set-mcf-param \"l-src2-rbranch\" \"$src2_rbranch\" 0 && \
+ git l-echo-l2 \"$CMD 2:\"                                   && git w-set-mcf-param \"l-master\" \"$master\" 0 && \
+ git l-echo-l2 \"$CMD 3:\"                                   && git w-set-mcf-param \"l-src1-rbranch\" \"$master\" 0 && \
+ if [ \"$src1\" != '' ]; then git l-echo-l2 \"$CMD 4:\"      && git w-set-mcf-param \"l-src1\" \"$src1\" 0 ; fi && \
+ if [ \"$src2\" != '' ]; then git l-echo-l2 \"$CMD 5:\"      && git w-set-mcf-param \"l-src2\" \"$src2\" 0 ; fi && \
+ if [ \"$src2_src2\" != '' ]; then git l-echo-l2 \"$CMD 6:\" && git w-set-mcf-param \"l-src2-rbranch\" \"$src2_rbranch\" 0  ; fi && \
  if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi && \
  git w-list-mcf-param \
 ;}; f"
@@ -1242,10 +1242,10 @@ mcf-hotfix = "! f(){ \
 	fi && \
     git l-echo-lc \"$CMD 6:\"                                                       && git l-checkout-b '' $cfg_hf $master_hf && \
     git l-echo-lc \"$CMD 7:\" \"git rebase --onto $cfg_hf $master $cfg\"            && git rebase $quite --onto $cfg_hf $master $cfg && \
-    do_rbranch=$(git w-get-mcf-param l-hotfix-autocreate-rbranch) ;\
-    if [ $(git l-check-is-on $do_rbranch) = 'on' ]; then \
+    create_rbranch=$(git w-get-mcf-param l-hotfix-autocreate-rbranch) ;\
+    if [ $(git l-check-is-on $create_rbranch) = 'on' ]; then \
 		src1=$(git w-get-mcf-param l-src1) && \
-        git l-echo-lc \"$CMD 8:\" \"git push -u $src1 $master_hf:$src1_rbranch_hf\" && git push $quite -u $src1 $master_hf:$src1_rbranch_hf ;\
+        git l-echo-lc \"$CMD 8:\" \"git push -u $src1 $master_hf:$src1_rbranch_hf\" && git l-echo \"git push $quite -u $src1 $master_hf:$src1_rbranch_hf\" ;\
 	fi ;\
  fi && \
  git l-echo-l2 \"$CMD 9:\"                                                          && git w-rebuild-base $fix_hf $cfg_hf $master_hf off && \
@@ -1262,7 +1262,10 @@ l-hotfix-lite = "! f(){ \
  showlog=${2:-on} && \
  git l-echo-l1 \"$CMD $master_hf $showlog\" && \
  if [ -z $master_hf ]; then git l-echo \"$CMD Error!!!\nMust be minimum 1 parameter. Check hotfix name.\" 1; exit 1; fi && \
- git l-echo-l2 \"$CMD 1:\" && git w-hotfix $master_hf '' '' '' $showlog \
+ fix=\"_/${master_hf}/_fix\" && \
+ cfg=\"_/${master_hf}/_cfg\" && \
+ src1=$(git w-get-mcf-param 'l-src1') && \
+ git l-echo-l2 \"$CMD 1:\" && git w-hotfix $master_hf $cfg $fix $master_hf $showlog \
 ;}; f"
 
 # Проверяет наличие локальной ветки 0-существует, 1-нет
@@ -1446,7 +1449,6 @@ l-flow-setup-dev = "! f(){\
 		git l-echo-lc \"$CMD 6:\"                                         && git l-checkout-b '' $dev $master ;\
 	fi ;\
  fi && \
- if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi && \
  git l-echo-l2 \"$CMD 7:\"                                                && git w-new-master $dev 0 && \
  git l-echo-l2 \"$CMD 8:\"                                                && git l-rebuild-base-lite off && \
  if [ $(git l-check-is-on $showlog) != 'on' ]; then return 0; fi && \
@@ -1601,3 +1603,9 @@ l-fix-all-old-names = "! f(){ \
 	l-prev-fix          = _fix
 	l-prev-cfg          = _cfg
     l-prev-src1-rbranch = master
+
+# Выполнять или нет создание удаленной ветки w-hotfix.
+# l-hotfix-autocreate-rbranch = off - 0|off или 1|on
+    l-hotfix-autocreate-rbranch = off
+
+################################################################
