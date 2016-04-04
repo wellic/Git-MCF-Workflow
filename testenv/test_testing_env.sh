@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 
-DEBUG_LEVEL_WUPLOAD2=0
+DEBUG_LEVEL_WUPLOAD2=2
 
-CFG_BRANCH=$(git w-get-mcf-param l-cfg)
-FIX_BRANCH=$(git w-get-mcf-param l-fix)
+CFG_BRANCH=$(git w-mcf-param-get l-cfg)
+FIX_BRANCH=$(git w-mcf-param-get l-fix)
 
 set -o nounset
 set -e
@@ -164,7 +164,7 @@ start_test() {
       DEV=dev2
       do_cmd "$STEP 3-$CNT ($DEV)" "cd ../$DEV" ${c_cmdcd}
       
-      do_cmd "$STEP 4-$CNT ($DEV)" "git w-set-mcf-param l-backup-cfg on off"
+      do_cmd "$STEP 4-$CNT ($DEV)" "git w-mcf-param-set l-backup-cfg on off"
       do_cmd "$STEP 5-$CNT ($DEV)" "git w-upload"
 
       DEV=dev1
@@ -216,9 +216,9 @@ start_test() {
       do_cmd "$STEP 15-$CNT ($DEV)" "git w-fakecommit dev2_fix3 off"
       do_cmd "$STEP 16-$CNT ($DEV)" "git checkout -q $CFG_BRANCH"
       do_cmd "$STEP 17-$CNT ($DEV)" "git w-fakecommit dev2_cfg3 off"
-      do_cmd "$STEP 18-$CNT ($DEV)" "git w-set-mcf-param l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
+      do_cmd "$STEP 18-$CNT ($DEV)" "git w-mcf-param-set l-debug-level $DEBUG_LEVEL_WUPLOAD2 off"
       do_cmd "$STEP 19-$CNT ($DEV)" "git w-upload2 server2"
-      do_cmd "$STEP 20-$CNT ($DEV)" "git w-del-mcf-param l-src2 off"
+      do_cmd "$STEP 20-$CNT ($DEV)" "git w-mcf-param-del l-src2 off"
 
       DEV=dev1
       do_cmd "$STEP 21-$CNT ($DEV)"  "cd ../$DEV" ${c_cmdcd}
