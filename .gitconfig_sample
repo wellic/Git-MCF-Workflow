@@ -4,7 +4,7 @@
 #   mcf.nickname
 [user]
     name = your_name
-    email = your@mail
+    email = v.savchenko@cpcs.ws
 [mcf]
 # Use commands w-(get,set,del,list)-mcf-param for work with l-* parameters
 #Your nickname
@@ -830,7 +830,7 @@ mcf-load-fix-from-repo = "!f(){ \
  else \
     git l-echo-l2 \"$CMD 3:\" && git l-cmd-fetch '' $src1 $src1_rbranch && \
 	git l-echo-l2 \"$CMD 4:\" && git l-cmd-checkout '' $master && \
-	git l-echo-l2 \"$CMD 5:\" && git l-cmd-merge '' $src1/$src1_rbranch; \
+	git l-echo-l2 \"$CMD 5:\" && git l-cmd-merge '--allow-unrelated-histories' $src1/$src1_rbranch; \
  fi && \
  git l-showlog $showlog \
 ;};f"
