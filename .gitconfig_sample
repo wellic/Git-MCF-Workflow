@@ -3,8 +3,8 @@
 #   user.email
 #   mcf.nickname
 [user]
-    name = your_name
-    email = v.savchenko@cpcs.ws
+	name = your_name
+	email = your@mail
 [mcf]
 # Use commands w-(get,set,del,list)-mcf-param for work with l-* parameters
 #Your nickname
@@ -141,6 +141,9 @@ rb = rebase
 rbi = rebase -i
 ch = cherry-pick
 unstage = reset HEAD
+
+#tags
+sync-tags = !git tag -l | xargs git tag -d && git fetch -t
 
 # diff
 df = diff
