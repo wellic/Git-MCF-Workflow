@@ -59,7 +59,7 @@
 		- [w-update-extcmd](#)
 		- [w-upload-extcmd](#)
 	- [Команды для работы с l-* mcf-переменными](#)
-		- [w-list-mcf-param](#)
+		- [w-mcf-param-list](#)
 		- [w-get-mcf-param](#)
 		- [w-set-mcf-param](#)
 		- [w-del-mcf-param](#)
@@ -492,7 +492,7 @@
 
 **$src2 = l-src2** - имя вспомогательного источника
 
-**$src2_rbranch = l-src2-rbranch** - имя удаленной (remote) ветки вспомогательного источника.
+**$src2_rbranch = l-src2-rmaster** - имя удаленной (remote) ветки вспомогательного источника.
 
 **$showlog = on** - показывать или не показывать (off) log после выполнения команды
 
@@ -776,9 +776,9 @@
 
 Команды w-(list,get,st,rm)-mcf-param позволяют просматривать и изменять l-* параметры для текущего проекта. Удобно для изменения некоторых значений, а не глобально. Переменные добавляются и удаляются в локальный файл конфигурации git.
 
-### w-list-mcf-param
+### w-mcf-param-list
 
-**w-list-mcf-param**
+**w-mcf-param-list**
 
 Показывает значения всех l-* параметров для текущего проекта.
 
@@ -826,13 +826,13 @@
 
 **l-src1 = origin**
 
-**l-src1-rbranch = master**
+**l-src1-rmaster = master**
 
 ### Дополнительный источник обновлений
 
 **l-src2         = origin**
 
-**l-src2-rbranch = master**
+**l-src2-rmaster = master**
 
 ### Уровень детализации отладки
 
@@ -870,7 +870,7 @@
 
   **New: l-fix = dev**
 
-**> git w-list-mcf-param**
+**> git w-mcf-param-list**
 
   **Global:**
 
@@ -1359,7 +1359,7 @@ git commit -m 'Issue 3'**
 
 **> git w-set-mcf-param l-src2 presta**
 
-**> git w-set-mcf-param l-src2-rbranch 1.6**
+**> git w-set-mcf-param l-src2-rmaster 1.6**
 
 
 И тогда, все выше описанные действия выполняются, в дальнейшем, одной командой:
