@@ -1882,6 +1882,20 @@ l-fix-all-old-names = "!f(){ \
  git w-mcf-param-list\
 ;};f"
 
+
+master-pull = "!f(){ \
+ [ \"$(git config --global mcf.l-debug-level)\" = '99' ] && set -x; \
+ CMD='master_pull' && \
+ quite=$(git l-quite) && \
+ master=${1:-$(git l-mcf-param-get l-master)} && \
+ src1=${2:-$(git l-mcf-param-get l-src1)} && \
+ src1_rbranch=${3:-$(git l-mcf-param-get l-src1-rmaster)} && \
+ cbr=$(git cbr); \
+ git l-echo-l2 \"$CMD 1:\"; git l-cmd-checkout '' $master; \
+ git l-echo-l2 \"$CMD 2:\"; git l-cmd-pull --rebase $src1 $src1_rbranch; \
+ git l-echo-l2 \"$CMD 3:\"; git l-cmd-checkout '' $cbr \
+;};f"
+
 ###################
 ### End ALIASES ###
 ###################
