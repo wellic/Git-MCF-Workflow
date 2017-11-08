@@ -16,7 +16,7 @@
 #    $level :  2  is debug mode 2. Show all diagnostic message in w-* and mcf-* functions.
 #  Локальный метод, позволяет управлять выводом сообщений при работе w-* and mcf-* методов.
 #  Необходим при отладке методов и при изучении работы команд.
-    l-debug-level = 0
+    l-debug-level = 1
 
 # Выполнять или нет копирование локальной ветки $cfg в основной источник $src1 при выполнении w-upload*.
 # 0|off или 1|on
@@ -161,9 +161,9 @@ hist2 = "! f() { git --no-pager log                    --pretty=format:\"%C(yell
 hist3 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %C(cyan)%d %C(black bold)[%an]%Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
 hist4 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %Creset\" --graph --date=short --decorate $@ && echo  ; }; f"
 hist5 = "! f() { git --no-pager log                    --pretty=format:\"%C(yellow)%ad %C(green)%h%Creset | %s %Creset\"         --date=short            $@ && echo  ; }; f"
-last  = "! git hist  -20 $* "
-last2 = "! git hist2 -20 $* "
-last3 = "! git hist3 -20 $* "
+last  = "! git hist  --all -20 $* "
+last2 = "! git hist2 --all -20 $* "
+last3 = "! git hist3 --all -20 $* "
 
 #
 # User info
