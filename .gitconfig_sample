@@ -719,7 +719,7 @@ mcf-copy2tmp = "!f(){ \
  git l-echo-l1 \"$CMD $src1 $showlog\" && \
  git l-echo-lc \"$CMD 1:\" \"git add --all\"                        && git add --all && \
  git l-echo-lc \"$CMD 2:\" \"git commit -am '$MESS'\"               && git commit -m \"${MESS}\" && \
- git l-echo-lc \"$CMD 3:\" \"git push -f $src1 $cbr:$src1_rbranch\" && git push $quite -f $src1 $cbr:$src1_rbranch && \
+ git l-echo-lc \"$CMD 3:\" \"git push -f --no-verify $src1 $cbr:$src1_rbranch\" && git push $quite -f --no-verify $src1 $cbr:$src1_rbranch && \
  git l-echo-lc \"$CMD 4:\" \"git reset HEAD~1\"                                && git reset HEAD~1 && \
  rm -f \"$TMPFILE\" && \
  git l-showlog $showlog \
